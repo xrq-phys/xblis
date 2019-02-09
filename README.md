@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
 
+This is a copy of BLIS library with SVE microkernel (kernels/armv8a\_sve256bits/3/bli\_dgemm\_armv8a\_sve\_opt\_4x4.c) for testing.
+To use it, configure for architecture 'cortexa57\_sve256bits'
+
 Contents
 --------
 
