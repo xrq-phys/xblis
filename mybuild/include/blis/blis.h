@@ -109,11 +109,11 @@ extern "C" {
 #define BLIS_CONFIG_H
 
 // Enabled configuration "family" (config_name)
-#define BLIS_FAMILY_CORTEXA57_SVE256BITS
+#define BLIS_FAMILY_CORTEXA57_SVE1024BITS
 
 
 // Enabled sub-configurations (config_list)
-#define BLIS_CONFIG_CORTEXA57_SVE256BITS
+#define BLIS_CONFIG_CORTEXA57_SVE1024BITS
 
 
 // Enabled kernel sets (kernel_list)
@@ -1174,6 +1174,8 @@ typedef enum
 	BLIS_ARCH_BULLDOZER,
 
 	// ARM
+	BLIS_ARCH_CORTEXA57_SVE1024BITS,
+	BLIS_ARCH_CORTEXA57_SVE512BITS,
 	BLIS_ARCH_CORTEXA57_SVE256BITS,
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
@@ -1189,7 +1191,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 19
+#define BLIS_NUM_ARCHS 21
 
 
 //
@@ -20329,6 +20331,12 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+#ifdef BLIS_CONFIG_CORTEXA57_SVE1024BITS
+CNTX_INIT_PROTS( cortexa57_sve1024bits )
+#endif
+#ifdef BLIS_CONFIG_CORTEXA57_SVE512BITS
+CNTX_INIT_PROTS( cortexa57_sve512bits )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57_SVE256BITS
 CNTX_INIT_PROTS( cortexa57_sve256bits )
 #endif
@@ -20417,18 +20425,18 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
-#ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
-// begin bli_family_cortexa57_sve256bits.h
+#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
+// begin bli_family_cortexa57_sve1024bits.h
 
 
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
-#define BLIS_SIMD_SIZE 	32
+#define BLIS_SIMD_SIZE 	128
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE           32
+#define BLIS_SIMD_ALIGN_SIZE           128
 
 
 #if 0
@@ -20440,10 +20448,10 @@ CNTX_INIT_PROTS( generic )
 #define BLIS_DEFAULT_KC_S              640 //1536 //336 //704 //1280 //672 //528 // 856 //2048 //528 
 #define BLIS_DEFAULT_NC_S              3072
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_12x6
-#define BLIS_DEFAULT_MR_D              12
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_48x6
+#define BLIS_DEFAULT_MR_D              48
 #define BLIS_DEFAULT_NR_D              6
-#define BLIS_DEFAULT_MC_D              120 //1536 //160 //80 //176 
+#define BLIS_DEFAULT_MC_D              240 //1536 //160 //80 //176 
 #define BLIS_DEFAULT_KC_D              240 //1536 //304 //336 //368 
 #define BLIS_DEFAULT_NC_D              3072
 
@@ -20463,7 +20471,13 @@ CNTX_INIT_PROTS( generic )
 
 //#endif
 
-// end bli_family_cortexa57_sve256bits.h
+// end bli_family_cortexa57_sve1024bits.h
+#endif
+#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
+#include "bli_family_cortexa57_sve512bits.h" // skipped
+#endif
+#ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
+#include "bli_family_cortexa57_sve256bits.h" // skipped
 #endif
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h" // skipped
@@ -20546,6 +20560,8 @@ CNTX_INIT_PROTS( generic )
 
 
 GEMM_UKR_PROT( double,   d, gemm_armv8a_sve256bits_asm_12x6 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve512bits_asm_24x6 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve1024bits_asm_48x6 )
 // end bli_kernels_armv8a_sve.h
 #endif
 #ifdef BLIS_KERNELS_ARMV7A
@@ -23997,6 +24013,8 @@ char*   bli_arch_string( arch_t id );
 	BLIS_ARCH_CORTEXA15 = 11,
 	BLIS_ARCH_CORTEXA9  = 12,
 	BLIS_ARCH_GENERIC   = 13
+	BLIS_ARCH_CORTEXA57_SVE1024BITS = 16,
+	BLIS_ARCH_CORTEXA57_SVE512BITS = 15,
 	BLIS_ARCH_CORTEXA57_SVE256BITS = 14,
   } arch_t;
   typedef uint64_t bool_t;
@@ -38240,11 +38258,11 @@ void PASTEF770(bli_thread_set_num_threads)
 #define BLIS_CONFIG_H
 
 // Enabled configuration "family" (config_name)
-#define BLIS_FAMILY_CORTEXA57_SVE256BITS
+#define BLIS_FAMILY_CORTEXA57_SVE1024BITS
 
 
 // Enabled sub-configurations (config_list)
-#define BLIS_CONFIG_CORTEXA57_SVE256BITS
+#define BLIS_CONFIG_CORTEXA57_SVE1024BITS
 
 
 // Enabled kernel sets (kernel_list)
@@ -39301,6 +39319,8 @@ typedef enum
 	BLIS_ARCH_BULLDOZER,
 
 	// ARM
+	BLIS_ARCH_CORTEXA57_SVE1024BITS,
+	BLIS_ARCH_CORTEXA57_SVE512BITS,
 	BLIS_ARCH_CORTEXA57_SVE256BITS,
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
@@ -39316,7 +39336,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 19
+#define BLIS_NUM_ARCHS 21
 
 
 //

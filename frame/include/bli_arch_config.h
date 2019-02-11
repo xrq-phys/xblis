@@ -80,6 +80,12 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+#ifdef BLIS_CONFIG_CORTEXA57_SVE1024BITS
+CNTX_INIT_PROTS( cortexa57_sve1024bits )
+#endif
+#ifdef BLIS_CONFIG_CORTEXA57_SVE512BITS
+CNTX_INIT_PROTS( cortexa57_sve512bits )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57_SVE256BITS
 CNTX_INIT_PROTS( cortexa57_sve256bits )
 #endif
@@ -168,6 +174,12 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
+#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
+#include "bli_family_cortexa57_sve1024bits.h"
+#endif
+#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
+#include "bli_family_cortexa57_sve512bits.h"
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
 #include "bli_family_cortexa57_sve256bits.h"
 #endif

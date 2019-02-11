@@ -93,11 +93,11 @@
 #define BLIS_CONFIG_H
 
 // Enabled configuration "family" (config_name)
-#define BLIS_FAMILY_CORTEXA57_SVE256BITS
+#define BLIS_FAMILY_CORTEXA57_SVE1024BITS
 
 
 // Enabled sub-configurations (config_list)
-#define BLIS_CONFIG_CORTEXA57_SVE256BITS
+#define BLIS_CONFIG_CORTEXA57_SVE1024BITS
 
 
 // Enabled kernel sets (kernel_list)
@@ -1154,6 +1154,8 @@ typedef enum
 	BLIS_ARCH_BULLDOZER,
 
 	// ARM
+	BLIS_ARCH_CORTEXA57_SVE1024BITS,
+	BLIS_ARCH_CORTEXA57_SVE512BITS,
 	BLIS_ARCH_CORTEXA57_SVE256BITS,
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
@@ -1169,7 +1171,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 19
+#define BLIS_NUM_ARCHS 21
 
 
 //

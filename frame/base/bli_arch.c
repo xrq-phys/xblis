@@ -121,6 +121,12 @@ void bli_arch_set_id( void )
 #endif
 
 	// ARM microarchitectures.
+#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
+	id = BLIS_ARCH_CORTEXA57_SVE1024BITS;
+#endif
+#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
+	id = BLIS_ARCH_CORTEXA57_SVE512BITS;
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
 	id = BLIS_ARCH_CORTEXA57_SVE256BITS;
 #endif
@@ -175,6 +181,8 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "piledriver",
     "bulldozer",
 
+    "cortexa57_sve1024bits",
+    "cortexa57_sve512bits",
     "cortexa57_sve256bits",
     "cortexa57",
     "cortexa53",

@@ -124,6 +124,16 @@ void bli_gks_init( void )
 #endif
 
 		// ARM architectures
+#ifdef BLIS_CONFIG_CORTEXA57_SVE1024BITS
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57_SVE1024BITS,   bli_cntx_init_cortexa57_sve1024bits,
+		                                              bli_cntx_init_cortexa57_sve1024bits_ref,
+		                                              bli_cntx_init_cortexa57_sve1024bits_ind );
+#endif
+#ifdef BLIS_CONFIG_CORTEXA57_SVE512BITS
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57_SVE512BITS,   bli_cntx_init_cortexa57_sve512bits,
+		                                              bli_cntx_init_cortexa57_sve512bits_ref,
+		                                              bli_cntx_init_cortexa57_sve512bits_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57_SVE256BITS
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57_SVE256BITS,   bli_cntx_init_cortexa57_sve256bits,
 		                                              bli_cntx_init_cortexa57_sve256bits_ref,
