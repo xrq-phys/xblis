@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,249 +33,165 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_H
-#define BLIS_ARCH_CONFIG_H
-
-//
-// -- Context initialization prototypes ----------------------------------------
-//
-
-// -- Intel64 architectures --
-#ifdef BLIS_CONFIG_SKX
-CNTX_INIT_PROTS( skx )
-#endif
-#ifdef BLIS_CONFIG_KNL
-CNTX_INIT_PROTS( knl )
-#endif
-#ifdef BLIS_CONFIG_KNC
-CNTX_INIT_PROTS( knc )
-#endif
-#ifdef BLIS_CONFIG_HASWELL
-CNTX_INIT_PROTS( haswell )
-#endif
-#ifdef BLIS_CONFIG_SANDYBRIDGE
-CNTX_INIT_PROTS( sandybridge )
-#endif
-#ifdef BLIS_CONFIG_PENRYN
-CNTX_INIT_PROTS( penryn )
+#ifndef BLIS_CONFIGURETIME_CPUID
+  #include "blis.h"
+#else
+  #include "bli_system.h"
+  #include "bli_type_defs.h"
+  #include "bli_arch.h"
+  #include "bli_cpuid.h"
 #endif
 
-// -- AMD64 architectures --
+// -----------------------------------------------------------------------------
 
-#ifdef BLIS_CONFIG_ZEN
-CNTX_INIT_PROTS( zen )
-#endif
-#ifdef BLIS_CONFIG_EXCAVATOR
-CNTX_INIT_PROTS( excavator )
-#endif
-#ifdef BLIS_CONFIG_STEAMROLLER
-CNTX_INIT_PROTS( steamroller )
-#endif
-#ifdef BLIS_CONFIG_PILEDRIVER
-CNTX_INIT_PROTS( piledriver )
-#endif
-#ifdef BLIS_CONFIG_BULLDOZER
-CNTX_INIT_PROTS( bulldozer )
-#endif
+// The arch_t id for the currently running hardware. We initialize to -1,
+// which will be overwritten upon calling bli_arch_set_id().
+static arch_t id = -1;
 
-// -- ARM architectures --
+arch_t bli_arch_query_id( void )
+{
+	bli_arch_set_id_once();
 
-#ifdef BLIS_CONFIG_CORTEXA57_SVE1024BITS
-CNTX_INIT_PROTS( cortexa57_sve1024bits )
+	// Simply return the id that was previously cached.
+	return id;
+}
+
+// -----------------------------------------------------------------------------
+
+// A pthread structure used in pthread_once(). pthread_once() is guaranteed to
+// execute exactly once among all threads that pass in this control object.
+static bli_pthread_once_t once_id = BLIS_PTHREAD_ONCE_INIT;
+
+void bli_arch_set_id_once( void )
+{
+#ifndef BLIS_CONFIGURETIME_CPUID
+	bli_pthread_once( &once_id, bli_arch_set_id );
 #endif
-#ifdef BLIS_CONFIG_CORTEXA57_SVE512BITS
-CNTX_INIT_PROTS( cortexa57_sve512bits )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA57_SVE256BITS
-CNTX_INIT_PROTS( cortexa57_sve256bits )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA57
-CNTX_INIT_PROTS( cortexa57 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA53
-CNTX_INIT_PROTS( cortexa53 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA15
-CNTX_INIT_PROTS( cortexa15 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA9
-CNTX_INIT_PROTS( cortexa9 )
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_arch_set_id( void )
+{
+	// Architecture families.
+#if defined BLIS_FAMILY_INTEL64 || \
+    defined BLIS_FAMILY_AMD64   || \
+    defined BLIS_FAMILY_X86_64  || \
+    defined BLIS_FAMILY_ARM64   || \
+    defined BLIS_FAMILY_ARM32
+	id = bli_cpuid_query_id();
 #endif
 
-// -- IBM BG/Q --
-
-#ifdef BLIS_CONFIG_POWER7
-CNTX_INIT_PROTS( power7 )
-#endif
-#ifdef BLIS_CONFIG_BGQ
-CNTX_INIT_PROTS( bgq )
-#endif
-
-// -- Generic --
-
-#ifdef BLIS_CONFIG_GENERIC
-CNTX_INIT_PROTS( generic )
-#endif
-
-
-//
-// -- Architecture family-specific headers -------------------------------------
-//
-
-// -- x86_64 families --
-
-#ifdef BLIS_FAMILY_INTEL64
-#include "bli_family_intel64.h"
-#endif
-#ifdef BLIS_FAMILY_AMD64
-#include "bli_family_amd64.h"
-#endif
-#ifdef BLIS_FAMILY_X86_64
-#include "bli_family_x86_64.h"
-#endif
-
-// -- Intel64 architectures --
+	// Intel microarchitectures.
 #ifdef BLIS_FAMILY_SKX
-#include "bli_family_skx.h"
+	id = BLIS_ARCH_SKX;
 #endif
 #ifdef BLIS_FAMILY_KNL
-#include "bli_family_knl.h"
+	id = BLIS_ARCH_KNL;
 #endif
 #ifdef BLIS_FAMILY_KNC
-#include "bli_family_knc.h"
+	id = BLIS_ARCH_KNC;
 #endif
 #ifdef BLIS_FAMILY_HASWELL
-#include "bli_family_haswell.h"
+	id = BLIS_ARCH_HASWELL;
 #endif
 #ifdef BLIS_FAMILY_SANDYBRIDGE
-#include "bli_family_sandybridge.h"
+	id = BLIS_ARCH_SANDYBRIDGE;
 #endif
 #ifdef BLIS_FAMILY_PENRYN
-#include "bli_family_penryn.h"
+	id = BLIS_ARCH_PENRYN;
 #endif
 
-// -- AMD64 architectures --
-
+	// AMD microarchitectures.
 #ifdef BLIS_FAMILY_ZEN
-#include "bli_family_zen.h"
+	id = BLIS_ARCH_ZEN;
 #endif
 #ifdef BLIS_FAMILY_EXCAVATOR
-#include "bli_family_excavator.h"
+	id = BLIS_ARCH_EXCAVATOR;
 #endif
 #ifdef BLIS_FAMILY_STEAMROLLER
-#include "bli_family_steamroller.h"
+	id = BLIS_ARCH_STEAMROLLER;
 #endif
 #ifdef BLIS_FAMILY_PILEDRIVER
-#include "bli_family_piledriver.h"
+	id = BLIS_ARCH_PILEDRIVER;
 #endif
 #ifdef BLIS_FAMILY_BULLDOZER
-#include "bli_family_bulldozer.h"
+	id = BLIS_ARCH_BULLDOZER;
 #endif
 
-// -- ARM architectures --
-
-#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
-#include "bli_family_cortexa57_sve1024bits.h"
-#endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
-#include "bli_family_cortexa57_sve512bits.h"
-#endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
-#include "bli_family_cortexa57_sve256bits.h"
+	// ARM microarchitectures.
+#ifdef BLIS_FAMILY_THUNDERX2
+	id = BLIS_ARCH_THUNDERX2;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA57
-#include "bli_family_cortexa57.h"
+	id = BLIS_ARCH_CORTEXA57;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA53
-#include "bli_family_cortexa53.h"
+	id = BLIS_ARCH_CORTEXA53;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA15
-#include "bli_family_cortexa15.h"
+	id = BLIS_ARCH_CORTEXA15;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA9
-#include "bli_family_cortexa9.h"
+	id = BLIS_ARCH_CORTEXA9;
 #endif
 
-// -- IBM BG/Q --
-
+	// IBM microarchitectures.
 #ifdef BLIS_FAMILY_POWER7
-#include "bli_family_power7.h"
+	id = BLIS_ARCH_POWER7;
 #endif
 #ifdef BLIS_FAMILY_BGQ
-#include "bli_family_bgq.h"
+	id = BLIS_ARCH_BGQ;
+#endif
+#ifdef BLIS_FAMILY_POWER9
+        id = BLIS_ARCH_POWER9;
 #endif
 
-// -- Generic --
-
+	// Generic microarchitecture.
 #ifdef BLIS_FAMILY_GENERIC
-#include "bli_family_generic.h"
+	id = BLIS_ARCH_GENERIC;
 #endif
 
+	//printf( "blis_arch_query_id(): id = %u\n", id );
+	//exit(1);
+}
 
-//
-// -- kernel set prototypes ----------------------------------------------------
-//
+// -----------------------------------------------------------------------------
 
-// -- Intel64 architectures --
-#ifdef BLIS_KERNELS_SKX
-#include "bli_kernels_skx.h"
-#endif
-#ifdef BLIS_KERNELS_KNL
-#include "bli_kernels_knl.h"
-#endif
-#ifdef BLIS_KERNELS_KNC
-#include "bli_kernels_knc.h"
-#endif
-#ifdef BLIS_KERNELS_HASWELL
-#include "bli_kernels_haswell.h"
-#endif
-#ifdef BLIS_KERNELS_SANDYBRIDGE
-#include "bli_kernels_sandybridge.h"
-#endif
-#ifdef BLIS_KERNELS_PENRYN
-#include "bli_kernels_penryn.h"
-#endif
+// NOTE: This string array must be kept up-to-date with the arch_t
+// enumeration that is typedef'ed in bli_type_defs.h. That is, the
+// index order of each string should correspond to the implied/assigned
+// enum value given to the corresponding BLIS_ARCH_ value.
+static char* config_name[ BLIS_NUM_ARCHS ] =
+{
+    "skx",
+    "knl",
+    "knc",
+    "haswell",
+    "sandybridge",
+    "penryn",
 
-// -- AMD64 architectures --
+    "zen",
+    "excavator",
+    "steamroller",
+    "piledriver",
+    "bulldozer",
 
-#ifdef BLIS_KERNELS_ZEN
-#include "bli_kernels_zen.h"
-#endif
-//#ifdef BLIS_KERNELS_EXCAVATOR
-//#include "bli_kernels_excavator.h"
-//#endif
-//#ifdef BLIS_KERNELS_STEAMROLLER
-//#include "bli_kernels_steamroller.h"
-//#endif
-#ifdef BLIS_KERNELS_PILEDRIVER
-#include "bli_kernels_piledriver.h"
-#endif
-#ifdef BLIS_KERNELS_BULLDOZER
-#include "bli_kernels_bulldozer.h"
-#endif
+    "thunderx2",
+    "cortexa57",
+    "cortexa53",
+    "cortexa15",
+    "cortexa9",
 
-// -- ARM architectures --
+    "power7",
+    "bgq",
+    "power9",
 
-#ifdef BLIS_KERNELS_ARMV8A
-#include "bli_kernels_armv8a.h"
-#endif
-#ifdef BLIS_KERNELS_ARMV8A_SVE
-#include "bli_kernels_armv8a_sve.h"
-#endif
-#ifdef BLIS_KERNELS_ARMV7A
-#include "bli_kernels_armv7a.h"
-#endif
+    "generic"
+};
 
-// -- IBM BG/Q --
-
-#ifdef BLIS_KERNELS_POWER7
-#include "bli_kernels_power7.h"
-#endif
-#ifdef BLIS_KERNELS_BGQ
-#include "bli_kernels_bgq.h"
-#endif
-
-
-
-#endif
+char* bli_arch_string( arch_t id )
+{
+	return config_name[ id ];
+}
 
