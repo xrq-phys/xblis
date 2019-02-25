@@ -34,4 +34,4 @@
 
 GEMM_UKR_PROT( double,   d, gemm_armv8a_sve256bits_asm_12x6 )
 GEMM_UKR_PROT( double,   d, gemm_armv8a_sve512bits_asm_16x10 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_sve1024bits_asm_48x6 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve1024bits_asm_32x10 )
