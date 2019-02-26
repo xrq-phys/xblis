@@ -123,14 +123,14 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_THUNDERX2
 	id = BLIS_ARCH_THUNDERX2;
 #endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
-	id = BLIS_ARCH_CORTEXA57_SVE1024BITS;
+#ifdef BLIS_FAMILY_CORTEXA72_SVE1024
+	id = BLIS_ARCH_CORTEXA72_SVE1024;
 #endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
-	id = BLIS_ARCH_CORTEXA57_SVE512BITS;
+#ifdef BLIS_FAMILY_CORTEXA72_SVE512
+	id = BLIS_ARCH_CORTEXA72_SVE512;
 #endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
-	id = BLIS_ARCH_CORTEXA57_SVE256BITS;
+#ifdef BLIS_FAMILY_CORTEXA72_SVE256
+	id = BLIS_ARCH_CORTEXA72_SVE256;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
@@ -187,9 +187,9 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "bulldozer",
 
     "thunderx2",
-    "cortexa57_sve1024bits",
-    "cortexa57_sve512bits",
-    "cortexa57_sve256bits",
+    "cortexa72_sve1024",
+    "cortexa72_sve512",
+    "cortexa72_sve256",
     "cortexa57",
     "cortexa53",
     "cortexa15",

@@ -34,12 +34,12 @@
 
 #include "blis.h"
 
-void bli_cntx_init_cortexa57_sve1024bits( cntx_t* cntx )
+void bli_cntx_init_cortexa72_sve256( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_cortexa57_sve1024bits_ref( cntx );
+	bli_cntx_init_cortexa72_sve256_ref( cntx );
 
 	// -------------------------------------------------------------------------
 
@@ -48,17 +48,17 @@ void bli_cntx_init_cortexa57_sve1024bits( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_sve1024bits_asm_32x10,  FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_sve256bits_asm_12x6,  FALSE,
 	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,    32,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   160,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,    80,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3200,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,    12,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   660,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   300,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

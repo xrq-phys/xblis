@@ -83,14 +83,14 @@ CNTX_INIT_PROTS( bulldozer )
 #ifdef BLIS_CONFIG_THUNDERX2
 CNTX_INIT_PROTS( thunderx2 )
 #endif
-#ifdef BLIS_CONFIG_CORTEXA57_SVE1024BITS
-CNTX_INIT_PROTS( cortexa57_sve1024bits )
+#ifdef BLIS_CONFIG_CORTEXA72_SVE1024
+CNTX_INIT_PROTS( cortexa72_sve1024 )
 #endif
-#ifdef BLIS_CONFIG_CORTEXA57_SVE512BITS
-CNTX_INIT_PROTS( cortexa57_sve512bits )
+#ifdef BLIS_CONFIG_CORTEXA72_SVE512
+CNTX_INIT_PROTS( cortexa72_sve512 )
 #endif
-#ifdef BLIS_CONFIG_CORTEXA57_SVE256BITS
-CNTX_INIT_PROTS( cortexa57_sve256bits )
+#ifdef BLIS_CONFIG_CORTEXA72_SVE256
+CNTX_INIT_PROTS( cortexa72_sve256 )
 #endif
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
@@ -180,14 +180,14 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
-#ifdef BLIS_FAMILY_CORTEXA57_SVE1024BITS
-#include "bli_family_cortexa57_sve1024bits.h"
+#ifdef BLIS_FAMILY_CORTEXA72_SVE1024
+#include "bli_family_cortexa72_sve1024.h"
 #endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE512BITS
-#include "bli_family_cortexa57_sve512bits.h"
+#ifdef BLIS_FAMILY_CORTEXA72_SVE512
+#include "bli_family_cortexa72_sve512.h"
 #endif
-#ifdef BLIS_FAMILY_CORTEXA57_SVE256BITS
-#include "bli_family_cortexa57_sve256bits.h"
+#ifdef BLIS_FAMILY_CORTEXA72_SVE256
+#include "bli_family_cortexa72_sve256.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
