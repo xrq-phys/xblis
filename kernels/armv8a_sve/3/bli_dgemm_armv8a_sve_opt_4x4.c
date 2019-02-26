@@ -1,10 +1,7 @@
     /* 
 
-   BLIS
-   An object-based framework for developing high-performance BLAS-like
-   libraries.
-
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Forschungszentrum Juelich GmbH, Germany
+   Author: Bine Brank
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,9 +39,6 @@
    o Tested on Juawei arm nodes with ARMIE emulator.
    o Due to the fact that mr and nr depend on size of the vector
      registers, this kernel only works when size=256!!
-
-   February 2019.
-   Bine Brank 
 
  * tests still need to be done to check performance
 */
@@ -816,9 +810,6 @@ __asm__ volatile
    o Tested on Juawei arm nodes with ARMIE emulator.
    o Due to the fact that mr and nr depend on size of the vector
      registers, this kernel only works when size=512!!
-
-   February 2019.
-   Bine Brank 
 
  * tests still need to be done to check performance
 */
@@ -1736,9 +1727,6 @@ __asm__ volatile
    o Tested on Juawei arm nodes with ARMIE emulator.
    o Due to the fact that mr and nr depend on size of the vector
      registers, this kernel only works when size=1024!
-
-   February 2019.
-   Bine Brank 
 
  * tests still need to be done to check performance
 */
