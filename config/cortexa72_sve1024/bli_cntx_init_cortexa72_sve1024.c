@@ -58,7 +58,7 @@ void bli_cntx_init_cortexa72_sve1024( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    10,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   160,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,    80,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3200,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  2720,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

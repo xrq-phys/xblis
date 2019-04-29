@@ -266,10 +266,10 @@
 1        # gemm
 -1       #   dimensions: k
 
-1        # trsm
+0        # trsm
 ?        #   parameters: uploa
 
-1        # gemmtrsm
+0        # gemmtrsm
 -1       #   dimensions: k
 ?        #   parameters: uploa
 
@@ -304,7 +304,7 @@
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
-1        # trmm
+0        # trmm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa transa diaga
 
