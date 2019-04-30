@@ -34,12 +34,12 @@
 
 #include "blis.h"
 
-void bli_cntx_init_cortexa72_sve512( cntx_t* cntx )
+void bli_cntx_init_cortexa76_sve512( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_cortexa72_sve512_ref( cntx );
+	bli_cntx_init_cortexa76_sve512_ref( cntx );
 
 	// -------------------------------------------------------------------------
 

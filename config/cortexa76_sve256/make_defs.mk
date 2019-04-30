@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := cortexa72_sve1024
+THIS_CONFIG    := cortexa76_sve256
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -56,7 +56,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a57
+COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a72
 endif
 
 # Flags specific to optimized kernels.
