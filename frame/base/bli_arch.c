@@ -132,6 +132,9 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_CORTEXA76_SVE256
 	id = BLIS_ARCH_CORTEXA76_SVE256;
 #endif
+#ifdef BLIS_FAMILY_RHEA_R1
+	id = BLIS_ARCH_RHEA_R1;
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
 #endif
@@ -190,6 +193,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa76_sve1024",
     "cortexa76_sve512",
     "cortexa76_sve256",
+    "rhea_r1",
     "cortexa57",
     "cortexa53",
     "cortexa15",

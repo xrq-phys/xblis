@@ -92,6 +92,9 @@ CNTX_INIT_PROTS( cortexa76_sve512 )
 #ifdef BLIS_CONFIG_CORTEXA76_SVE256
 CNTX_INIT_PROTS( cortexa76_sve256 )
 #endif
+#ifdef BLIS_CONFIG_RHEA_R1
+CNTX_INIT_PROTS( rhea_r1 )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
 #endif
@@ -189,6 +192,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_CORTEXA76_SVE256
 #include "bli_family_cortexa76_sve256.h"
 #endif
+#ifdef BLIS_FAMILY_RHEA_R1
+#include "bli_family_rhea_r1.h"
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
 #endif
@@ -267,6 +273,9 @@ CNTX_INIT_PROTS( generic )
 
 #ifdef BLIS_KERNELS_ARMV8A_SVE
 #include "bli_kernels_armv8a_sve.h"
+#endif
+#ifdef BLIS_KERNELS_RHEA_R1
+#include "bli_kernels_rhea_r1.h"
 #endif
 #ifdef BLIS_KERNELS_ARMV8A
 #include "bli_kernels_armv8a.h"

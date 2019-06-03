@@ -144,6 +144,11 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa76_sve1024_ref,
 		                                              bli_cntx_init_cortexa76_sve1024_ind );
 #endif
+#ifdef BLIS_CONFIG_RHEA_R1
+		bli_gks_register_cntx( BLIS_ARCH_RHEA_R1,   bli_cntx_init_rhea_r1,
+		                                              bli_cntx_init_rhea_r1_ref,
+		                                              bli_cntx_init_rhea_r1_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa57,
 		                                              bli_cntx_init_cortexa57_ref,
