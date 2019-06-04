@@ -52,11 +52,11 @@
 #define BLIS_DEFAULT_NC_S              3072
 
 #define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_12x6
-#define BLIS_DEFAULT_MR_D              12
-#define BLIS_DEFAULT_NR_D              6
-#define BLIS_DEFAULT_MC_D              72 //1536 //160 //80 //176 
-#define BLIS_DEFAULT_KC_D              300 //1536 //304 //336 //368 
-#define BLIS_DEFAULT_NC_D              708
+#define BLIS_DEFAULT_MR_D              8
+#define BLIS_DEFAULT_NR_D              10
+#define BLIS_DEFAULT_MC_D              80 //1536 //160 //80 //176 
+#define BLIS_DEFAULT_KC_D              240 //1536 //304 //336 //368 
+#define BLIS_DEFAULT_NC_D              880
 
 #define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
