@@ -195,6 +195,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_RHEA_R1
 #include "bli_family_rhea_r1.h"
 #endif
+#ifdef BLIS_FAMILY_THUNDERX2
+#include "bli_family_thunderx2.h"
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
 #endif
