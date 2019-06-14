@@ -63,7 +63,7 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv8-a+sve
+CKVECFLAGS     := -march=armv8.4-a+fp+simd+crc+crypto+sve
 else
 $(error gcc is required for this configuration.)
 endif
@@ -75,4 +75,3 @@ CRVECFLAGS     := $(CKVECFLAGS)
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
-

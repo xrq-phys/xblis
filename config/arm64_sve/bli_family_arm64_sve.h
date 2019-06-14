@@ -35,11 +35,13 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
-#define BLIS_SIMD_SIZE 32
+#define BLIS_SIMD_VLA 1
+
+#define BLIS_SIMD_SIZE get_sve_vecsize()
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE 32
+#define BLIS_SIMD_ALIGN_SIZE 256
 
 
 
