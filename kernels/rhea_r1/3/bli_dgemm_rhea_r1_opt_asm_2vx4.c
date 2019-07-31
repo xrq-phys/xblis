@@ -1,11 +1,12 @@
-   /* 
+/*
 
    BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Forschungszentrum Juelich, Stepan Nassyr 
-                       s.nassyr@fz-juelich.de
+   Copyright (C) 2019, Forschunszentrum Juelich
+
+   Author(s): Stepan Nassyr, s.nassyr@fz-juelich.de
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,7 +31,6 @@
    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 */
 

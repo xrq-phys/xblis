@@ -1,7 +1,12 @@
-    /* 
+/*
 
-   Copyright (C) 2019, Forschungszentrum Juelich GmbH, Germany
-   Author: Bine Brank
+   BLIS
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2019, Forschunszentrum Juelich
+
+   Author(s): Bine Brank
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -27,10 +32,23 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 */
 
 #include "blis.h"
+
+int get_vector_length()
+{
+    int size = 0;
+
+    __asm__ volatile(
+    " mov  %[size], #0          \n\t"
+    " incb %[size]             \n\t"
+    : [size] "=r" (size)
+    :
+    :
+    ); 
+    return size * 8;
+}
 
 /*
    o 12x6 Double precision micro-kernel 
@@ -54,6 +72,15 @@ void bli_dgemm_armv8a_sve256bits_asm_12x6
        cntx_t*    restrict cntx
      )
 {
+
+    // safety check
+    if (get_vector_length() != 256)
+    {
+        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 256bits, but your length is %d.\n", get_vector_length());
+        exit(EXIT_FAILURE);
+    }
+        
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -830,6 +857,16 @@ void bli_dgemm_armv8a_sve256bits_asm_8x10
        cntx_t*    restrict cntx
      )
 {
+
+    // safety check
+    if (get_vector_length() != 256)
+    {
+        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 256bits, but your length is %d.\n", get_vector_length());
+        exit(EXIT_FAILURE);
+    }
+
+
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -1322,7 +1359,7 @@ __asm__ volatile
 "                                            \n\t"
 " ld1d  z0.d, p0/z, [x0]                     \n\t" // Load a
 " ld1d  z1.d, p0/z, [x0, #1, MUL VL]         \n\t"
-" add x0, x0, #128                           \n\t"
+" add x0, x0, #64                            \n\t"
 "                                            \n\t"
 " ld1rd  z2.d, p0/z, [x1]                    \n\t" // Load b
 " ld1rd  z3.d, p0/z, [x1, #8]                \n\t"
@@ -1740,6 +1777,15 @@ void bli_dgemm_armv8a_sve512bits_asm_16x10
        cntx_t*    restrict cntx
      )
 {
+
+    // safety check
+    if (get_vector_length() != 512)
+    {
+        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 512bits, but your length is %d.\n", get_vector_length());
+        exit(EXIT_FAILURE);
+    }
+
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -2657,6 +2703,15 @@ void bli_dgemm_armv8a_sve1024bits_asm_32x10
        cntx_t*    restrict cntx
      )
 {
+
+    // safety check
+    if (get_vector_length() != 1024)
+    {
+        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 1024bits, but your length is %d.\n", get_vector_length());
+        exit(EXIT_FAILURE);
+    }
+
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 	// Typecast local copies of integers in case dim_t and inc_t are a
