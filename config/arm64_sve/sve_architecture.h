@@ -36,10 +36,10 @@
 #ifndef SVE_ARCHITECTURE_H
 #define SVE_ARCHITECTURE_H
 
-// Use vector length agnostic kernels
+// set SVE_VECSIZE to this to use vector length agnostic kernels
 #define SVE_VECSIZE_VLA 0
 
-// Use fixed-size kernels
+// set SVE_VECSIZE to on of these to use fixed-size kernels
 #define SVE_VECSIZE_128 128
 #define SVE_VECSIZE_256 256
 #define SVE_VECSIZE_384 384
