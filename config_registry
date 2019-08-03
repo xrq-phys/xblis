@@ -31,11 +31,8 @@ piledriver:  piledriver
 bulldozer:   bulldozer
 
 # ARM architectures.
+arm64_sve:   arm64_sve/armv8a_sve
 thunderx2:   thunderx2/armv8a
-cortexa76_sve256:    cortexa76_sve256/armv8a_sve
-cortexa76_sve512:    cortexa76_sve512/armv8a_sve
-cortexa76_sve1024:   cortexa76_sve1024/armv8a_sve
-rhea_r1:     rhea_r1
 cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a
 cortexa15:   cortexa15/armv7a

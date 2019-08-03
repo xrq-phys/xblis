@@ -40,7 +40,7 @@
 
 /* 2 vectors in m_r, n_r = 8
 */
-void bli_dgemm_rhea_r1_asm_2vx8
+void bli_dgemm_arm64_sve_asm_2vx8
      (
        dim_t               k0,
        double*    restrict alpha,

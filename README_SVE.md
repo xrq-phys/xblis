@@ -2,11 +2,11 @@ This branch of BLIS library provides micro kernels for Arm SVE extension.
 
 There are currently 4 available configurations:
 
-rhea_r1:
+arm64_sve:
     This configuration uses a vector-length-agnostic micro kernel, which works
     for all SVE vector lengths (128, 256, ..., 2048)
     
-    Configure with configuration name 'rhea_r1'. For more information on build system,
+    Configure with configuration name 'arm64_sve'. For more information on build system,
     refer to README.md.
 
     Note: 

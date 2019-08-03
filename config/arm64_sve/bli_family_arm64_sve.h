@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Forschungszentrum Juelich, Germany
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,14 +36,19 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
+
+
 #define BLIS_SIMD_VLA 1
 
-#define BLIS_SIMD_SIZE get_sve_vecsize()
+#define BLIS_SIMD_SIZE get_sve_byte_size()
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
+//#define BLIS_SIMD_ALIGN_SZE get_sve_byte_size()
 #define BLIS_SIMD_ALIGN_SIZE 256
 
+#include <stdint.h>
+#include "sve_helpers.h"
 
 
 //#endif

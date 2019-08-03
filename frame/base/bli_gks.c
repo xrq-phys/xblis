@@ -125,30 +125,15 @@ void bli_gks_init( void )
 #endif
 
 		// ARM architectures
+#ifdef BLIS_CONFIG_ARM64_SVE
+		bli_gks_register_cntx( BLIS_ARCH_ARM64_SVE,   bli_cntx_init_arm64_sve,
+		                                              bli_cntx_init_arm64_sve_ref,
+		                                              bli_cntx_init_arm64_sve_ind );
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 		bli_gks_register_cntx( BLIS_ARCH_THUNDERX2,   bli_cntx_init_thunderx2,
 		                                              bli_cntx_init_thunderx2_ref,
 		                                              bli_cntx_init_thunderx2_ind );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE256
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA76_SVE256,   bli_cntx_init_cortexa76_sve256,
-		                                              bli_cntx_init_cortexa76_sve256_ref,
-		                                              bli_cntx_init_cortexa76_sve256_ind );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE512
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA76_SVE512,   bli_cntx_init_cortexa76_sve512,
-		                                              bli_cntx_init_cortexa76_sve512_ref,
-		                                              bli_cntx_init_cortexa76_sve512_ind );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE1024
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA76_SVE1024,   bli_cntx_init_cortexa76_sve1024,
-		                                              bli_cntx_init_cortexa76_sve1024_ref,
-		                                              bli_cntx_init_cortexa76_sve1024_ind );
-#endif
-#ifdef BLIS_CONFIG_RHEA_R1
-		bli_gks_register_cntx( BLIS_ARCH_RHEA_R1,   bli_cntx_init_rhea_r1,
-		                                              bli_cntx_init_rhea_r1_ref,
-		                                              bli_cntx_init_rhea_r1_ind );
 #endif
 #ifdef BLIS_CONFIG_CORTEXA57
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa57,

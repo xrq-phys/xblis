@@ -81,20 +81,11 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+#ifdef BLIS_CONFIG_ARM64_SVE
+CNTX_INIT_PROTS( arm64_sve )
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 CNTX_INIT_PROTS( thunderx2 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE1024
-CNTX_INIT_PROTS( cortexa76_sve1024 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE512
-CNTX_INIT_PROTS( cortexa76_sve512 )
-#endif
-#ifdef BLIS_CONFIG_CORTEXA76_SVE256
-CNTX_INIT_PROTS( cortexa76_sve256 )
-#endif
-#ifdef BLIS_CONFIG_RHEA_R1
-CNTX_INIT_PROTS( rhea_r1 )
 #endif
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
@@ -183,18 +174,8 @@ CNTX_INIT_PROTS( generic )
 #endif
 
 // -- ARM architectures --
-
-#ifdef BLIS_FAMILY_CORTEXA76_SVE1024
-#include "bli_family_cortexa76_sve1024.h"
-#endif
-#ifdef BLIS_FAMILY_CORTEXA76_SVE512
-#include "bli_family_cortexa76_sve512.h"
-#endif
-#ifdef BLIS_FAMILY_CORTEXA76_SVE256
-#include "bli_family_cortexa76_sve256.h"
-#endif
-#ifdef BLIS_FAMILY_RHEA_R1
-#include "bli_family_rhea_r1.h"
+#ifdef BLIS_FAMILY_ARM64_SVE
+#include "bli_family_arm64_sve.h"
 #endif
 #ifdef BLIS_FAMILY_THUNDERX2
 #include "bli_family_thunderx2.h"
@@ -278,8 +259,8 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_KERNELS_ARMV8A_SVE
 #include "bli_kernels_armv8a_sve.h"
 #endif
-#ifdef BLIS_KERNELS_RHEA_R1
-#include "bli_kernels_rhea_r1.h"
+#ifdef BLIS_KERNELS_ARM64_SVE
+#include "bli_kernels_arm64_sve.h"
 #endif
 #ifdef BLIS_KERNELS_ARMV8A
 #include "bli_kernels_armv8a.h"

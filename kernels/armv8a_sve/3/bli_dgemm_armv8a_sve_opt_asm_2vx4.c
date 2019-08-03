@@ -51,7 +51,7 @@
 
 /* 2 vectors in m_r, n_r = 4 
 */
-void bli_dgemm_rhea_r1_asm_2vx4
+void bli_dgemm_arm64_sve_asm_2vx4
      (
        dim_t               k0,
        double*    restrict alpha,

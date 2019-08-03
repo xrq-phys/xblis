@@ -47,3 +47,6 @@ output.testsuite
 
 # BLAS test output files
 out.*
+
+# compile commands for LLVM tooling
+compile_commands.json

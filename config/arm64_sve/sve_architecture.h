@@ -33,45 +33,49 @@
 
 */
 
-#include "blis.h"
+#ifndef SVE_ARCHITECTURE_H
+#define SVE_ARCHITECTURE_H
 
-void bli_cntx_init_cortexa76_sve512( cntx_t* cntx )
-{
-	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+// Use vector length agnostic kernels
+#define SVE_VECSIZE_VLA 0
 
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_cortexa76_sve512_ref( cntx );
+// Use fixed-size kernels
+#define SVE_VECSIZE_128 128
+#define SVE_VECSIZE_256 256
+#define SVE_VECSIZE_384 384
+#define SVE_VECSIZE_512 512
+#define SVE_VECSIZE_640 640
+#define SVE_VECSIZE_768 768
+#define SVE_VECSIZE_896 896
+#define SVE_VECSIZE_1024 1024
+#define SVE_VECSIZE_1152 1152
+#define SVE_VECSIZE_1280 1280
+#define SVE_VECSIZE_1408 1408
+#define SVE_VECSIZE_1536 1536
+#define SVE_VECSIZE_1664 1664
+#define SVE_VECSIZE_1792 1792
+#define SVE_VECSIZE_1920 1920
+#define SVE_VECSIZE_2048 2048
 
-	// -------------------------------------------------------------------------
+#define SVE_VECSIZE SVE_VECSIZE_VLA
 
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-	bli_cntx_set_l3_nat_ukrs
-	(
-	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_sve512bits_asm_16x10,  FALSE,
-	  cntx
-	);
+// Number of cache lines in a set
+#define N_L1 256
+// L1 associativity
+#define W_L1 4
+// Cacheline size
+#define C_L1 64
+// FMA latency (chained)
+#define L_VFMA 5
+// Number of SVE engines
+#define N_VFMA 2   
 
-	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,    16,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,    80,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,   880,    -1,    -1 );
+#define N_L2 512
+#define W_L2 8
+#define C_L2 64
 
-	// Update the context with the current architecture's register and cache
-	// blocksizes (and multiples) for native execution.
-	bli_cntx_set_blkszs
-	(
-	  BLIS_NAT, 5,
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  cntx
-	);
-}
+#define N_L3 16384
+#define W_L3 16
+#define C_L3 64
 
+#endif

@@ -1,10 +1,10 @@
 #
-#
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2019, Forschungszentrum Juelich, Germany
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,12 +41,11 @@ THIS_CONFIG    := arm64_sve
 #
 # --- Determine the C compiler and related flags ---
 #
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE
-CMISCFLAGS     :=
+CMISCFLAGS     := -march=armv8.4-a+sve 
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -57,13 +56,13 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3
+COPTFLAGS      := -O3 -ftree-vectorize 
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv8.4-a+fp+simd+crc+crypto+sve
+CKVECFLAGS     := -march=armv8.4-a+sve
 else
 $(error gcc is required for this configuration.)
 endif
@@ -75,3 +74,4 @@ CRVECFLAGS     := $(CKVECFLAGS)
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
+

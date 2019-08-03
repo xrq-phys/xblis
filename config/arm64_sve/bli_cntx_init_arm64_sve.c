@@ -35,86 +35,47 @@
 
 #include "blis.h"
 
+#include "sve_architecture.h"
 #include "sve_helpers.h"
 
 void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
 {
-    return (void*) bli_dgemm_rhea_r1_asm_2vx8;
+    void* kptr = NULL;
+#if SVE_VECSIZE == SVE_VECSIZE_VLA
+    // TODO: More VLA kernels + selection depending on m_r/n_r
+    kptr = (void*) bli_dgemm_arm64_sve_asm_2vx8;
+#elif SVE_VECSIZE == SVE_VECSIZE_256
+    kptr = (void*) bli_dgemm_arm64_sve_8x10;
+#elif SVE_VECSIZE == SVE_VECSIZE_512
+    kptr = (void*) bli_dgemm_arm64_sve_16x10;
+#elif SVE_VECSIZE == SVE_VECSIZE_1024
+    kptr = (void*) bli_dgemm_arm64_sve_32x10;
+#else
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+#error "Chosen SVE vector size (" STR(SVE_VECSIZE) ") invalid or not implemented!"
+#undef STR
+#undef STR_HELPER
+#endif
+
+#if SVE_VECSIZE != SVE_VECSIZE_VLA
+    int sve_bit_size = get_sve_byte_size()*8;
+    if(SVE_VECSIZE != sve_bit_size)
+    {
+        fprintf(STDERR,"Error: Runtime vector size (%d) does not match compile-time size (%d)!\n", sve_bit_size, SVE_VECSIZE);
+        kptr = NULL;
+    }
+#endif
+
+    return kptr;
+
     (void) m_r;
     (void) n_r;
 }
 
-void bli_cntx_init_rhea_r1( cntx_t* cntx )
+void bli_cntx_init_arm64_sve( cntx_t* cntx )
 {
 
-    // Technical information:
-    // 64kb 4-way associative L1 cache
-    // 256kb 8-way L2
-    // 1MB 16 way L3
-    // 2x 256bit(?) SVE engines
-    // Assumption: fmla latency: 5 cycles (Cortex-A72)
-    //
-    // L_vfma = 5
-    // N_vfma = 2
-    //
-    // m_r = ceil(sqrt(N_vec*L_vfma*N_vfma)/N_vec)*N_vec
-    // n_r = ceil(N_vec*L_vfma*N_vfma/m_r)
-    //
-    // Assumption: Cacheline size = 64 bytes
-    //
-    // N_L1 = 256
-    // C_L1 = 64
-    // S_Data = sve_vector_size/2
-    //
-    // k_c = C_Ar*N_L1*C_L1/(m_r*S_Data)
-    //
-    // C_Ar <= floor((W_L1 - 1)/(1+n_r/m_r))
-    //
-    // 256bit:
-    //
-    // N_vec = 4
-    //
-    // m_r = 8
-    // n_r = 5
-    // C_Ar = 1
-    // k_c = 256
-    //
-    // 512bit:
-    //
-    // N_vec = 8
-    //
-    // m_r = 16
-    // n_r = 5
-    // C_Ar = 2
-    // k_c = 256
-    //
-    // 1024bit:
-    //
-    // N_vec = 16
-    //
-    // m_r = 16
-    // n_r = 10
-    // C_Ar = 1
-    // k_c = 128
- 
-    // Number of cache lines in a set
-    #define N_L1 256
-    // L1 associativity
-    #define W_L1 4
-    // Cacheline size
-    #define C_L1 64
-    // FMA latency (chained)
-    #define L_VFMA 5
-    // Number of SVE engines
-    #define N_VFMA 2   
-
-    #define N_L2 512
-    #define W_L2 8
-    #define C_L2 64
-
-    #define N_L3 16384
-    #define W_L3 16
-    #define C_L3 64
 
     int S_Data   = 8;
     int simd_size = get_sve_byte_size()/S_Data;
@@ -152,22 +113,11 @@ void bli_cntx_init_rhea_r1( cntx_t* cntx )
     C_Bc = W_L3 - 1 - ceil(((double)k_c_s*m_c_s*S_Data)/(C_L3*N_L3));
     int n_c_s = C_Bc * (N_L3 * C_L3)/(k_c_s*S_Data);
     n_c_s -= (n_c_s%n_r_s);
-    #undef N_L1
-    #undef W_L1
-    #undef C_L1
-    #undef N_L2
-    #undef W_L2
-    #undef C_L2
-    #undef N_L3
-    #undef W_L3
-    #undef C_L3
-    #undef L_VFMA
-    #undef N_VFMA
 
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_rhea_r1_ref( cntx );
+	bli_cntx_init_arm64_sve_ref( cntx );
 
 	// -------------------------------------------------------------------------
 

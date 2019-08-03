@@ -122,20 +122,11 @@ void bli_arch_set_id( void )
 #endif
 
 	// ARM microarchitectures.
+#ifdef BLIS_FAMILY_ARM64_SVE
+	id = BLIS_ARCH_ARM64_SVE;
+#endif
 #ifdef BLIS_FAMILY_THUNDERX2
 	id = BLIS_ARCH_THUNDERX2;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA76_SVE1024
-	id = BLIS_ARCH_CORTEXA76_SVE1024;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA76_SVE512
-	id = BLIS_ARCH_CORTEXA76_SVE512;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA76_SVE256
-	id = BLIS_ARCH_CORTEXA76_SVE256;
-#endif
-#ifdef BLIS_FAMILY_RHEA_R1
-	id = BLIS_ARCH_RHEA_R1;
 #endif
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
@@ -191,11 +182,9 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "piledriver",
     "bulldozer",
 
+    "arm64_sve",
+
     "thunderx2",
-    "cortexa76_sve1024",
-    "cortexa76_sve512",
-    "cortexa76_sve256",
-    "rhea_r1",
     "cortexa57",
     "cortexa53",
     "cortexa15",
