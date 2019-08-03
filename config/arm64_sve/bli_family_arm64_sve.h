@@ -36,10 +36,6 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
-
-
-#define BLIS_SIMD_VLA 1
-
 #define BLIS_SIMD_SIZE get_sve_byte_size()
 
 // -- MEMORY ALLOCATION --------------------------------------------------------

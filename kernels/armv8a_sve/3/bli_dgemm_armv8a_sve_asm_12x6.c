@@ -60,7 +60,7 @@
 
  * tests still need to be done to check performance
 */
-void bli_dgemm_armv8a_sve256bits_asm_12x6
+void bli_dgemm_armv8a_sve_asm_12x6
      (
        dim_t               k0,
        double*    restrict alpha,

@@ -51,16 +51,19 @@
 }*/
 
 /*
-   o 32x10 Double precision micro-kernel 
+   o 8x10 Double precision micro-kernel 
    o Runnable on ARMv8+SVE, compiled with aarch64 GCC.
    o Use it together with the armv8_sve BLIS configuration.
    o Tested on Juawei arm nodes with ARMIE emulator.
    o Due to the fact that mr and nr depend on size of the vector
-     registers, this kernel only works when size=1024!
+     registers, this kernel only works when size=256!!
 
  * tests still need to be done to check performance
 */
-void bli_dgemm_armv8a_sve1024bits_asm_32x10
+
+
+
+void bli_dgemm_armv8a_sve_asm_8x10
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -74,11 +77,12 @@ void bli_dgemm_armv8a_sve1024bits_asm_32x10
 {
 
     // safety check
-    /*if (get_vector_length() != 1024)
+    /*if (get_vector_length() != 256)
     {
-        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 1024bits, but your length is %d.\n", get_vector_length());
+        fprintf(stderr, "Wrong SVE vector length! You compiled for vector length of 256bits, but your length is %d.\n", get_vector_length());
         exit(EXIT_FAILURE);
     }*/
+
 
 
 	void* a_next = bli_auxinfo_next_a( data );
@@ -112,8 +116,8 @@ __asm__ volatile
 " ldr x13,%[rs_c]                            \n\t" // Load rs_c.
 " lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
 "                                            \n\t"
-" mov x11, #16                               \n\t"
-" mov x12, #32                               \n\t"
+" mov x11, #4                                \n\t"
+" mov x12, #8                               \n\t"
 "                                            \n\t"
 " add x20,x2,x10                             \n\t" //Load address Column 1 of C
 " add x21,x20,x10                            \n\t" //Load address Column 2 of C
@@ -154,64 +158,51 @@ __asm__ volatile
 "                                            \n\t"
 "                                            \n\t"
 " dup z12.d, #0                              \n\t" // Vector for accummulating column 0
-" prfm PLDL1KEEP, [x1, #320]                 \n\t"
 " dup z13.d, #0                              \n\t" // Vector for accummulating column 0
-" prfm PLDL1KEEP, [x1, #384]                 \n\t"
 " dup z14.d, #0                              \n\t" // Vector for accummulating column 1
-" prfm PLDL1KEEP, [x1, #448]                 \n\t"
 " dup z15.d, #0                              \n\t" // Vector for accummulating column 1
-" prfm PLDL1KEEP, [x1, #512]                 \n\t"
+" prfm PLDL1KEEP, [x1, #320]                 \n\t"
 " dup z16.d, #0                              \n\t" // Vector for accummulating column 2
-" prfm PLDL1KEEP, [x1, #576]                 \n\t"
+" prfm PLDL1KEEP, [x1, #384]                 \n\t"
 "                                            \n\t"
 " dup z17.d, #0                              \n\t" // Vector for accummulating column 2
-" prfm PLDL1KEEP, [x0, #1024]                 \n\t"
+" prfm PLDL1KEEP, [x1, #448]                 \n\t"
 " dup z18.d, #0                              \n\t" // Vector for accummulating column 3
-" prfm PLDL1KEEP, [x0, #1088]                 \n\t"
+" prfm PLDL1KEEP, [x1, #512]                 \n\t"
 " dup z19.d, #0                              \n\t" // Vector for accummulating column 3
-" prfm PLDL1KEEP, [x0, #1152]                \n\t"
+" prfm PLDL1KEEP, [x1, #576]                 \n\t"
 "                                            \n\t"
+" prfm PLDL1KEEP, [x0, #256]                 \n\t"
 "                                            \n\t"
 " dup z20.d, #0                              \n\t" // Vector for accummulating column 4
-" prfm PLDL1KEEP, [x0, #1216]                \n\t"
+" prfm PLDL1KEEP, [x0, #320]                 \n\t"
 " dup z21.d, #0                              \n\t" // Vector for accummulating column 4
-" prfm PLDL1KEEP, [x0, #1280]                \n\t"
+" prfm PLDL1KEEP, [x0, #384]                \n\t"
 " dup z22.d, #0                              \n\t" // Vector for accummulating column 5
-" prfm PLDL1KEEP, [x0, #1344]                \n\t"
 "                                            \n\t"
 " dup z23.d, #0                              \n\t" // Vector for accummulating column 5
-" prfm PLDL1KEEP, [x0, #1408]                \n\t"
+" prfm PLDL1KEEP, [x0, #448]                \n\t"
 " dup z24.d, #0                              \n\t" // Vector for accummulating column 6
-" prfm PLDL1KEEP, [x0, #1472]                \n\t"
 " dup z25.d, #0                              \n\t" // Vector for accummulating column 6
-" prfm PLDL1KEEP, [x0, #1536]                \n\t"
 "                                            \n\t"
 " dup z26.d, #0                              \n\t" // Vector for accummulating column 7
-" prfm PLDL1KEEP, [x0, #1600]                \n\t"
 " dup z27.d, #0                              \n\t" // Vector for accummulating column 7
-" prfm PLDL1KEEP, [x0, #1664]                \n\t"
 " dup z28.d, #0                              \n\t" // Vector for accummulating column 8
-" prfm PLDL1KEEP, [x0, #1728]                \n\t"
 "                                            \n\t"
 " dup z29.d, #0                              \n\t" // Vector for accummulating column 8
-" prfm PLDL1KEEP, [x0, #1792]                \n\t"
 " dup z30.d, #0                              \n\t" // Vector for accummulating column 9
-" prfm PLDL1KEEP, [x0, #1856]                \n\t"
 " dup z31.d, #0                              \n\t" // Vector for accummulating column 9
-" prfm PLDL1KEEP, [x0, #1920]                \n\t"
-"                                            \n\t"
-" prfm PLDL1KEEP, [x0, #1984]                \n\t"
 "                                            \n\t"
 " cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
-" beq .D1024CONSIDERKLEFT                     \n\t"
+" beq .D256CONSIDERKLEFT                     \n\t"
 "                                            \n\t"
-" add x0, x0, #256                           \n\t" //update address of A
+" add x0, x0, #64                            \n\t" //update address of A
 " add x1, x1, #80                            \n\t" //update address of B
 "                                            \n\t"
 " cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
-" beq .D1024LASTITER                          \n\t" // (as loop is do-while-like).
+" beq .D256LASTITER                          \n\t" // (as loop is do-while-like).
 "                                            \n\t"
-" D1024LOOP:                                  \n\t" // Body
+" D256LOOP:                                  \n\t" // Body
 "                                            \n\t"
 " fmla z12.d, p0/m, z0.d, z2.d               \n\t"
 " prfm PLDL1KEEP, [x1, #560]                 \n\t"
@@ -247,21 +238,19 @@ __asm__ volatile
 " ld1rd  z8.d, p0/z, [x1, #48]               \n\t"
 "                                            \n\t"
 " fmla z26.d, p0/m, z0.d, z9.d               \n\t"
-" prfm PLDL1KEEP, [x0, #1792]                \n\t"  // 1984 + 64 - 256
 " fmla z27.d, p0/m, z1.d, z9.d               \n\t"
-" prfm PLDL1KEEP, [x0, #1856]                \n\t"
 " ld1rd  z9.d, p0/z, [x1, #56]               \n\t"
 "                                            \n\t"
 " fmla z28.d, p0/m, z0.d, z10.d              \n\t"
-" prfm PLDL1KEEP, [x0, #1920]                \n\t"
+" prfm PLDL1KEEP, [x0, #448]                \n\t"  // 448 + 64 -64 
 " fmla z29.d, p0/m, z1.d, z10.d              \n\t"
-" prfm PLDL1KEEP, [x0, #1984]                \n\t"
+" prfm PLDL1KEEP, [x0, #512]                \n\t"  
 " ld1rd  z10.d, p0/z, [x1, #64]              \n\t"
 "                                            \n\t"
 " fmla z30.d, p0/m, z0.d, z11.d              \n\t"
-" prfm PLDL1KEEP, [x0, #2048]                \n\t"
+" prfm PLDL1KEEP, [x0, #576]                \n\t"  
 " fmla z31.d, p0/m, z1.d, z11.d              \n\t"
-" prfm PLDL1KEEP, [x0, #2112]                \n\t"
+" prfm PLDL1KEEP, [x0, #640]                \n\t"  
 " ld1rd  z11.d, p0/z, [x1, #72]              \n\t"
 "                                            \n\t"
 " ld1d   z0.d, p0/z, [x0]                    \n\t" 
@@ -269,33 +258,23 @@ __asm__ volatile
 "                                            \n\t"	//End it 1.
 "                                            \n\t"
 " fmla z12.d, p0/m, z0.d, z2.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2176]                \n\t"
 " fmla z13.d, p0/m, z1.d, z2.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2240]                \n\t"
 " ld1rd  z2.d, p0/z, [x1, #80]               \n\t"
 "                                            \n\t"
 " fmla z14.d, p0/m, z0.d, z3.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2304]                \n\t"
 " fmla z15.d, p0/m, z1.d, z3.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2368]                \n\t"
 " ld1rd  z3.d, p0/z, [x1, #88]               \n\t"
 "                                            \n\t"
 " fmla z16.d, p0/m, z0.d, z4.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2432]                \n\t"
 " fmla z17.d, p0/m, z1.d, z4.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2496]                \n\t"
 " ld1rd  z4.d, p0/z, [x1, #96]               \n\t"
 "                                            \n\t"
 " fmla z18.d, p0/m, z0.d, z5.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2560]                \n\t"
 " fmla z19.d, p0/m, z1.d, z5.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2624]                \n\t"
 " ld1rd  z5.d, p0/z, [x1, #104]               \n\t"
 "                                            \n\t"
 " fmla z20.d, p0/m, z0.d, z6.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2688]                \n\t"
 " fmla z21.d, p0/m, z1.d, z6.d               \n\t"
-" prfm PLDL1KEEP, [x0, #2752]                \n\t"
 " ld1rd  z6.d, p0/z, [x1, #112]               \n\t"
 "                                            \n\t"
 " fmla z22.d, p0/m, z0.d, z7.d               \n\t"
@@ -412,14 +391,14 @@ __asm__ volatile
 "                                            \n\t"
 "                                            \n\t"	//End it 4.
 "                                            \n\t"
-" add x0, x0, #1024                          \n\t" // incremenenting by 1024 
+" add x0, x0, #256                           \n\t" // incremenenting by 256 
 " add x1, x1, #320                           \n\t"
 "                                            \n\t"
 " sub x5,x5,1                                \n\t" // i-=1
 " cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
-" bne D1024LOOP                               \n\t"
+" bne D256LOOP                               \n\t"
 "                                            \n\t"
-" .D1024LASTITER:                             \n\t"
+" .D256LASTITER:                             \n\t"
 "                                            \n\t"
 " fmla z12.d, p0/m, z0.d, z2.d               \n\t"
 " fmla z13.d, p0/m, z1.d, z2.d               \n\t"
@@ -587,18 +566,18 @@ __asm__ volatile
 "                                            \n\t"
 "                                            \n\t"	//End it 4.
 "                                            \n\t"
-" add x0, x0, #768                           \n\t" // incremenenting by 1024*3/4 
+" add x0, x0, #192                           \n\t" // incremenenting by 256*3/4 
 " add x1, x1, #240                           \n\t" // incremenenting by 320*3/4 
 "                                            \n\t"
-" .D1024CONSIDERKLEFT:                        \n\t" 
+" .D256CONSIDERKLEFT:                        \n\t" 
 " cmp x6,0                                   \n\t" // If k_left == 0, we are done.
-" beq .D1024POSTACCUM                         \n\t" // else, we enter the k_left loop.
+" beq .D256POSTACCUM                         \n\t" // else, we enter the k_left loop.
 "                                            \n\t"
-".D1024LOOPKLEFT:                             \n\t"
+".D256LOOPKLEFT:                             \n\t"
 "                                            \n\t"
 " ld1d  z0.d, p0/z, [x0]                     \n\t" // Load a
 " ld1d  z1.d, p0/z, [x0, #1, MUL VL]         \n\t"
-" add x0, x0, #256                           \n\t"
+" add x0, x0, #64                            \n\t"
 "                                            \n\t"
 " ld1rd  z2.d, p0/z, [x1]                    \n\t" // Load b
 " ld1rd  z3.d, p0/z, [x1, #8]                \n\t"
@@ -645,17 +624,17 @@ __asm__ volatile
 " fmla z31.d, p0/m, z1.d, z11.d              \n\t"
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
-" bne .D1024LOOPKLEFT                         \n\t" // if i!=0.
+" bne .D256LOOPKLEFT                         \n\t" // if i!=0.
 "                                            \n\t"
-" .D1024POSTACCUM:                            \n\t"
+" .D256POSTACCUM:                            \n\t"
 "                                            \n\t"
 " ld1rd  z8.d, p0/z, [x7]                    \n\t" // Load alpha
 " ld1rd  z9.d, p0/z, [x8]                    \n\t" // Load beta
 "                                            \n\t"
 " cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
-" bne .D1024GENSTORED                         \n\t"
+" bne .D256GENSTORED                         \n\t"
 "                                            \n\t"
-" .D1024COLSTORED:                            \n\t" // C is column-major.
+" .D256COLSTORED:                            \n\t" // C is column-major.
 "                                            \n\t"
 " dup z0.d, #0                               \n\t" 
 " dup z1.d, #0                               \n\t" 
@@ -667,7 +646,7 @@ __asm__ volatile
 " dup z7.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROCOLSTOREDS1               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROCOLSTOREDS1               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d  {z0.d}, p0/z, [x2]                   \n\t" // Load column 0 of C
 " ld1d  {z1.d}, p0/z, [x2, #1, MUL VL]       \n\t"
@@ -690,7 +669,7 @@ __asm__ volatile
 " fmul z6.d, p0/m, z6.d, z9.d                \n\t" // Scale by beta
 " fmul z7.d, p0/m, z7.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROCOLSTOREDS1:                  \n\t"
+" .D256BETAZEROCOLSTOREDS1:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z12.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z13.d, z8.d               \n\t" // Scale by alpha
@@ -723,7 +702,7 @@ __asm__ volatile
 " dup z7.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROCOLSTOREDS2               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROCOLSTOREDS2               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d  {z0.d}, p0/z, [x23]                   \n\t" // Load column 5 of C
 " ld1d  {z1.d}, p0/z, [x23, #1, MUL VL]       \n\t"
@@ -746,7 +725,7 @@ __asm__ volatile
 " fmul z6.d, p0/m, z6.d, z9.d                \n\t" // Scale by beta
 " fmul z7.d, p0/m, z7.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROCOLSTOREDS2:                  \n\t"
+" .D256BETAZEROCOLSTOREDS2:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z20.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z21.d, z8.d               \n\t" // Scale by alpha
@@ -776,7 +755,7 @@ __asm__ volatile
 " dup z3.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROCOLSTOREDS3               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROCOLSTOREDS3               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d  {z0.d}, p0/z, [x27]                   \n\t" // Load column 5 of C
 " ld1d  {z1.d}, p0/z, [x27, #1, MUL VL]       \n\t"
@@ -790,7 +769,7 @@ __asm__ volatile
 " fmul z2.d, p0/m, z2.d, z9.d                \n\t" // Scale by beta
 " fmul z3.d, p0/m, z3.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROCOLSTOREDS3:                  \n\t"
+" .D256BETAZEROCOLSTOREDS3:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z28.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z29.d, z8.d               \n\t" // Scale by alpha
@@ -804,9 +783,9 @@ __asm__ volatile
 " st1d  {z3.d}, p0, [x28, #1, MUL VL]        \n\t"
 "                                            \n\t"
 "                                            \n\t"
-" b .D1024END                                 \n\t"
+" b .D256END                                 \n\t"
 "                                            \n\t"
-" .D1024GENSTORED:                            \n\t" // C is general-stride stored.
+" .D256GENSTORED:                            \n\t" // C is general-stride stored.
 "                                            \n\t"
 " index z10.d, xzr, x13                       \n\t" // Creating index for stride load&store access
 " mul x15, x13, x11                          \n\t"
@@ -822,7 +801,7 @@ __asm__ volatile
 " dup z7.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROGENSTOREDS1               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROGENSTOREDS1               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d {z0.d}, p0/z, [x2, z10.d, LSL #3]     \n\t" // Load column 0 of C
 " ld1d {z1.d}, p0/z, [x2, z11.d, LSL #3]     \n\t"
@@ -845,7 +824,7 @@ __asm__ volatile
 " fmul z6.d, p0/m, z6.d, z9.d                \n\t" // Scale by beta
 " fmul z7.d, p0/m, z7.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROGENSTOREDS1:                  \n\t"
+" .D256BETAZEROGENSTOREDS1:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z12.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z13.d, z8.d               \n\t" // Scale by alpha
@@ -878,7 +857,7 @@ __asm__ volatile
 " dup z7.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROGENSTOREDS2               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROGENSTOREDS2               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d {z0.d}, p0/z, [x23, z10.d, LSL #3]     \n\t" // Load column 5 of C
 " ld1d {z1.d}, p0/z, [x23, z11.d, LSL #3]     \n\t"
@@ -901,7 +880,7 @@ __asm__ volatile
 " fmul z6.d, p0/m, z6.d, z9.d                \n\t" // Scale by beta
 " fmul z7.d, p0/m, z7.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROGENSTOREDS2:                  \n\t"
+" .D256BETAZEROGENSTOREDS2:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z20.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z21.d, z8.d               \n\t" // Scale by alpha
@@ -931,7 +910,7 @@ __asm__ volatile
 " dup z3.d, #0                               \n\t" 
 "                                            \n\t"
 " fcmp d9,#0.0                               \n\t"
-" beq .D1024BETAZEROGENSTOREDS3               \n\t" // Taking care of the beta==0 case.
+" beq .D256BETAZEROGENSTOREDS3               \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 " ld1d {z0.d}, p0/z, [x27, z10.d, LSL #3]     \n\t" // Load column 7 of C
 " ld1d {z1.d}, p0/z, [x27, z11.d, LSL #3]     \n\t"
@@ -944,7 +923,7 @@ __asm__ volatile
 " fmul z2.d, p0/m, z2.d, z9.d                \n\t" // Scale by beta
 " fmul z3.d, p0/m, z3.d, z9.d                \n\t" // Scale by beta
 "                                            \n\t"
-" .D1024BETAZEROGENSTOREDS3:                  \n\t"
+" .D256BETAZEROGENSTOREDS3:                  \n\t"
 "                                            \n\t"
 " fmla z0.d, p0/m, z28.d, z8.d               \n\t" // Scale by alpha
 " fmla z1.d, p0/m, z29.d, z8.d               \n\t" // Scale by alpha
@@ -957,7 +936,7 @@ __asm__ volatile
 " st1d {z2.d}, p0, [x28, z10.d, LSL #3]      \n\t" // Store column 8 of C
 " st1d {z3.d}, p0, [x28, z11.d, LSL #3]      \n\t"
 "                                            \n\t"
-" .D1024END:                                  \n\t" // Done!
+" .D256END:                                  \n\t" // Done!
 "                                            \n\t"
 :// output operands (none)
 :// input operands
@@ -992,4 +971,5 @@ __asm__ volatile
 );
 
 }
+
 

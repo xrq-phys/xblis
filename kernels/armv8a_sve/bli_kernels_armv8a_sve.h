@@ -32,19 +32,19 @@
 
 */
 
-GEMM_UKR_PROT( double,   d, gemm_armv8a_sve256bits_asm_12x6 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_sve256bits_asm_8x10 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_sve512bits_asm_16x10 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_sve1024bits_asm_32x10 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_12x6 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_8x10 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_16x10 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_32x10 )
 
 /* Vary number of vectors for m_r
  * Vary n_r
  */
 
-GEMM_UKR_PROT(double, d, gemm_arm64_sve_asm_2vx4)
-GEMM_UKR_PROT(double, d, gemm_arm64_sve_asm_2vx8)
-//GEMM_UKR_PROT(double, d, gemm_arm64_sve_asm_4vx4)
-//GEMM_UKR_PROT(double, d, gemm_arm64_sve_asm_4vx8)
-//GEMM_UKR_PROT(double, d, gemm_arm64_sve_asm_4vx16)
+GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_2vx4)
+GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_2vx8)
+//GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_4vx4)
+//GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_4vx8)
+//GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_4vx16)
 
 void* get_sve_dgemm_bli_kernel(int m_r, int n_r);

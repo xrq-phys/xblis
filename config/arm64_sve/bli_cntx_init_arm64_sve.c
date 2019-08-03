@@ -43,17 +43,18 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
     void* kptr = NULL;
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
     // TODO: More VLA kernels + selection depending on m_r/n_r
-    kptr = (void*) bli_dgemm_arm64_sve_asm_2vx8;
+    kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
-    kptr = (void*) bli_dgemm_arm64_sve_8x10;
+    kptr = (void*) bli_dgemm_armv8a_sve_asm_8x10;
 #elif SVE_VECSIZE == SVE_VECSIZE_512
-    kptr = (void*) bli_dgemm_arm64_sve_16x10;
+    kptr = (void*) bli_dgemm_armv8a_sve_asm_16x10;
 #elif SVE_VECSIZE == SVE_VECSIZE_1024
-    kptr = (void*) bli_dgemm_arm64_sve_32x10;
+    kptr = (void*) bli_dgemm_armv8a_sve_asm_32x10;
 #else
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-#error "Chosen SVE vector size (" STR(SVE_VECSIZE) ") invalid or not implemented!"
+#pragma message "Vector size: (" STR(SVE_VECSIZE) ")"
+#error "Chosen SVE vector size  invalid or not implemented!"
 #undef STR
 #undef STR_HELPER
 #endif
@@ -62,8 +63,9 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
     int sve_bit_size = get_sve_byte_size()*8;
     if(SVE_VECSIZE != sve_bit_size)
     {
-        fprintf(STDERR,"Error: Runtime vector size (%d) does not match compile-time size (%d)!\n", sve_bit_size, SVE_VECSIZE);
+        fprintf(stderr,"Error: Runtime vector size (%d) does not match compile-time size (%d)!\n", sve_bit_size, SVE_VECSIZE);
         kptr = NULL;
+        exit(EXIT_FAILURE);
     }
 #endif
 
