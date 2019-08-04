@@ -56,15 +56,17 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -ftree-vectorize 
+COPTFLAGS      := -O3 -ftree-vectorize
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -march=armv8.4-a+sve
+else ifeq ($(CC_VENDOR),armclang)
+CKVECFLAGS     := -march=armv8.4-a+sve
 else
-$(error gcc is required for this configuration.)
+$(error gcc or armclang is required for this configuration. You are using $(CC_VENDOR) )
 endif
 
 # Flags specific to reference kernels.

@@ -98,7 +98,7 @@ __asm__ volatile
 " lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
 "                                            \n\t"
 " ldr x13,%[rs_c]                            \n\t" // Load rs_c.
-" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
+//" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
 "                                            \n\t"
 " mov x11, #4                                \n\t"
 "                                            \n\t"
@@ -220,8 +220,8 @@ FINC_2COL(2VX4,CONT,z8,z9,z11,z12,x21,x22, no,no, 6, 7, z18,z19,z20,z21,2)
 " .D2VX4GENSTORED:                               \n\t" // C is general-stride stored.
 "                                            \n\t"
 " index z8.d, xzr, x13                       \n\t" // Creating index for stride load&store access
-" mul x15, x13, x11                          \n\t"
-" index z9.d, x15, x13                       \n\t" // Creating index for stride load&store access
+" mul x3, x13, x11                           \n\t"
+" index z9.d, x3, x13                        \n\t" // Creating index for stride load&store access
 "                                            \n\t"
 FINC_2COL(2VX4,GENI,z0,z1,z2,z3,x2,x20, z8,z9, 6, 7, z14,z15,z16,z17,1)
 FINC_2COL(2VX4,GENI,z10,z11,z12,z13,x21,x22, z8,z9, 6, 7, z18,z19,z20,z21,2)
@@ -245,9 +245,8 @@ FINC_2COL(2VX4,GENI,z10,z11,z12,z13,x21,x22, z8,z9, 6, 7, z18,z19,z20,z21,2)
  "x0","x1","x2","x3",
  "x4","x5","x6",
  "x7","x8","x9",
- "x10","x11","x12","x13","x14","x16","x17",
+ "x10","x11","x13",
  "x20","x21","x22","x23","x24","x25","x26",
- "x27",       
  "z0","z1","z2",
  "z3","z4","z5",
  "z6","z7","z8",
