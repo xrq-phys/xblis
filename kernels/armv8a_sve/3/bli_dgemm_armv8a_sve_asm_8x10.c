@@ -107,11 +107,12 @@ __asm__ volatile
 " ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
 " ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
 "                                            \n\t" 
-" ldr x7,%[alpha]                            \n\t" // Alpha address      
-" ldr x8,%[beta]                             \n\t" // Beta address      
+// Moved to where the values are loaded and reusing x0 and x1
+//" ldr x7,%[alpha]                            \n\t" // Alpha address      
+//" ldr x8,%[beta]                             \n\t" // Beta address      
 "                                            \n\t" 
-" ldr x9,%[cs_c]                             \n\t" // Load cs_c
-" lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
+" ldr x10,%[cs_c]                             \n\t" // Load cs_c
+" lsl x10,x10,#3                              \n\t" // cs_c * sizeof(double)
 "                                            \n\t"
 " ldr x13,%[rs_c]                            \n\t" // Load rs_c.
 //" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
@@ -627,8 +628,10 @@ __asm__ volatile
 "                                            \n\t"
 " .D256POSTACCUM:                            \n\t"
 "                                            \n\t"
-" ld1rd  z8.d, p0/z, [x7]                    \n\t" // Load alpha
-" ld1rd  z9.d, p0/z, [x8]                    \n\t" // Load beta
+" ldr x0,%[alpha]                            \n\t" // Alpha address      
+" ldr x1,%[beta]                             \n\t" // Beta address      
+" ld1rd  z8.d, p0/z, [x0]                    \n\t" // Load alpha
+" ld1rd  z9.d, p0/z, [x1]                    \n\t" // Load beta
 "                                            \n\t"
 " cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
 " bne .D256GENSTORED                         \n\t"
@@ -953,7 +956,6 @@ __asm__ volatile
 :// Register clobber list
  "x0","x1","x2","x3",
  "x4","x5","x6",
- "x7","x8","x9",
  "x10","x11","x13",
  "x20","x21","x22","x23","x24","x25","x26",
  "x27", "x28",       

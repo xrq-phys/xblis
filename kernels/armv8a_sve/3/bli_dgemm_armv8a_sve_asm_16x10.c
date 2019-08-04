@@ -103,17 +103,18 @@ __asm__ volatile
 " ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
 " ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
 "                                            \n\t" 
-" ldr x7,%[alpha]                            \n\t" // Alpha address      
-" ldr x8,%[beta]                             \n\t" // Beta address      
+// Moved to where the values are loaded, reusing x0 and x1 instead
+//" ldr x7,%[alpha]                            \n\t" // Alpha address      
+//" ldr x8,%[beta]                             \n\t" // Beta address      
 "                                            \n\t" 
-" ldr x9,%[cs_c]                             \n\t" // Load cs_c
-" lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
+" ldr x10,%[cs_c]                             \n\t" // Load cs_c
+" lsl x10,x10,#3                              \n\t" // cs_c * sizeof(double)
 "                                            \n\t"
 " ldr x13,%[rs_c]                            \n\t" // Load rs_c.
-" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
+//" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
 "                                            \n\t"
 " mov x11, #8                                \n\t"
-" mov x12, #16                               \n\t"
+//" mov x12, #16                               \n\t"
 "                                            \n\t"
 " add x20,x2,x10                             \n\t" //Load address Column 1 of C
 " add x21,x20,x10                            \n\t" //Load address Column 2 of C
@@ -632,8 +633,10 @@ __asm__ volatile
 "                                            \n\t"
 " .D512POSTACCUM:                            \n\t"
 "                                            \n\t"
-" ld1rd  z8.d, p0/z, [x7]                    \n\t" // Load alpha
-" ld1rd  z9.d, p0/z, [x8]                    \n\t" // Load beta
+" ldr x0,%[alpha]                            \n\t" // Alpha address      
+" ldr x1,%[beta]                             \n\t" // Beta address      
+" ld1rd  z8.d, p0/z, [x0]                    \n\t" // Load alpha
+" ld1rd  z9.d, p0/z, [x1]                    \n\t" // Load beta
 "                                            \n\t"
 " cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
 " bne .D512GENSTORED                         \n\t"
@@ -791,8 +794,8 @@ __asm__ volatile
 " .D512GENSTORED:                            \n\t" // C is general-stride stored.
 "                                            \n\t"
 " index z10.d, xzr, x13                       \n\t" // Creating index for stride load&store access
-" mul x15, x13, x11                          \n\t"
-" index z11.d, x15, x13                       \n\t" // Creating index for stride load&store access
+" mul x3, x13, x11                          \n\t"
+" index z11.d, x3, x13                       \n\t" // Creating index for stride load&store access
 "                                            \n\t"
 " dup z0.d, #0                               \n\t" 
 " dup z1.d, #0                               \n\t" 
@@ -957,8 +960,8 @@ __asm__ volatile
 :// Register clobber list
  "x0","x1","x2","x3",
  "x4","x5","x6",
- "x7","x8","x9",
- "x10","x11","x12","x13","x14","x16","x17",
+ "x9",
+ "x10","x11","x13",
  "x20","x21","x22","x23","x24","x25","x26",
  "x27", "x28",       
  "z0","z1","z2",
