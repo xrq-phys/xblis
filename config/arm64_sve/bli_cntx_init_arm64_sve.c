@@ -135,11 +135,11 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ], m_r_s,   m_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ], n_r_s,   n_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ], m_c_s,   m_c_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ], k_c_s,   k_c_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], n_c_s,   n_c_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ], /*m_r_s*/ -1,   m_r_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ], /*n_r_s*/ -1,   n_r_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ], /*m_c_s*/ -1,   m_c_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ], /*k_c_s*/ -1,   k_c_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], /*n_c_s*/ -1,   n_c_d,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
