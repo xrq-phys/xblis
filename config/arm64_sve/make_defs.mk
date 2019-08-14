@@ -50,7 +50,7 @@ CPICFLAGS      :=
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
-CDBGFLAGS      := -g
+CDBGFLAGS      := -g -DDEBUG
 endif
 
 ifeq ($(DEBUG_TYPE),noopt)

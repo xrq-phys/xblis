@@ -117,9 +117,8 @@ LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
 "                                            \n\t"
 ZERO4VEC(z10,z11,z12,z13)                          // c columns 0-1
 " prfm PLDL1KEEP, [x1, #64]                  \n\t"
-" prfm PLDL1KEEP, [x1, #128]                 \n\t"
 ZERO4VEC(z14,z15,z16,z17)                          // c columns 2-3
-" prfm PLDL1KEEP, [x1, #192]                  \n\t"
+" prfm PLDL1KEEP, [x1, #128]                  \n\t"
 ZERO4VEC(z18,z19,z20,z21)                          // c columns 4-5
 " prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // prefetch next a vector
 ZERO4VEC(z22,z23,z24,z25)                          // c columns 6-7
@@ -155,13 +154,13 @@ MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,56)
 " prfd pldl1keep,p0, [x0, #9, MUL VL]        \n\t" // prefetch next a vector
 "                                            \n\t"
 MLA2ROW_LA_LB(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,64) 
-" prfm PLDL1KEEP, [x1, #256]                 \n\t"
+" prfm PLDL1KEEP, [x1, #128]                 \n\t"
 MLA2ROW_LA_LB(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,72) 
-" prfm PLDL1KEEP, [x1, #320]                 \n\t"
+" prfm PLDL1KEEP, [x1, #192]                 \n\t"
 MLA2ROW_LB(z14, z15, z26, z27, z4, p0, x1,80)
-" prfm PLDL1KEEP, [x1, #384]                 \n\t"
+" prfm PLDL1KEEP, [x1, #256]                 \n\t"
 MLA2ROW_LB(z16, z17, z26, z27, z5, p0, x1,88)
-" prfm PLDL1KEEP, [x1, #448]                 \n\t"
+" prfm PLDL1KEEP, [x1, #320]                 \n\t"
 MLA2ROW_LB(z18, z19, z26, z27, z6, p0, x1,96)
 MLA2ROW_LB(z20, z21, z26, z27, z7, p0, x1,104)
 MLA2ROW_LB(z22, z23, z26, z27, z8, p0, x1,112)
@@ -192,9 +191,13 @@ MLA2ROW_LB(z24, z25, z26, z27, z9, p0, x1,248)
 " bne .D2VX8LOOP                             \n\t"
 " .D2VX8LASTITER:                            \n\t" // Body
 MLA2ROW_LA_LB(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,0) 
+" prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // prefetch next a vector
 MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,8) 
+" prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
 MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,16)
+" prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // prefetch next a vector
 MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,24)
+" prfd pldl1keep,p0, [x0, #5, MUL VL]        \n\t" // prefetch next a vector
 MLA2ROW_LB(z18, z19, z0, z1, z6, p0, x1,32)
 MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,40)
 MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,48)
@@ -277,10 +280,10 @@ FINC_4COL(2VX8,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,3
 " b .D2VX8END                                \n\t"
 "                                            \n\t"
 " .D2VX8GENSTORED:                           \n\t" // C is general-stride stored.
-"                                            \n\t"
-" index z8.d, xzr, x13                       \n\t" // Creating index for stride load&store access
-" mul x3, x13, x11                          \n\t"
-" index z9.d, x3, x13                       \n\t" // Creating index for stride load&store access
+"                                            \n\t" // Creating index for stride load&store access
+" index z8.d, xzr, x13                       \n\t" // 0, stride*double, 2*stride*double, ...
+" mul x3, x13, x11                           \n\t" // x3 <- stride*double*vecsize
+" index z9.d, x3, x13                        \n\t" // stride*double*vecsize, (vecsize+1)*stride*double, (vecsize+2)*stride*double, ...
 "                                            \n\t"
 //FINC_2COL(2VX8,GENI,z0,z1,z2,z3,     x2,x20,  z8,z9, 29, 30, z10,z11,z12,z13,1)
 //FINC_2COL(2VX8,GENI,z4,z5,z6,z7,     x21,x22, z8,z9, 29, 30, z14,z15,z16,z17,2)

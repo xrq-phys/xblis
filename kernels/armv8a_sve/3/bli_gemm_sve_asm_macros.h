@@ -34,46 +34,13 @@
 
 */
 
+//#define USE_SVE_CMLA_INSTRUCTION
+#if defined(DEBUG)
+#include "bli_sve_asm_debug.h"
+#endif
+#include "bli_sve_asm_loadstore.h"
 
 #define COMBINE2(a,b) a ## _ ## b
-
-#define LOAD2VEC(vec1,vec2,preg,areg)\
-    " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "]           \n\t"\
-    " ld1d  " #vec2 ".d, " #preg "/z, [" #areg ",#1, MUL VL]\n\t"
-
-#define LOAD2VEC_CONT(vec1,vec2,preg,areg,avec1,avec2) LOAD2VEC(vec1,vec2,preg,areg)
-
-#define LOAD2VEC_GENI(vec1,vec2,preg,areg,avec1,avec2)\
-    " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "," #avec1 ".d, LSL #3]\n\t"\
-    " ld1d  " #vec2 ".d, " #preg "/z, [" #areg "," #avec2 ".d, LSL #3]\n\t"
-
-#define LDR_NOADDR(vec1,preg)\
-    " ld1rd  " #vec1 ".d, " #preg "/z"
-#define OA(areg,offset)\
-    ",[" #areg ", #" #offset"]"
-
-#define LOADVEC_DIST(vec1,preg,areg)\
-    LDR_NOADDR(vec1,preg)OA(areg,0)"\n\t"
-
-#define LOAD2VEC_DIST(vec1,vec2,preg,areg)\
-    LDR_NOADDR(vec1,preg)OA(areg,0)"\n\t"\
-    LDR_NOADDR(vec2,preg)OA(areg,8)"\n\t"
-
-#define LOAD4VEC_DIST(vec1,vec2,vec3,vec4,preg,areg)\
-    LDR_NOADDR(vec1,preg)OA(areg,0)"\n\t"\
-    LDR_NOADDR(vec2,preg)OA(areg,8)"\n\t"\
-    LDR_NOADDR(vec3,preg)OA(areg,16)"\n\t"\
-    LDR_NOADDR(vec4,preg)OA(areg,24)"\n\t"
-
-#define LOAD8VEC_DIST(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8,preg,areg)\
-    LDR_NOADDR(vec1,preg)OA(areg,0)"\n\t"\
-    LDR_NOADDR(vec2,preg)OA(areg,8)"\n\t"\
-    LDR_NOADDR(vec3,preg)OA(areg,16)"\n\t"\
-    LDR_NOADDR(vec4,preg)OA(areg,24)"\n\t"\
-    LDR_NOADDR(vec5,preg)OA(areg,32)"\n\t"\
-    LDR_NOADDR(vec6,preg)OA(areg,40)"\n\t"\
-    LDR_NOADDR(vec7,preg)OA(areg,48)"\n\t"\
-    LDR_NOADDR(vec8,preg)OA(areg,56)"\n\t"
 
 #define ZEROVEC(vec1)\
     " dup " #vec1 ".d, #0\n\t"
@@ -90,8 +57,8 @@
     ZERO4VEC(vec1,vec2,vec3,vec4)\
     ZERO4VEC(vec5,vec6,vec7,vec8)
 
-#define MLA1ROW(c1, a1, bvec, preg)\
-    " fmla " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d\n\t"
+#define MLA1ROW(cvec, avec, bvec, preg)\
+    " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d\n\t"
 
 #define MLA2ROW(c1, c2 , a1, a2, bvec, preg)\
     MLA1ROW(c1,a1,bvec,preg)\
@@ -100,6 +67,7 @@
 #define MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     MLA2ROW(c1,c2,a1,a2,bvec,preg)\
     MLA2ROW(c3,c4,a3,a4,bvec,preg)
+
 
 #define MUL1ROW(c1, a1, bvec, preg)\
     " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d\n\t"
@@ -115,6 +83,11 @@
 #define MLA2X2ROW(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg)\
     MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
     MLA2ROW(c21, c22, a1, a2, bvec2, preg)
+
+#define MLA1ROW_LA_LB(cvec, avec, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA1ROW(cvec, avec, bvec, preg)\
+    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #define MLA2ROW_LA_LB(c1, c2 , a1, a2, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
     MLA2ROW(c1, c2, a1, a2, bvec, preg)\
@@ -140,6 +113,10 @@
     " ld1rd  " #bvec1 ".d, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
     " ld1rd  " #bvec2 ".d, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
 
+#define MLA1ROW_LB(cvec, avec, bvec, preg,  bareg, bboff)\
+    MLA1ROW(cvec, avec, bvec, preg)\
+    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+
 #define MLA2ROW_LB(c1, c2 , a1, a2, bvec, preg,  bareg, bboff)\
     MLA2ROW(c1, c2, a1, a2, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
@@ -148,18 +125,53 @@
     MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+    #define CMLA1ROW_ILV(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+        " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #0\n\t"\
+        ilv1\
+        " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #0\n\t"\
+        ilv2\
+        " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #90\n\t"\
+        ilv3\
+        " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #90\n\t"\
+        ilv4\
+        "\n\t"
+#else
+    #define CMLA1ROW_ILV(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
+        " fmla " #cvec_r ".d, " #preg "/m, " #avec_r ".d, " #bvec_r ".d\n\t"\
+        ilv1\
+        " fmla " #cvec_i ".d, " #preg "/m, " #avec_r ".d, " #bvec_i ".d\n\t"\
+        ilv2\
+        " fmls " #cvec_r ".d, " #preg "/m, " #avec_i ".d, " #bvec_i ".d\n\t"\
+        ilv3\
+        " fmla " #cvec_i ".d, " #preg "/m, " #avec_i ".d, " #bvec_r ".d\n\t"\
+        ilv4\
+        "\n\t"
+#endif
 
-// Load 2 vectors from contiguous memory
-#define STOR2VEC(vec1,vec2,preg,areg)\
-    " st1d  {" #vec1 ".d}, " #preg ", [" #areg "]           \n\t"\
-    " st1d  {" #vec2 ".d}, " #preg ", [" #areg ",#1, MUL VL]\n\t"
+#define CMLA1ROW(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+        CMLA1ROW_ILV(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
 
-#define STOR2VEC_CONT(vec1,vec2,preg,areg,avec1,avec2) STOR2VEC(vec1,vec2,preg,areg)
+#define CMLA1ROW_ILV_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
+    LOADC2VEC_VOFF(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
+    LOADC2VEC_DIST_OFF(bvec1, bvec2, preg, bareg, bboff1,bboff2)
 
-// Load 2 vectors with generic indexing (scatter-store)
-#define STOR2VEC_GENI(vec1,vec2,preg,areg,avec1,avec2)\
-    " st1d  {" #vec1 ".d}, " #preg ", [" #areg "," #avec1 ".d, LSL #3]\n\t"\
-    " st1d  {" #vec2 ".d}, " #preg ", [" #areg "," #avec2 ".d, LSL #3]\n\t"
+#define CMLA1ROW_ILV_LB(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    LOADC2VEC_DIST_OFF(bvec1, bvec2, preg, bareg, bboff1, bboff2)
+
+#define CMLA1ROW_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
+
+#define CMLA1ROW_LB(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_LB(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
+
+#define CMLA2ROW(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
+    CMLA1ROW(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+    CMLA1ROW(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
+
+#define PFL1(areg,preg,offset) " prfd pldl1keep, "#preg", [" #areg ", #" #offset ", MUL VL]\n\t"
 
 // Zero 2 columns of C,
 // Load 2 columns of C and multiply by beta if beta !=0
@@ -185,7 +197,36 @@ MLA4ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha,p0)\
 COMBINE2(STOR2VEC,addressing) (c0,c1,p0,ca0,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)         
 
+// 1x vector variant
+// Zero 4 columns of C,
+// Load 4 columns of C and multiply by beta if beta !=0
+// Add accumulated A*B values multiplied by alpha
+// Store 4 columns of C
+// Contiguous memory (CONT) or generic index (GENI) specified by addressing
+// labelnr for the beta case jumps
+#define FINC_4COL_1X(fsuf, addressing,c0,c1,c2,c3, ca0,ca1,ca2,ca3, avec, alpha, beta, acc0,acc1,acc2,acc3, labelnr)\
+ZERO4VEC(c0,c1,c2,c3)\
+"                                            \n\t"\
+" fcmp d" #beta ",#0.0                       \n\t"\
+" beq .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
+"                                            \n\t"\
+COMBINE2(LOAD1VEC,addressing) (c0,p0,ca0,avec)\
+COMBINE2(LOAD1VEC,addressing) (c1,p0,ca1,avec)\
+COMBINE2(LOAD1VEC,addressing) (c2,p0,ca2,avec)\
+COMBINE2(LOAD1VEC,addressing) (c3,p0,ca3,avec)\
+"                                            \n\t"\
+MUL4ROW(c0,c1,c2,c3,c0,c1,c2,c3,z ##beta,p0)\
+"                                            \n\t"\
+" .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+"                                            \n\t"\
+MLA4ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha,p0)\
+"                                            \n\t"\
+COMBINE2(STOR1VEC,addressing) (c0,p0,ca0,avec)\
+COMBINE2(STOR1VEC,addressing) (c1,p0,ca1,avec)\
+COMBINE2(STOR1VEC,addressing) (c2,p0,ca2,avec)\
+COMBINE2(STOR1VEC,addressing) (c3,p0,ca3,avec)
 
+// 2x vector variant
 // Zero 4 columns of C,
 // Load 4 columns of C and multiply by beta if beta !=0
 // Add accumulated A*B values multiplied by alpha
@@ -216,94 +257,50 @@ COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c4,c5,p0,ca2,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 
+// Check if a complex number is 0
+// TODO: Only first complex number needs to be checked, 
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define CMPCZB(vec1,vec2,label)\
+" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
+" nots p1.b, p0/z, p1.b\n\t"\
+" b.none " label "\n\t"
+#else
+#define CMPCZB(vec1,vec2,label)\
+" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
+" fcmeq p2.d, p0/z, " #vec2 ".d, #0.0\n\t"\
+" ands p1.b, p0/z, p1.b, p2.b\n\t"\
+" b.any " label "\n\t"
+#endif
 
-static void print_marker(uint64_t val)
-{
-    printf("Marker %lu\n",val);
-}
+// complex variant, 1row = 2 vectors worth of double complex
+// Zero 4 columns of C,
+// Load 4 columns of C and multiply by beta if beta !=0
+// Add accumulated A*B values multiplied by alpha
+// Store 4 columns of C
+// Contiguous memory (CONT) or generic index (GENI) specified by addressing
+// labelnr for the beta case jumps
+// TODO: csX are needed because there is no fcmul instruction - find a better way without using
+//       8 additional vector registers
+#define CFINC_4COL(fsuf, addressing, c0,c1,c2,c3,c4,c5,c6,c7, cs0,cs1,cs2,cs3,cs4,cs5,cs6,cs7, ca0,ca1,ca2,ca3, avec1,avec2, alpha1,alpha2,beta1,beta2, acc0,acc1,acc2,acc3,acc4,acc5,acc6,acc7, labelnr)\
+ZERO8VEC(c0,c1,c2,c3,c4,c5,c6,c7)\
+"                                            \n\t"\
+CMPCZB(z ##beta1, z ##beta2, ".Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
+"                                            \n\t"\
+COMBINE2(LOADC2VEC,addressing) (cs0,cs1,p0,ca0,avec1,avec2)\
+COMBINE2(LOADC2VEC,addressing) (cs2,cs3,p0,ca1,avec1,avec2)\
+COMBINE2(LOADC2VEC,addressing) (cs4,cs5,p0,ca2,avec1,avec2)\
+COMBINE2(LOADC2VEC,addressing) (cs6,cs7,p0,ca3,avec1,avec2)\
+"                                            \n\t"\
+CMLA2ROW(c0,c1,c2,c3,cs0,cs1,cs2,cs3,z ##beta1,z ##beta2,p0)\
+CMLA2ROW(c4,c5,c6,c7,cs4,cs5,cs6,cs7,z ##beta1,z ##beta2,p0)\
+"                                            \n\t"\
+" .Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+"                                            \n\t"\
+CMLA2ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha1 , z ##alpha2 ,p0)\
+CMLA2ROW(c4,c5,c6,c7,acc4,acc5,acc6,acc7,z ##alpha1 , z ##alpha2 ,p0)\
+"                                            \n\t"\
+COMBINE2(STORC2VEC,addressing) (c0,c1,p0,ca0,avec1,avec2)\
+COMBINE2(STORC2VEC,addressing) (c2,c3,p0,ca1,avec1,avec2)\
+COMBINE2(STORC2VEC,addressing) (c4,c5,p0,ca2,avec1,avec2)\
+COMBINE2(STORC2VEC,addressing) (c6,c7,p0,ca3,avec1,avec2)
 
-static void print_pointer(void* p)
-{
-    printf("Pointer: 0x%p\n", p);
-}
-
-#define MAX_COUNTERS 32
-static int initialized = 0;
-static uint64_t counters[MAX_COUNTERS];
-static void print_counter(uint64_t counter, uint64_t inc)
-{
-    if(!initialized)
-    {
-        for(int i = 0; i < MAX_COUNTERS; i++)
-        {
-            counters[i] = 0;
-        }
-        initialized = 1;
-    }
-    printf("Counter %lu: %lu\n", counter, counters[counter]);
-    counters[counter] += inc;
-}
-
-#define SAVEALLREGS\
-    " stp x0, x1,   [sp, #-16]!\n\t"\
-    " stp x2, x3,   [sp, #-16]!\n\t"\
-    " stp x4, x5,   [sp, #-16]!\n\t"\
-    " stp x6, x7,   [sp, #-16]!\n\t"\
-    " stp x8, x9,   [sp, #-16]!\n\t"\
-    " stp x10, x11, [sp, #-16]!\n\t"\
-    " stp x12, x13, [sp, #-16]!\n\t"\
-    " stp x14, x15, [sp, #-16]!\n\t"\
-    " stp x16, x17, [sp, #-16]!\n\t"\
-    " stp x18, x19, [sp, #-16]!\n\t"\
-    " stp x20, x21, [sp, #-16]!\n\t"\
-    " stp x22, x23, [sp, #-16]!\n\t"\
-    " stp x24, x25, [sp, #-16]!\n\t"\
-    " stp x26, x27, [sp, #-16]!\n\t"\
-    " stp x28, x29, [sp, #-16]!\n\t"\
-    " stp x30, x0,  [sp, #-16]!\n\t"\
-    " sub sp,sp,#16\n\t"
-
-#define RESTOREALLREGS\
-    " add sp,sp,#16\n\t"\
-    " ldp x30, x0,  [sp], #16\n\t"\
-    " ldp x28, x29, [sp], #16\n\t"\
-    " ldp x26, x27, [sp], #16\n\t"\
-    " ldp x24, x25, [sp], #16\n\t"\
-    " ldp x22, x23, [sp], #16\n\t"\
-    " ldp x20, x21, [sp], #16\n\t"\
-    " ldp x18, x19, [sp], #16\n\t"\
-    " ldp x16, x17, [sp], #16\n\t"\
-    " ldp x14, x15, [sp], #16\n\t"\
-    " ldp x12, x13, [sp], #16\n\t"\
-    " ldp x10, x11, [sp], #16\n\t"\
-    " ldp x8, x9,   [sp], #16\n\t"\
-    " ldp x6, x7,   [sp], #16\n\t"\
-    " ldp x4, x5,   [sp], #16\n\t"\
-    " ldp x2, x3,   [sp], #16\n\t"\
-    " ldp x0, x1,   [sp], #16\n\t"
-
-#define PMARKER(x)\
-    SAVEALLREGS\
-    " mov x0, #"#x"\n\t"\
-    " bl print_marker\n\t"\
-    RESTOREALLREGS
-
-#define PREGVAL(x)\
-    SAVEALLREGS\
-    " mov x0, "#x"\n\t"\
-    " bl print_marker\n\t"\
-    RESTOREALLREGS
-
-#define PPOINTER(x)\
-    SAVEALLREGS\
-    " mov x0, "#x"\n\t"\
-    " bl print_pointer\n\t"\
-    RESTOREALLREGS
-
-#define PCOUNTER(x,y)\
-    SAVEALLREGS\
-    " mov x0, "#x"\n\t"\
-    " mov x1, "#y"\n\t"\
-    " bl print_counter\n\t"\
-    RESTOREALLREGS
- 

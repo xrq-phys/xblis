@@ -52,7 +52,15 @@ uint64_t get_sve_byte_size()
 void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 {
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    *m_r = (2*get_sve_byte_size())/8;
+    int onevec = (get_sve_byte_size())/8;
+    if(*m_r > onevec)
+    {
+        *m_r = 2*onevec;
+    }
+    else
+    {
+        *m_r = onevec;
+    }
     *n_r = 8;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 8;
@@ -80,5 +88,16 @@ void  adjust_sve_mr_nr_s(int* m_r, int* n_r)
 #elif SVE_VECSIZE == SVE_VECSIZE_1024
     *m_r = 64;
     *n_r = 20;
+#endif
+}
+
+void  adjust_sve_mr_nr_z(int* m_r, int* n_r)
+{
+#if SVE_VECSIZE == SVE_VECSIZE_VLA
+    *m_r = (2*get_sve_byte_size())/16;
+    *n_r = 4;
+#elif SVE_VECSIZE == SVE_VECSIZE_256
+#elif SVE_VECSIZE == SVE_VECSIZE_512
+#elif SVE_VECSIZE == SVE_VECSIZE_1024
 #endif
 }
