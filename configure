@@ -305,6 +305,21 @@ print_usage()
 	echo " "
 	echo "   -h, --help    Output this information and quit."
 	echo " "
+	echo " Architecture-specific options:"
+	echo " "
+	echo "   --sve-vector-size=SIZE"
+	echo " "
+	echo "                 When compiling for an ARM SVE target, sets the vector "
+	echo "                 register size in bits. This can be either a multiple "
+	echo "                 of 128 up to 2048 for fixed size kernels, or 'vla' "
+	echo "                 for a vector-length agnostic kernel, that will work "
+	echo "                 with any vector size. The default is 'vla'"
+	echo " "
+	echo "   --sve-use-fcmla"
+	echo " "
+	echo "                 Enable the use of the FCMLA instruction in the complex"
+	echo "                 SVE kernels"
+	echo " "
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
@@ -1875,6 +1890,13 @@ main()
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
 
+	# -- architecture-dependent ----------------------------------
+
+	sve_vector_size='vla'
+	sve_vector_size_flag=0
+
+	sve_use_fcmla='no'
+	sve_use_fcmla_flag=0
 
 	# -- Command line option/argument parsing ----------------------------------
 
@@ -2032,6 +2054,14 @@ main()
 							;;
 						show-config-list)
 							show_config_list=1
+							;;
+						sve-vector-size=*)
+							sve_vector_size=${OPTARG#*=}
+							sve_vector_size_flag=1
+							;;
+						sve-use-fcmla)
+							sve_use_fcmla='yes'
+							sve_use_fcmla_flag=1
 							;;
 						*)
 							print_usage
@@ -2535,6 +2565,29 @@ main()
 	pragma_omp_simd=$(has_pragma_omp_simd)
 
 
+	# -- Check if any architecture-dependent options apply and set them
+
+	if [ "${config_name}" == "arm64_sve" ]; then
+		if [ "${sve_vector_size}" == "vla" ]; then
+			sve_vector_size='VLA'
+		elif [ $(($sve_vector_size % 128 )) -ne 0] \
+			|| [ $sve_vector_size -lt 128 ] \
+			|| [ $sve_vector_size -gt 2048 ]; then
+			echo "${script_name}: Chosen SVE vector size is invalid: ${sve_vector_size}"
+			echo "${script_name}: *** Vector size must be multiple of 128 up to 2048 or 'vla'."
+		fi
+		arch_extra_flags+=" -DSVE_VECSIZE=SVE_VECSIZE_${sve_vector_size}"
+
+		if [ "x${sve_use_fcmla}" == 'xyes' ]; then
+			arch_extra_flags+=" -DUSE_SVE_CMLA_INSTRUCTION"
+		fi
+	elif [ "${sve_vector_size_flag}" == 1 ] || [ "${sve_use_fcmla_flag}" == 1 ]; then
+			echo "${script_name}: SVE options are only valid for ARM64_SVE"
+			echo "${script_name}: Current config: ${config_name}"
+			echo "${script_name}: *** Please do not use these option for non-SVE targets."
+			exit 1
+	fi
+
 	# -- Prepare variables for subsitution into template files -----------------
 
 	# Parse the status of the prefix option and echo feedback.
@@ -2590,6 +2643,8 @@ main()
 		cflags_preset=''
 		echo "${script_name}: no preset CFLAGS detected."
 	fi
+
+	cflags_preset+=${arch_extra_flags}
 
 	# Check if LDFLAGS is non-empty.
 	if [ -n "${LDFLAGS}" ]; then
@@ -2918,7 +2973,6 @@ main()
 		kernel_define="BLIS_KERNELS_${uconf}"
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
-
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 

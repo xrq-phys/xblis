@@ -57,7 +57,7 @@
 #define SVE_VECSIZE_1920 1920
 #define SVE_VECSIZE_2048 2048
 
-#define SVE_VECSIZE SVE_VECSIZE_VLA
+//#define SVE_VECSIZE SVE_VECSIZE_VLA
 
 // Number of cache lines in a set
 #define N_L1 256
