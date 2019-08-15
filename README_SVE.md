@@ -19,7 +19,7 @@ There are two additional options that can be given to the configure script:
    - enable the use of the FCMLA instruction in the zgemm microkernel
 
 Note: 
-The VLA microkernel uses vector prefetch instructions, which (to this day) are
+The VLA microkernels uses vector prefetch instructions, which (to this day) are
 not yet supported in gem5. This negatively impacts measured performance when
 running in the gem5 simulator.
 
