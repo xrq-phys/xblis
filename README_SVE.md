@@ -14,9 +14,9 @@ The configuration includes fixed-size kernels as well as vector-length-agnostic 
 
 There are two additional options that can be given to the configure script:
  - --sve-vector-size
-  - can be a multiple of 128 up to 2048 or 'vla'
+   - can be a multiple of 128 up to 2048 or 'vla'
  - --sve-use-fcmla
-  - enable the use of the FCMLA instruction in the zgemm microkernel
+   - enable the use of the FCMLA instruction in the zgemm microkernel
 
 Note: 
 The VLA microkernel uses vector prefetch instructions, which (to this day) are
