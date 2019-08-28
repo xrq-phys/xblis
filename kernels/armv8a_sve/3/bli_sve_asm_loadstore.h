@@ -201,3 +201,32 @@
     " st1d  {" #vec1 ".d}, " #preg ", [" #areg "," #avec1 ".d, LSL #3]\n\t"\
     " st1d  {" #vec2 ".d}, " #preg ", [" #areg "," #avec2 ".d, LSL #3]\n\t"
 
+
+// Some macros used for fixed size kernels
+
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define LDR_BVEC(vec1, vec2, preg, reg, offset1, offset2)\
+    " ld1rqd  " #vec1 ".d, " #preg "/z, [" #reg ", #" #offset1 "]   \n\t"
+#else
+#define LDR_BVEC(vec1, vec2, preg, reg, offset1, offset2)\
+    " ld1rd  " #vec1 ".d, " #preg "/z, [" #reg ", #" #offset1 "]   \n\t"\
+    " ld1rd  " #vec2 ".d, " #preg "/z, [" #reg ", #" #offset2 "]   \n\t"
+#endif
+
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define LD_AVEC(vec1, vec2, preg, reg)\
+    " ld1d  " #vec1 ".d, " #preg "/z, [" #reg "]           \n\t"\
+    " ld1d  " #vec2 ".d, " #preg "/z, [" #reg ",#1, MUL VL]\n\t"
+#else
+#define LD_AVEC(vec1, vec2, preg, reg)\
+    " ld2d {" #vec1 ".d," #vec2 ".d}, " #preg "/z, [" #reg "]\n\t"
+#endif
+
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define ST_AVEC(vec1, vec2, preg, reg)\
+    " st1d  " #vec1 ".d, " #preg ", [" #reg "]           \n\t"\
+    " st1d  " #vec2 ".d, " #preg ", [" #reg ",#1, MUL VL]\n\t"
+#else
+#define ST_AVEC(vec1, vec2, preg, reg)\
+    " st2d {" #vec1 ".d," #vec2 ".d}, " #preg ", [" #reg "]\n\t"
+#endif

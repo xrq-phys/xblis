@@ -48,6 +48,9 @@ GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_2vx8)
 //GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_4vx8)
 //GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_4vx16)
 
+GEMM_UKR_PROT(dcomplex, z, gemm_armv8a_sve_asm_4x4)
+GEMM_UKR_PROT(dcomplex, z, gemm_armv8a_sve_asm_8x4)
+GEMM_UKR_PROT(dcomplex, z, gemm_armv8a_sve_asm_16x4)
 GEMM_UKR_PROT(dcomplex, z, gemm_armv8a_sve_asm_2vx4)
 
 void* get_sve_dgemm_bli_kernel(int m_r, int n_r);

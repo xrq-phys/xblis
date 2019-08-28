@@ -97,7 +97,13 @@ void  adjust_sve_mr_nr_z(int* m_r, int* n_r)
     *m_r = (2*get_sve_byte_size())/16;
     *n_r = 4;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
+    *m_r = 4;
+    *n_r = 4;
 #elif SVE_VECSIZE == SVE_VECSIZE_512
+    *m_r = 8;
+    *n_r = 4;
 #elif SVE_VECSIZE == SVE_VECSIZE_1024
+    *m_r = 16;
+    *n_r = 4;
 #endif
 }

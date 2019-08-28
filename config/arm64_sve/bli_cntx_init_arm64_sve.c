@@ -85,7 +85,16 @@ void* get_sve_zgemm_bli_kernel(int m_r, int n_r)
 {
     void* kptr = NULL;
 
+#if SVE_VECSIZE == SVE_VECSIZE_VLA
     kptr = (void*) bli_zgemm_armv8a_sve_asm_2vx4;
+#elif SVE_VECSIZE == SVE_VECSIZE_256
+    kptr = (void*) bli_zgemm_armv8a_sve_asm_4x4;
+#elif SVE_VECSIZE == SVE_VECSIZE_512
+    kptr = (void*) bli_zgemm_armv8a_sve_asm_8x4;
+#elif SVE_VECSIZE == SVE_VECSIZE_1024
+    kptr = (void*) bli_zgemm_armv8a_sve_asm_16x4;
+#else
+#endif
 
     return kptr;
 }
@@ -170,17 +179,18 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
       BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
 #else
-	  1,
+	  2,
       //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d,n_r_d), FALSE,
+      BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
 #endif
 	  cntx
 	);
 
     // TODO: clean this up
-#if SVE_VECSIZE != SVE_VECSIZE_VLA
-    m_r_z = n_r_z = m_c_z = k_c_z = n_c_z = -1;
-#endif
+//#if SVE_VECSIZE != SVE_VECSIZE_VLA
+ //   m_r_z = n_r_z = m_c_z = k_c_z = n_c_z = -1;
+//#endif
 
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
