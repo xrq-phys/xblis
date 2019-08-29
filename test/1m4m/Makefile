@@ -199,8 +199,8 @@ DNAT     := -DIND=BLIS_NAT
 #STR_3M1  := -DSTR=\"3m1\"
 #STR_4MHW := -DSTR=\"4mhw\"
 #STR_4M1B := -DSTR=\"4m1b\"
-#STR_4M1A := -DSTR=\"4m1a\"
-#STR_1M   := -DSTR=\"1m\"
+STR_4M1A := -DSTR=\"4m1a_blis\"
+STR_1M   := -DSTR=\"1m_blis\"
 STR_NAT  := -DSTR=\"asm_blis\"
 STR_OBL  := -DSTR=\"openblas\"
 STR_EIG  := -DSTR=\"eigen\"
@@ -234,17 +234,19 @@ all-st:     blis-st openblas-st mkl-st
 all-1s:     blis-1s openblas-1s mkl-1s
 all-2s:     blis-2s openblas-2s mkl-2s
 
-blis-st:    blis-nat-st
-blis-1s:    blis-nat-1s
-blis-2s:    blis-nat-2s
+blis-st:    blis-nat-st blis-1m-st blis-4m1a-st
+blis-1s:    blis-nat-1s blis-1m-1s blis-4m1a-1s
+blis-2s:    blis-nat-2s blis-1m-2s blis-4m1a-2s
 
 #blis-ind:   blis-ind-st blis-ind-mt
-blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
+blis-nat:   blis-nat-st  blis-nat-1s  blis-nat-2s
+blis-1m:    blis-1m-st   blis-1m-1s   blis-1m-2s
+blis-4m1a:  blis-4m1a-st blis-4m1a-1s blis-4m1a-2s
 
 # Define the datatypes, operations, and implementations.
 DTS    := s d c z
-OPS    := gemm hemm herk trmm trsm
-BIMPLS := asm_blis openblas vendor
+OPS    := gemm
+BIMPLS := asm_blis 4m1a_blis 1m_blis openblas vendor
 EIMPLS := eigen
 
 # Define functions to construct object filenames from the datatypes and
@@ -256,6 +258,20 @@ get-2s-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(P2_MAX)_
 
 # Construct object and binary names for single-threaded, single-socket, and
 # dual-socket files for BLIS, OpenBLAS, and a vendor library (e.g. MKL).
+BLIS_1M_ST_OBJS := $(call get-st-objs,1m_blis)
+BLIS_1M_ST_BINS := $(patsubst %.o,%.x,$(BLIS_1M_ST_OBJS))
+BLIS_1M_1S_OBJS := $(call get-1s-objs,1m_blis)
+BLIS_1M_1S_BINS := $(patsubst %.o,%.x,$(BLIS_1M_1S_OBJS))
+BLIS_1M_2S_OBJS := $(call get-2s-objs,1m_blis)
+BLIS_1M_2S_BINS := $(patsubst %.o,%.x,$(BLIS_1M_2S_OBJS))
+
+BLIS_4M1A_ST_OBJS := $(call get-st-objs,4m1a_blis)
+BLIS_4M1A_ST_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_ST_OBJS))
+BLIS_4M1A_1S_OBJS := $(call get-1s-objs,4m1a_blis)
+BLIS_4M1A_1S_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_1S_OBJS))
+BLIS_4M1A_2S_OBJS := $(call get-2s-objs,4m1a_blis)
+BLIS_4M1A_2S_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_2S_OBJS))
+
 BLIS_NAT_ST_OBJS := $(call get-st-objs,asm_blis)
 BLIS_NAT_ST_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_ST_OBJS))
 BLIS_NAT_1S_OBJS := $(call get-1s-objs,asm_blis)
@@ -289,6 +305,14 @@ blis-nat-st: $(BLIS_NAT_ST_BINS)
 blis-nat-1s: $(BLIS_NAT_1S_BINS)
 blis-nat-2s: $(BLIS_NAT_2S_BINS)
 
+blis-1m-st: $(BLIS_1M_ST_BINS)
+blis-1m-1s: $(BLIS_1M_1S_BINS)
+blis-1m-2s: $(BLIS_1M_2S_BINS)
+
+blis-4m1a-st: $(BLIS_4M1A_ST_BINS)
+blis-4m1a-1s: $(BLIS_4M1A_1S_BINS)
+blis-4m1a-2s: $(BLIS_4M1A_2S_BINS)
+
 openblas-st: $(OPENBLAS_ST_BINS)
 openblas-1s: $(OPENBLAS_1S_BINS)
 openblas-2s: $(OPENBLAS_2S_BINS)
@@ -312,6 +336,8 @@ armpl-2s: vendor-2s
 # Mark the object files as intermediate so that make will remove them
 # automatically after building the binaries on which they depend.
 .INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(BLIS_NAT_1S_OBJS) $(BLIS_NAT_2S_OBJS)
+.INTERMEDIATE: $(BLIS_1M_ST_OBJS)  $(BLIS_1M_1S_OBJS)  $(BLIS_1M_2S_OBJS)
+.INTERMEDIATE: $(BLIS_4M1A_ST_OBJS) $(BLIS_4M1A_1S_OBJS) $(BLIS_4M1A_2S_OBJS)
 .INTERMEDIATE: $(OPENBLAS_ST_OBJS) $(OPENBLAS_1S_OBJS) $(OPENBLAS_2S_OBJS)
 .INTERMEDIATE: $(EIGEN_ST_OBJS)    $(EIGEN_1S_OBJS)    $(EIGEN_2S_OBJS)
 .INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_1S_OBJS)   $(VENDOR_2S_OBJS)
@@ -330,6 +356,11 @@ get-dt-cpp = $(strip \
              $(if $(findstring c,$(1)),-DDT=BLIS_SCOMPLEX -DIS_SCOMPLEX,\
                                        -DDT=BLIS_DCOMPLEX -DIS_DCOMPLEX))))
 
+get-in-cpp = $(strip \
+             $(if $(findstring   1m_blis,$(1)),-DIND=BLIS_1M,\
+             $(if $(findstring 4m1a_blis,$(1)),-DIND=BLIS_4M1A,\
+                                               -DIND=BLIS_NAT)))
+
 # A function to return other cpp macros that help the test driver
 # identify the implementation.
 #get-bl-cpp = $(strip \
@@ -339,30 +370,32 @@ get-dt-cpp = $(strip \
 #                                              $(STR_VEN) $(BLA_DEF)))))
 
 get-bl-cpp = $(strip \
-             $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
-             $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
+             $(if $(findstring   1m_blis,$(1)),$(STR_1M) $(BLI_DEF),\
+             $(if $(findstring 4m1a_blis,$(1)),$(STR_4M1A) $(BLI_DEF),\
+             $(if $(findstring  asm_blis,$(1)),$(STR_NAT) $(BLI_DEF),\
+             $(if $(findstring  openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
              $(if $(and $(findstring eigen,$(1)),\
                         $(findstring  gemm,$(2))),\
                                               $(STR_EIG) $(EIG_DEF),\
              $(if       $(findstring eigen,$(1)),\
                                               $(STR_EIG) $(BLA_DEF),\
-                                              $(STR_VEN) $(BLA_DEF))))))
+                                              $(STR_VEN) $(BLA_DEF))))))))
 
 
 # Rules for BLIS and BLAS libraries.
 define make-st-rule
 test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_ST) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(call get-in-cpp,$(3)) $(STR_ST) -c $$< -o $$@
 endef
 
 define make-1s-rule
 test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_1S) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(call get-in-cpp,$(3)) $(STR_1S) -c $$< -o $$@
 endef
 
 define make-2s-rule
 test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_2S) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(call get-in-cpp,$(3)) $(STR_2S) -c $$< -o $$@
 endef
 
 $(foreach dt,$(DTS), \
@@ -412,6 +445,26 @@ $(foreach im,$(EIMPLS),$(eval $(call make-eig2s-rule,$(dt),$(op),$(im))))))
 # on the link command line in case BLIS was configured with the BLAS
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
+
+test_%_$(PS_MAX)_1m_blis_st.x: test_%_$(PS_MAX)_1m_blis_st.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_1m_blis_1s.x: test_%_$(P1_MAX)_1m_blis_1s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_1m_blis_2s.x: test_%_$(P2_MAX)_1m_blis_2s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+test_%_$(PS_MAX)_4m1a_blis_st.x: test_%_$(PS_MAX)_4m1a_blis_st.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_4m1a_blis_1s.x: test_%_$(P1_MAX)_4m1a_blis_1s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_4m1a_blis_2s.x: test_%_$(P2_MAX)_4m1a_blis_2s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
 
 test_%_$(PS_MAX)_asm_blis_st.x: test_%_$(PS_MAX)_asm_blis_st.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
