@@ -760,6 +760,20 @@ LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
+ifeq ($(CC_VENDOR),armclang)
+ifeq ($(THREADING_MODEL),auto)
+THREADING_MODEL := pthreads
+endif
+ifeq ($(THREADING_MODEL),openmp)
+CTHREADFLAGS := -fopenmp
+LDFLAGS      += -fopenmp
+endif
+ifeq ($(THREADING_MODEL),pthreads)
+CTHREADFLAGS := -pthread
+LDFLAGS      += $(LIBPTHREAD)
+endif
+endif
+
 # --- #pragma omp simd flags (used for reference kernels only) ---
 
 ifeq ($(PRAGMA_OMP_SIMD),yes)
