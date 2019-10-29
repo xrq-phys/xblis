@@ -38,6 +38,19 @@
 #include "sve_architecture.h"
 #include "sve_helpers.h"
 
+void* get_sve_sgemm_bli_kernel(int m_r, int n_r)
+{
+    void* kptr = NULL;
+
+#if SVE_VECSIZE == SVE_VECSIZE_256
+    kptr = (void*) bli_sgemm_armv8a_sve_asm_16x8;
+#else
+#endif
+
+    return kptr;
+}
+
+
 void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
 {
     void* kptr = NULL;
@@ -142,6 +155,9 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     int n_c_s = C_Bc * (N_L3 * C_L3)/(k_c_s*S_Data);
     n_c_s -= (n_c_s%n_r_s);
 
+    // if kernel not implemented, set everything to -1 -> back to default
+    if (m_r_s == -1 || n_r_s == -1)
+        k_c_s = m_c_s = n_c_s = -1;
 
     // double complex
     S_Data   = 16;
@@ -178,6 +194,11 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
       //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
       BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
+#elif SVE_VECSIZE == SVE_VECSIZE_256
+	  3,
+      BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d,n_r_d), FALSE,
+      BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
 #else
 	  2,
       //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
@@ -195,11 +216,11 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                                  s        d      c       z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ], /*m_r_s*/ -1,   m_r_d,    -1,  m_r_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ], /*n_r_s*/ -1,   n_r_d,    -1,  n_r_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ], /*m_c_s*/ -1,   m_c_d,    -1,  m_c_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ], /*k_c_s*/ -1,   k_c_d,    -1,  k_c_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], /*n_c_s*/ -1,   n_c_d,    -1,  n_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],        m_r_s,   m_r_d,    -1,  m_r_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],        n_r_s,   n_r_d,    -1,  n_r_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],        m_c_s,   m_c_d,    -1,  m_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],        k_c_s,   k_c_d,    -1,  k_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],        n_c_s,   n_c_d,    -1,  n_c_z);
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

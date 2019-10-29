@@ -76,18 +76,19 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 
 void  adjust_sve_mr_nr_s(int* m_r, int* n_r)
 {
+    //if not implemented, set to -1
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    *m_r = (2*get_sve_byte_size())/4;
-    *n_r = 8;
+    *m_r = -1;
+    *n_r = -1;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 16;
-    *n_r = 20;
+    *n_r = 8;
 #elif SVE_VECSIZE == SVE_VECSIZE_512
-    *m_r = 32;
-    *n_r = 20;
+    *m_r = -1;
+    *n_r = -1;
 #elif SVE_VECSIZE == SVE_VECSIZE_1024
-    *m_r = 64;
-    *n_r = 20;
+    *m_r = -1;
+    *n_r = -1;
 #endif
 }
 

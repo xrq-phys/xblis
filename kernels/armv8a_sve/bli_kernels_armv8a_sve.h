@@ -31,6 +31,7 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+GEMM_UKR_PROT( float,   s, gemm_armv8a_sve_asm_16x8 )
 
 GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_12x6 )
 GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_8x10 )
