@@ -46,7 +46,7 @@
  */
 
 #include "blis.h"
-#include "bli_gemm_sve_asm_macros.h"
+#include "bli_dgemm_sve_asm_macros.h"
 
 
 /* 2 vectors in m_r, n_r = 4 

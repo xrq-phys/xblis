@@ -1,5 +1,5 @@
 #if defined(DEBUG)
-#include "bli_gemm_sve_asm_macros.h"
+#include "bli_sve_asm_debug.h"
 #include <stdio.h>
 
 void print_marker(uint64_t val)

@@ -36,7 +36,7 @@
 
 
 #include "blis.h"
-#include "bli_gemm_sve_asm_macros.h"
+#include "bli_dgemm_sve_asm_macros.h"
 
 #if defined(DEBUG)
 // seen a compiler use the stack instead when it's inside the function

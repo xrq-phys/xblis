@@ -42,6 +42,9 @@ GEMM_UKR_PROT( double,   d, gemm_armv8a_sve_asm_32x10 )
  * Vary n_r
  */
 
+GEMM_UKR_PROT(float, s, gemm_armv8a_sve_asm_2vx8)
+//GEMM_UKR_PROT(float, s, gemm_armv8a_sve_asm_2vx16)
+
 GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_1vx8)
 GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_2vx4)
 GEMM_UKR_PROT(double, d, gemm_armv8a_sve_asm_2vx8)

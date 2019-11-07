@@ -35,7 +35,7 @@
 */
 
 #include "blis.h"
-#include "bli_gemm_sve_asm_macros.h"
+#include "bli_dgemm_sve_asm_macros.h"
 
 
 /*

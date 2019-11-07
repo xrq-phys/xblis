@@ -6,7 +6,7 @@
 
    Copyright (C) 2019, Forschunszentrum Juelich
 
-   Author(s): Stepan Nassyr, s.nassyr@fz-juelich.de
+   Author(s): Stepan Nassyr, s.nassyr@fz-juelich.se
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,12 +40,12 @@
 #if defined(DEBUG)
 #include "bli_sve_asm_debug.h"
 #endif
-#include "bli_sve_asm_loadstore.h"
+#include "bli_sve_asm_loadstore_s.h"
 
 #define COMBINE2(a,b) a ## _ ## b
 
 #define ZEROVEC(vec1)\
-    " dup " #vec1 ".d, #0\n\t"
+    " dup " #vec1 ".s, #0\n\t"
 
 #define ZERO2VEC(vec1,vec2)\
     ZEROVEC(vec1)\
@@ -60,7 +60,7 @@
     ZERO4VEC(vec5,vec6,vec7,vec8)
 
 #define MLA1ROW(cvec, avec, bvec, preg)\
-    " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d\n\t"
+    " fmla " #cvec ".s, " #preg "/m, " #avec ".s, " #bvec ".s\n\t"
 
 #define MLA2ROW(c1, c2 , a1, a2, bvec, preg)\
     MLA1ROW(c1,a1,bvec,preg)\
@@ -72,7 +72,7 @@
 
 
 #define MUL1ROW(c1, a1, bvec, preg)\
-    " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d\n\t"
+    " fmul " #c1 ".s, " #preg "/m, " #a1 ".s, " #bvec ".s\n\t"
 
 #define MUL2ROW(c1, c2 , a1, a2, bvec, preg)\
     MUL1ROW(c1,a1,bvec,preg)\
@@ -88,65 +88,65 @@
 
 #define MLA1ROW_LA_LB(cvec, avec, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
     MLA1ROW(cvec, avec, bvec, preg)\
-    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1w   " #nextavec ".s, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #define MLA2ROW_LA_LB(c1, c2 , a1, a2, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
     MLA2ROW(c1, c2, a1, a2, bvec, preg)\
-    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1w   " #nextavec ".s, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #define MLA2X2ROW_LA_LB(c11,c12,c21,c22, a1, a2, bvec1,bvec2, preg, nextavec, aareg, avoff, bareg, bboff1,bboff2)\
     MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
     MLA2ROW(c21, c22, a1, a2, bvec2, preg)\
-    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    " ld1rd  " #bvec1 ".d, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
-    " ld1rd  " #bvec2 ".d, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
+    " ld1w   " #nextavec ".s, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rw  " #bvec1 ".s, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
+    " ld1rw  " #bvec2 ".s, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
 
 #define MLA4ROW_LA_LB(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
     MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
-    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1w   " #nextavec ".s, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 
 #define MLA2X2ROW_LB(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg, bareg, bboff1,bboff2)\
     MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
     MLA2ROW(c21, c22, a1, a2, bvec2, preg)\
-    " ld1rd  " #bvec1 ".d, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
-    " ld1rd  " #bvec2 ".d, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
+    " ld1rw  " #bvec1 ".s, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
+    " ld1rw  " #bvec2 ".s, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
 
 #define MLA1ROW_LB(cvec, avec, bvec, preg,  bareg, bboff)\
     MLA1ROW(cvec, avec, bvec, preg)\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #define MLA2ROW_LB(c1, c2 , a1, a2, bvec, preg,  bareg, bboff)\
     MLA2ROW(c1, c2, a1, a2, bvec, preg)\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #define MLA4ROW_LB(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg,  bareg, bboff)\
     MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+    " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #if defined(USE_SVE_CMLA_INSTRUCTION)
     #define CMLA1ROW_ILV(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
-        " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #0\n\t"\
+        " fcmla " #cvec1 ".s, " #preg "/m, " #avec1 ".s, " #bvec1 ".s, #0\n\t"\
         ilv1\
-        " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #0\n\t"\
+        " fcmla " #cvec2 ".s, " #preg "/m, " #avec2 ".s, " #bvec1 ".s, #0\n\t"\
         ilv2\
-        " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #90\n\t"\
+        " fcmla " #cvec1 ".s, " #preg "/m, " #avec1 ".s, " #bvec1 ".s, #90\n\t"\
         ilv3\
-        " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #90\n\t"\
+        " fcmla " #cvec2 ".s, " #preg "/m, " #avec2 ".s, " #bvec1 ".s, #90\n\t"\
         ilv4\
         "\n\t"
 #else
     #define CMLA1ROW_ILV(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
-        " fmla " #cvec_r ".d, " #preg "/m, " #avec_r ".d, " #bvec_r ".d\n\t"\
+        " fmla " #cvec_r ".s, " #preg "/m, " #avec_r ".s, " #bvec_r ".s\n\t"\
         ilv1\
-        " fmla " #cvec_i ".d, " #preg "/m, " #avec_r ".d, " #bvec_i ".d\n\t"\
+        " fmla " #cvec_i ".s, " #preg "/m, " #avec_r ".s, " #bvec_i ".s\n\t"\
         ilv2\
-        " fmls " #cvec_r ".d, " #preg "/m, " #avec_i ".d, " #bvec_i ".d\n\t"\
+        " fmls " #cvec_r ".s, " #preg "/m, " #avec_i ".s, " #bvec_i ".s\n\t"\
         ilv3\
-        " fmla " #cvec_i ".d, " #preg "/m, " #avec_i ".d, " #bvec_r ".d\n\t"\
+        " fmla " #cvec_i ".s, " #preg "/m, " #avec_i ".s, " #bvec_r ".s\n\t"\
         ilv4\
         "\n\t"
 #endif
@@ -185,14 +185,14 @@
 ZERO4VEC(c0,c1,c2,c3)\
 "                                            \n\t"\
 " fcmp d" #beta ",#0.0                       \n\t"\
-" beq .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
+" beq .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
 "                                            \n\t"\
 COMBINE2(LOAD2VEC,addressing) (c0,c1,p0,ca0,avec0,avec1)\
 COMBINE2(LOAD2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)\
 "                                            \n\t"\
 MUL4ROW(c0,c1,c2,c3,c0,c1,c2,c3,z ##beta,p0)\
 "                                            \n\t"\
-" .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+" .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
 "                                            \n\t"\
 MLA4ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha,p0)\
 "                                            \n\t"\
@@ -210,7 +210,7 @@ COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)
 ZERO4VEC(c0,c1,c2,c3)\
 "                                            \n\t"\
 " fcmp d" #beta ",#0.0                       \n\t"\
-" beq .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
+" beq .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
 "                                            \n\t"\
 COMBINE2(LOAD1VEC,addressing) (c0,p0,ca0,avec)\
 COMBINE2(LOAD1VEC,addressing) (c1,p0,ca1,avec)\
@@ -219,7 +219,7 @@ COMBINE2(LOAD1VEC,addressing) (c3,p0,ca3,avec)\
 "                                            \n\t"\
 MUL4ROW(c0,c1,c2,c3,c0,c1,c2,c3,z ##beta,p0)\
 "                                            \n\t"\
-" .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+" .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
 "                                            \n\t"\
 MLA4ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha,p0)\
 "                                            \n\t"\
@@ -238,8 +238,8 @@ COMBINE2(STOR1VEC,addressing) (c3,p0,ca3,avec)
 #define FINC_4COL(fsuf, addressing,c0,c1,c2,c3,c4,c5,c6,c7, ca0,ca1,ca2,ca3, avec0,avec1, alpha, beta, acc0,acc1,acc2,acc3,acc4,acc5,acc6,acc7, labelnr)\
 ZERO8VEC(c0,c1,c2,c3,c4,c5,c6,c7)\
 "                                            \n\t"\
-" fcmp d" #beta ",#0.0                       \n\t"\
-" beq .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
+" fcmp s" #beta ",#0.0                       \n\t"\
+" beq .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr "       \n\t"\
 "                                            \n\t"\
 COMBINE2(LOAD2VEC,addressing) (c0,c1,p0,ca0,avec0,avec1)\
 COMBINE2(LOAD2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)\
@@ -249,7 +249,7 @@ COMBINE2(LOAD2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)\
 MUL4ROW(c0,c1,c2,c3,c0,c1,c2,c3,z ##beta,p0)\
 MUL4ROW(c4,c5,c6,c7,c4,c5,c6,c7,z ##beta,p0)\
 "                                            \n\t"\
-" .D" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+" .S" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
 "                                            \n\t"\
 MLA4ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha,p0)\
 MLA4ROW(c4,c5,c6,c7,acc4,acc5,acc6,acc7,z ##alpha,p0)\
@@ -263,13 +263,13 @@ COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 // TODO: Only first complex number needs to be checked, 
 #if defined(USE_SVE_CMLA_INSTRUCTION)
 #define CMPCZB(vec1,vec2,label)\
-" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
+" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
 " nots p1.b, p0/z, p1.b\n\t"\
 " b.none " label "\n\t"
 #else
 #define CMPCZB(vec1,vec2,label)\
-" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
-" fcmeq p2.d, p0/z, " #vec2 ".d, #0.0\n\t"\
+" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
+" fcmeq p2.s, p0/z, " #vec2 ".s, #0.0\n\t"\
 " ands p1.b, p0/z, p1.b, p2.b\n\t"\
 " b.any " label "\n\t"
 #endif
@@ -286,7 +286,7 @@ COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 #define CFINC_4COL(fsuf, addressing, c0,c1,c2,c3,c4,c5,c6,c7, cs0,cs1,cs2,cs3,cs4,cs5,cs6,cs7, ca0,ca1,ca2,ca3, avec1,avec2, alpha1,alpha2,beta1,beta2, acc0,acc1,acc2,acc3,acc4,acc5,acc6,acc7, labelnr)\
 ZERO8VEC(c0,c1,c2,c3,c4,c5,c6,c7)\
 "                                            \n\t"\
-CMPCZB(z ##beta1, z ##beta2, ".Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
+CMPCZB(z ##beta1, z ##beta2, ".C" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
 "                                            \n\t"\
 COMBINE2(LOADC2VEC,addressing) (cs0,cs1,p0,ca0,avec1,avec2)\
 COMBINE2(LOADC2VEC,addressing) (cs2,cs3,p0,ca1,avec1,avec2)\
@@ -296,7 +296,7 @@ COMBINE2(LOADC2VEC,addressing) (cs6,cs7,p0,ca3,avec1,avec2)\
 CMLA2ROW(c0,c1,c2,c3,cs0,cs1,cs2,cs3,z ##beta1,z ##beta2,p0)\
 CMLA2ROW(c4,c5,c6,c7,cs4,cs5,cs6,cs7,z ##beta1,z ##beta2,p0)\
 "                                            \n\t"\
-" .Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
+" .C" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
 "                                            \n\t"\
 CMLA2ROW(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha1 , z ##alpha2 ,p0)\
 CMLA2ROW(c4,c5,c6,c7,acc4,acc5,acc6,acc7,z ##alpha1 , z ##alpha2 ,p0)\

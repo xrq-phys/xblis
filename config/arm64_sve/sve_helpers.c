@@ -78,8 +78,9 @@ void  adjust_sve_mr_nr_s(int* m_r, int* n_r)
 {
     //if not implemented, set to -1
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    *m_r = -1;
-    *n_r = -1;
+    int onevec = (get_sve_byte_size())/4;
+    *m_r = 2*onevec;
+    *n_r = 8;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 16;
     *n_r = 8;
