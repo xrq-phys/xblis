@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Forschungszentrum Juelich, Germany
 
    Redistribution and use in source and binary forms, with or without
@@ -62,7 +63,9 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
-
+#ifdef BLIS_CONFIG_ZEN2
+CNTX_INIT_PROTS( zen2 )
+#endif
 #ifdef BLIS_CONFIG_ZEN
 CNTX_INIT_PROTS( zen )
 #endif
@@ -100,7 +103,7 @@ CNTX_INIT_PROTS( cortexa15 )
 CNTX_INIT_PROTS( cortexa9 )
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
 #ifdef BLIS_CONFIG_POWER9
 CNTX_INIT_PROTS( power9 )
@@ -108,6 +111,9 @@ CNTX_INIT_PROTS( power9 )
 #ifdef BLIS_CONFIG_POWER7
 CNTX_INIT_PROTS( power7 )
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_CONFIG_BGQ
 CNTX_INIT_PROTS( bgq )
 #endif
@@ -157,6 +163,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
+#ifdef BLIS_FAMILY_ZEN2
+#include "bli_family_zen2.h"
+#endif
 #ifdef BLIS_FAMILY_ZEN
 #include "bli_family_zen.h"
 #endif
@@ -193,7 +202,7 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_cortexa9.h"
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
 #ifdef BLIS_FAMILY_POWER9
 #include "bli_family_power9.h"
@@ -201,6 +210,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_POWER7
 #include "bli_family_power7.h"
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_FAMILY_BGQ
 #include "bli_family_bgq.h"
 #endif
@@ -238,6 +250,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
+//#ifdef BLIS_KERNELS_ZEN2
+//#include "bli_kernels_zen2.h"
+//#endif
 #ifdef BLIS_KERNELS_ZEN
 #include "bli_kernels_zen.h"
 #endif
@@ -269,11 +284,17 @@ CNTX_INIT_PROTS( generic )
 #include "bli_kernels_armv7a.h"
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
+#ifdef BLIS_KERNELS_POWER9
+#include "bli_kernels_power9.h"
+#endif
 #ifdef BLIS_KERNELS_POWER7
 #include "bli_kernels_power7.h"
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_KERNELS_BGQ
 #include "bli_kernels_bgq.h"
 #endif

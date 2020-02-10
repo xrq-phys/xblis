@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Forschungszentrum Juelich, Germany
 
    Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,11 @@ void bli_gks_init( void )
 #endif
 
 		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN2
+		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
+		                                              bli_cntx_init_zen2_ref,
+		                                              bli_cntx_init_zen2_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN
 		bli_gks_register_cntx( BLIS_ARCH_ZEN,         bli_cntx_init_zen,
 		                                              bli_cntx_init_zen_ref,
