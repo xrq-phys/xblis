@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Forschunszentrum Juelich
+   Copyright (C) 2019-2020, Forschunszentrum Juelich
 
    Author(s): Stepan Nassyr, s.nassyr@fz-juelich.de
 
@@ -84,9 +84,10 @@ __asm__ volatile
 "                                            \n\t"
 " ldr x5,%[k_iter]                           \n\t" // number of 8xk iterations
 " ldr x6,%[k_left]                           \n\t" // number of k iterations afterward
-"                                            \n\t" 
-" ldr x7,%[alpha]                            \n\t" // Alpha address      
-" ldr x8,%[beta]                             \n\t" // Beta address      
+"                                            \n\t"
+// move to where the values are loaded and reuse x0 and x1
+//" ldr x7,%[alpha]                            \n\t" // Alpha address      
+//" ldr x8,%[beta]                             \n\t" // Beta address      
 "                                            \n\t" 
 " ldr x9,%[cs_c]                             \n\t" // Load cs_c
 " lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
@@ -121,7 +122,7 @@ __asm__ volatile
 LOAD2VEC(z0,z1,p0,x0)
 "                                            \n\t"
 LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
-LDR_NOADDR(z10,preg)OA(x1,64)"\n\t"
+LDR_NOADDR(z10,p0)OA(x1,64)"\n\t"
 "                                            \n\t"
 "                                            \n\t"
 ZERO4VEC(z11,z12,z13,z14)                          // c columns 0-1
@@ -211,47 +212,48 @@ MLA2ROW_LB(z23, z24, z29, z30, z8, p0, x1,272)
 MLA2ROW_LB(z25, z26, z29, z30, z9, p0, x1,280)
 MLA2ROW_LB(z27, z28, z29, z30, z10, p0, x1,288)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-MLA2ROW_LA_LB(z11, z12, z0, z1, z2, p0, z29, x0,0,x1,296) 
-MLA2ROW_LA_LB(z13, z14, z0, z1, z3, p0, z30, x0,1,x1,304) 
-MLA2ROW_LB(z15, z16, z0, z1, z4, p0, x1,312)
-MLA2ROW_LB(z17, z18, z0, z1, z5, p0, x1,320)
-MLA2ROW_LB(z19, z20, z0, z1, z6, p0, x1,328)
-MLA2ROW_LB(z21, z22, z0, z1, z7, p0, x1,336)
-MLA2ROW_LB(z23, z24, z0, z1, z8, p0, x1,344)
-MLA2ROW_LB(z25, z26, z0, z1, z9, p0, x1,352)
-MLA2ROW_LB(z27, z28, z0, z1, z10, p0, x1,360)
+" add  x1, x1, #256                          \n\t" // max index for ld1d is 504, so add 256 here 
+MLA2ROW_LA_LB(z11, z12, z0, z1, z2, p0, z29, x0,0,x1,40) 
+MLA2ROW_LA_LB(z13, z14, z0, z1, z3, p0, z30, x0,1,x1,48) 
+MLA2ROW_LB(z15, z16, z0, z1, z4, p0, x1,56)
+MLA2ROW_LB(z17, z18, z0, z1, z5, p0, x1,64)
+MLA2ROW_LB(z19, z20, z0, z1, z6, p0, x1,72)
+MLA2ROW_LB(z21, z22, z0, z1, z7, p0, x1,80)
+MLA2ROW_LB(z23, z24, z0, z1, z8, p0, x1,88)
+MLA2ROW_LB(z25, z26, z0, z1, z9, p0, x1,96)
+MLA2ROW_LB(z27, z28, z0, z1, z10, p0, x1,104)
 "                                            \n\t"
-MLA2ROW_LA_LB(z11, z12, z29, z30, z2, p0, z0, x0,2,x1,368) 
-MLA2ROW_LA_LB(z13, z14, z29, z30, z3, p0, z1, x0,3,x1,376) 
-MLA2ROW_LB(z15, z16, z29, z30, z4, p0, x1,384)
-MLA2ROW_LB(z17, z18, z29, z30, z5, p0, x1,392)
-MLA2ROW_LB(z19, z20, z29, z30, z6, p0, x1,400)
-MLA2ROW_LB(z21, z22, z29, z30, z7, p0, x1,408)
-MLA2ROW_LB(z23, z24, z29, z30, z8, p0, x1,416)
-MLA2ROW_LB(z25, z26, z29, z30, z9, p0, x1,424)
-MLA2ROW_LB(z27, z28, z29, z30, z10, p0, x1,432)
+MLA2ROW_LA_LB(z11, z12, z29, z30, z2, p0, z0, x0,2,x1,112) 
+MLA2ROW_LA_LB(z13, z14, z29, z30, z3, p0, z1, x0,3,x1,120) 
+MLA2ROW_LB(z15, z16, z29, z30, z4, p0, x1,128)
+MLA2ROW_LB(z17, z18, z29, z30, z5, p0, x1,136)
+MLA2ROW_LB(z19, z20, z29, z30, z6, p0, x1,144)
+MLA2ROW_LB(z21, z22, z29, z30, z7, p0, x1,152)
+MLA2ROW_LB(z23, z24, z29, z30, z8, p0, x1,160)
+MLA2ROW_LB(z25, z26, z29, z30, z9, p0, x1,168)
+MLA2ROW_LB(z27, z28, z29, z30, z10, p0, x1,176)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-MLA2ROW_LA_LB(z11, z12, z0, z1, z2, p0, z29, x0,0,x1,440) 
-MLA2ROW_LA_LB(z13, z14, z0, z1, z3, p0, z30, x0,1,x1,448) 
-MLA2ROW_LB(z15, z16, z0, z1, z4, p0, x1,456)
-MLA2ROW_LB(z17, z18, z0, z1, z5, p0, x1,464)
-MLA2ROW_LB(z19, z20, z0, z1, z6, p0, x1,472)
-MLA2ROW_LB(z21, z22, z0, z1, z7, p0, x1,480)
-MLA2ROW_LB(z23, z24, z0, z1, z8, p0, x1,488)
-MLA2ROW_LB(z25, z26, z0, z1, z9, p0, x1,496)
-MLA2ROW_LB(z27, z28, z0, z1, z10, p0, x1,504)
+MLA2ROW_LA_LB(z11, z12, z0, z1, z2, p0, z29, x0,0,x1,184) 
+MLA2ROW_LA_LB(z13, z14, z0, z1, z3, p0, z30, x0,1,x1,192) 
+MLA2ROW_LB(z15, z16, z0, z1, z4, p0, x1,200)
+MLA2ROW_LB(z17, z18, z0, z1, z5, p0, x1,208)
+MLA2ROW_LB(z19, z20, z0, z1, z6, p0, x1,216)
+MLA2ROW_LB(z21, z22, z0, z1, z7, p0, x1,224)
+MLA2ROW_LB(z23, z24, z0, z1, z8, p0, x1,232)
+MLA2ROW_LB(z25, z26, z0, z1, z9, p0, x1,240)
+MLA2ROW_LB(z27, z28, z0, z1, z10, p0, x1,248)
 "                                            \n\t"
-MLA2ROW_LA_LB(z11, z12, z29, z30, z2, p0, z0, x0,2,x1,512) 
-MLA2ROW_LA_LB(z13, z14, z29, z30, z3, p0, z1, x0,3,x1,520) 
-MLA2ROW_LB(z15, z16, z29, z30, z4, p0, x1,528)
-MLA2ROW_LB(z17, z18, z29, z30, z5, p0, x1,536)
-MLA2ROW_LB(z19, z20, z29, z30, z6, p0, x1,544)
-MLA2ROW_LB(z21, z22, z29, z30, z7, p0, x1,552)
-MLA2ROW_LB(z23, z24, z29, z30, z8, p0, x1,560)
-MLA2ROW_LB(z25, z26, z29, z30, z9, p0, x1,568)
-MLA2ROW_LB(z27, z28, z29, z30, z10, p0, x1,576)
+MLA2ROW_LA_LB(z11, z12, z29, z30, z2, p0, z0, x0,2,x1,256) 
+MLA2ROW_LA_LB(z13, z14, z29, z30, z3, p0, z1, x0,3,x1,264) 
+MLA2ROW_LB(z15, z16, z29, z30, z4, p0, x1,272)
+MLA2ROW_LB(z17, z18, z29, z30, z5, p0, x1,280)
+MLA2ROW_LB(z19, z20, z29, z30, z6, p0, x1,288)
+MLA2ROW_LB(z21, z22, z29, z30, z7, p0, x1,296)
+MLA2ROW_LB(z23, z24, z29, z30, z8, p0, x1,304)
+MLA2ROW_LB(z25, z26, z29, z30, z9, p0, x1,312)
+MLA2ROW_LB(z27, z28, z29, z30, z10, p0, x1,320)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-" add x1, x1, #576                           \n\t" // B = B+8*9*sizeof(double)
+" add x1, x1, #320                           \n\t" // B = B+8*9*sizeof(double) - 256 bytes (already added)
 "                                            \n\t"
 " sub x5,x5,1                                \n\t" // i-=1
 " cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
@@ -360,7 +362,7 @@ MLA2ROW(z23, z24, z29, z30, z8, p0)
 MLA2ROW(z25, z26, z29, z30, z9, p0)
 MLA2ROW(z27, z28, z29, z30, z10, p0)
 " incb x0, ALL, MUL #2                       \n\t" // 14 Vectors loaded, 3x4 vecs already added to address
-" add x1, x1, #504                           \n\t" // B = B+7*9*sizeof(double)
+" add x1, x1, #512                           \n\t" // B = B+7*9*sizeof(double) + the skipped 8 byte offset
 "                                            \n\t"
 " .D2VX9CONSIDERKLEFT:                       \n\t" 
 " cmp x6,0                                   \n\t" // If k_left == 0, we are done.
@@ -372,7 +374,7 @@ LOAD2VEC(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
 LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
-LDR_NOADDR(z10,preg)OA(x1,64)"\n\t"
+LDR_NOADDR(z10,p0)OA(x1,64)"\n\t"
 " add x1, x1, #72                            \n\t" // advance b pointer by 9 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
@@ -394,8 +396,10 @@ MLA2ROW(z27,z28,z0,z1,z10,p0)
 " prfm PLDL2KEEP, [x3]                       \n\t" // prefetch next A address into L2
 " prfm PLDL2KEEP, [x4]                       \n\t" // prefetch next B address into L2
 "                                            \n\t"
-" ld1rd  z29.d, p0/z, [x7]                   \n\t" // Load alpha
-" ld1rd  z30.d, p0/z, [x8]                   \n\t" // Load beta
+" ldr x0,%[alpha]                            \n\t" // Alpha address      
+" ldr x1,%[beta]                             \n\t" // Beta address
+" ld1rd  z29.d, p0/z, [x0]                   \n\t" // Load alpha
+" ld1rd  z30.d, p0/z, [x1]                   \n\t" // Load beta
 "                                            \n\t"
 " cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
 " bne .D2VX9GENSTORED                        \n\t"
@@ -562,7 +566,7 @@ STOR2VEC_GENI(z27,z28,p0,x27, z10, z31)
 :// Register clobber list
  "x0","x1","x2","x3",
  "x4","x5","x6",
- "x7","x8","x9",
+ "x9",
  "x10","x11","x13",
  "x20","x21","x22","x23","x24","x25","x26","x27",
  "z0","z1","z2",
