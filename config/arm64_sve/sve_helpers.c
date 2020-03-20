@@ -61,7 +61,10 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
     {
         *m_r = onevec;
     }
-    *n_r = 8;
+    if(*n_r != 9)
+    {
+        *n_r = 8;
+    }
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 8;
     *n_r = 10;

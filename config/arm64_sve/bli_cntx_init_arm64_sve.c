@@ -64,7 +64,14 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
     }
     else
     {
-        kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8;
+        if(9 == n_r)
+        {
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx9;
+        }
+        else
+        {
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8;
+        }
     }
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     kptr = (void*) bli_dgemm_armv8a_sve_asm_8x10;
