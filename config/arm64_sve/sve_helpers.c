@@ -53,7 +53,7 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 {
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
     int onevec = (get_sve_byte_size())/8;
-    if(*m_r > onevec)
+    /*if(*m_r > onevec)
     {
         *m_r = 2*onevec;
     }
@@ -64,7 +64,10 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
     if(*n_r != 9)
     {
         *n_r = 8;
-    }
+    }*/
+    // force 4vx5 for testing
+    *m_r = 4*onevec;
+    *n_r = 5*onevec;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 8;
     *n_r = 10;

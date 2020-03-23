@@ -46,11 +46,23 @@
     " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "]           \n\t"\
     " ld1d  " #vec2 ".d, " #preg "/z, [" #areg ",#1, MUL VL]\n\t"
 
+#define LOAD4VEC(vec1, vec2, vec3, vec4, preg,areg)\
+    " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "]           \n\t"\
+    " ld1d  " #vec2 ".d, " #preg "/z, [" #areg ",#1, MUL VL]\n\t"\
+    " ld1d  " #vec3 ".d, " #preg "/z, [" #areg ",#2, MUL VL]\n\t"\
+    " ld1d  " #vec4 ".d, " #preg "/z, [" #areg ",#3, MUL VL]\n\t"
+
 #define LOAD2VEC_CONT(vec1,vec2,preg,areg,avec1,avec2) LOAD2VEC(vec1,vec2,preg,areg)
 
 #define LOAD2VEC_GENI(vec1,vec2,preg,areg,avec1,avec2)\
     " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "," #avec1 ".d, LSL #3]\n\t"\
     " ld1d  " #vec2 ".d, " #preg "/z, [" #areg "," #avec2 ".d, LSL #3]\n\t"
+
+#define LOAD4VEC_GENI(vec1,vec2,vec3,vec4, preg,areg, avec1,avec2,avec3,avec4)\
+    " ld1d  " #vec1 ".d, " #preg "/z, [" #areg "," #avec1 ".d, LSL #3]\n\t"\
+    " ld1d  " #vec2 ".d, " #preg "/z, [" #areg "," #avec2 ".d, LSL #3]\n\t"\
+    " ld1d  " #vec3 ".d, " #preg "/z, [" #areg "," #avec3 ".d, LSL #3]\n\t"\
+    " ld1d  " #vec4 ".d, " #preg "/z, [" #areg "," #avec4 ".d, LSL #3]\n\t"
 
 #define LDR_NOADDR(vec1,preg)\
     " ld1rd  " #vec1 ".d, " #preg "/z"
@@ -187,12 +199,26 @@
     " st1d  {" #vec1 ".d}, " #preg ", [" #areg "]           \n\t"\
     " st1d  {" #vec2 ".d}, " #preg ", [" #areg ",#1, MUL VL]\n\t"
 
+#define STOR4VEC(vec1,vec2,vec3,vec4,preg,areg)\
+    " st1d  {" #vec1 ".d}, " #preg ", [" #areg "]           \n\t"\
+    " st1d  {" #vec2 ".d}, " #preg ", [" #areg ",#1, MUL VL]\n\t"\
+    " st1d  {" #vec3 ".d}, " #preg ", [" #areg ",#2, MUL VL]\n\t"\
+    " st1d  {" #vec4 ".d}, " #preg ", [" #areg ",#3, MUL VL]\n\t"
+
 #define STOR2VEC_CONT(vec1,vec2,preg,areg,avec1,avec2) STOR2VEC(vec1,vec2,preg,areg)
+
+#define STOR4VEC_CONT(vec1,vec2,vec3,vec4,preg,areg,avec1,avec2) STOR4VEC(vec1,vec2,vec3,vec4,preg,areg)
 
 // Store 2 vectors with generic indexing (scatter-store)
 #define STOR2VEC_GENI(vec1,vec2,preg,areg,avec1,avec2)\
     " st1d  {" #vec1 ".d}, " #preg ", [" #areg "," #avec1 ".d, LSL #3]\n\t"\
     " st1d  {" #vec2 ".d}, " #preg ", [" #areg "," #avec2 ".d, LSL #3]\n\t"
+
+#define STOR4VEC_GENI(vec1,vec2,vec3,vec4, preg,areg,avec1,avec2,avec3,avec4)\
+    " st1d  {" #vec1 ".d}, " #preg ", [" #areg "," #avec1 ".d, LSL #3]\n\t"\
+    " st1d  {" #vec2 ".d}, " #preg ", [" #areg "," #avec2 ".d, LSL #3]\n\t"\
+    " st1d  {" #vec3 ".d}, " #preg ", [" #areg "," #avec3 ".d, LSL #3]\n\t"\
+    " st1d  {" #vec4 ".d}, " #preg ", [" #areg "," #avec4 ".d, LSL #3]\n\t"
 
 #define STORC2VEC_CONT(vec1,vec2,preg,areg,avec1,avec2) STORC2VEC(vec1,vec2,preg,areg)
 

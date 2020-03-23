@@ -100,14 +100,14 @@ __asm__ volatile
 " add x26,x25,x10                            \n\t" //Load address Column 7 of C
 "                                            \n\t"
 #if defined(PREFETCH64) || defined(PREFETCH256)
-" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
-" prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x23]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x2]                        \n\t" // Prefetch c.
+" prfm pstl1keep,[x20]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x21]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x22]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x23]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x24]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x25]                       \n\t" // Prefetch c.
+" prfm pstl1keep,[x26]                       \n\t" // Prefetch c.
 #endif
 "                                            \n\t"
 " ptrue p0.d                                 \n\t" // Creating all true predicate
@@ -155,7 +155,7 @@ MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,8)
 " prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,16)
-#if defined(PREFETCHSVE1) || defined (PREFETCHSVE2)
+#if defined(PREFETCHSVE1) 
 " prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,24)
@@ -171,7 +171,7 @@ MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,40)
 " prfd pldl1keep,p0, [x0, #7, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,48)
-#if defined(PREFETCHSVE1) || defined (PREFETCHSVE2)
+#if defined(PREFETCHSVE1)
 " prfd pldl1keep,p0, [x0, #8, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,56)
@@ -233,7 +233,7 @@ MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,8)
 " prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,16)
-#if defined(PREFETCHSVE1) || defined (PREFETCHSVE2)
+#if defined(PREFETCHSVE1)
 " prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // prefetch next a vector
 #endif
 MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,24)
