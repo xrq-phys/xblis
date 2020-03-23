@@ -315,8 +315,8 @@ MLA2ROW(z24,z25,z0,z1,z9,p0)
 " .D2VX8COLSTORED:                           \n\t" // C is column-major.
 "                                            \n\t"
 // Don't use FINC macro, do it by hand because interleaving is required
-//FINC_4COL(2VX9,CONT, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-//FINC_4COL(2VX9,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)   
+//FINC_4COL(2VX8,CONT, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+//FINC_4COL(2VX8,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)   
 
 // Accumulated results are stored in z10-z25
 // alpha is in z26, beta in z27
@@ -324,7 +324,7 @@ MLA2ROW(z24,z25,z0,z1,z9,p0)
 // Keep fmas on same registers min. 9 fma instructions apart (A64FX latency)
 "                                        \n\t"
 " fcmp d30,#0.0                          \n\t"
-" beq .D2VX9BETAZEROCONTCOLSTOREDS       \n\t" // multiply with beta if beta isn't zero
+" beq .D2VX8BETAZEROCONTCOLSTOREDS       \n\t" // multiply with beta if beta isn't zero
 "                                        \n\t"
 LOAD2VEC (z0,z1,p0,x2)
 LOAD2VEC (z2,z3,p0,x20)
@@ -355,9 +355,9 @@ STOR2VEC(z20,z21,p0,x24)
 STOR2VEC(z22,z23,p0,x25)
 STOR2VEC(z24,z25,p0,x26)
 
-" b .D2VX9END                                \n\t" // Duplicate code for stores required due to lack of registers
+" b .D2VX8END                                \n\t" // Duplicate code for stores required due to lack of registers
 "                                            \n\t"
-" .D2VX9BETAZEROCONTCOLSTOREDS:              \n\t"
+" .D2VX8BETAZEROCONTCOLSTOREDS:              \n\t"
 // No need to zero anything as we are storing the scaled accumulated A*B values
 MUL4ROW(z10,z11,z12,z13, z10,z11,z12,z13, z26, p0)
 MUL4ROW(z14,z15,z16,z17, z14,z15,z16,z17, z26, p0)
