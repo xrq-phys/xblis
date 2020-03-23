@@ -67,7 +67,7 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
     }*/
     // force 4vx5 for testing
     *m_r = 4*onevec;
-    *n_r = 5*onevec;
+    *n_r = 5;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 8;
     *n_r = 10;
