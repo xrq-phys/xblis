@@ -306,20 +306,72 @@ MLA2ROW(z24,z25,z0,z1,z9,p0)
 " prfm PLDL2KEEP, [x4]                       \n\t"
 #endif
 "                                            \n\t"
-" ld1rd  z29.d, p0/z, [x7]                   \n\t" // Load alpha
-" ld1rd  z30.d, p0/z, [x8]                   \n\t" // Load beta
+" ld1rd  z26.d, p0/z, [x7]                   \n\t" // Load alpha
+" ld1rd  z27.d, p0/z, [x8]                   \n\t" // Load beta
 "                                            \n\t"
 " cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
 " bne .D2VX8GENSTORED                        \n\t"
 "                                            \n\t"
 " .D2VX8COLSTORED:                           \n\t" // C is column-major.
 "                                            \n\t"
-//FINC_2COL(2VX8,CONT,z0,z1,z2,z3,     x2,x20,  no,no, 29, 30, z10,z11,z12,z13,1)
-//FINC_2COL(2VX8,CONT,z4,z5,z6,z7,     x21,x22, no,no, 29, 30, z14,z15,z16,z17,2)
-//FINC_2COL(2VX8,CONT,z8,z9,z10,z11,   x23,x24, no,no, 29, 30, z18,z19,z20,z21,3)
-//FINC_2COL(2VX8,CONT,z12,z13,z14,z15, x25,x26, no,no, 29, 30, z22,z23,z24,z25,4)
-FINC_4COL(2VX8,CONT, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-FINC_4COL(2VX8,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
+// Don't use FINC macro, do it by hand because interleaving is required
+//FINC_4COL(2VX9,CONT, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+//FINC_4COL(2VX9,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)   
+
+// Accumulated results are stored in z10-z25
+// alpha is in z26, beta in z27
+// z0-z9 and z28-z31 are free
+// Keep fmas on same registers min. 9 fma instructions apart (A64FX latency)
+"                                        \n\t"
+" fcmp d30,#0.0                          \n\t"
+" beq .D2VX9BETAZEROCONTCOLSTOREDS       \n\t" // multiply with beta if beta isn't zero
+"                                        \n\t"
+LOAD2VEC (z0,z1,p0,x2)
+LOAD2VEC (z2,z3,p0,x20)
+LOAD2VEC (z4,z5,p0,x21)
+LOAD2VEC (z6,z7,p0,x22)
+LOAD2VEC (z8,z9,p0,x23)
+LOAD2VEC (z28,z29,p0,x24)
+LOAD2VEC (z30,z31,p0,x25)
+"                                            \n\t"
+
+// Let's do Accum=Accum*alpha, then Accum=Accum+C*beta and add some interleaving
+MUL4ROW(z10,z11,z12,z13, z10,z11,z12,z13, z26, p0)
+MUL4ROW(z14,z15,z16,z17, z14,z15,z16,z17, z26, p0)
+MUL4ROW(z18,z19,z20,z21, z18,z19,z20,z21, z26, p0)
+MLA4ROW(z10,z11,z12,z13, z0,z1,z2,z3,     z27, p0)
+MUL4ROW(z22,z23,z24,z25, z22,z23,z24,z25, z26, p0)
+MLA4ROW(z14,z15,z16,z17, z4,z5,z6,z7,     z27, p0)
+LOAD2VEC(z0,z1,p0,x26)
+STOR2VEC(z10,z11,p0,x2)
+MLA4ROW(z18,z19,z20,z21, z8,z9,z28,z29, z27, p0)
+STOR2VEC(z12,z13,p0,x20)
+MLA4ROW(z22,z23,z24,z25, z30,z31,z0,z1, z27, p0) 
+STOR2VEC(z14,z15,p0,x21)
+
+STOR2VEC(z16,z17,p0,x22)
+STOR2VEC(z18,z19,p0,x23)
+STOR2VEC(z20,z21,p0,x24)
+STOR2VEC(z22,z23,p0,x25)
+STOR2VEC(z24,z25,p0,x26)
+
+" b .D2VX9END                                \n\t" // Duplicate code for stores required due to lack of registers
+"                                            \n\t"
+" .D2VX9BETAZEROCONTCOLSTOREDS:              \n\t"
+// No need to zero anything as we are storing the scaled accumulated A*B values
+MUL4ROW(z10,z11,z12,z13, z10,z11,z12,z13, z26, p0)
+MUL4ROW(z14,z15,z16,z17, z14,z15,z16,z17, z26, p0)
+MUL4ROW(z18,z19,z20,z21, z18,z19,z20,z21, z26, p0)
+MUL4ROW(z22,z23,z24,z25, z22,z23,z24,z25, z26, p0)
+STOR2VEC(z10,z11,p0,x2)
+STOR2VEC(z12,z13,p0,x20)
+STOR2VEC(z14,z15,p0,x21)
+STOR2VEC(z16,z17,p0,x22)
+STOR2VEC(z18,z19,p0,x23)
+STOR2VEC(z20,z21,p0,x24)
+STOR2VEC(z22,z23,p0,x25)
+STOR2VEC(z24,z25,p0,x26)
+
 "                                            \n\t"
 " b .D2VX8END                                \n\t"
 "                                            \n\t"
