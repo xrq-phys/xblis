@@ -92,6 +92,34 @@
     LDR_NOADDR(vec7,preg)OA(areg,48)"\n\t"\
     LDR_NOADDR(vec8,preg)OA(areg,56)"\n\t"
 
+#define LDRQ_NOADDR(vec1,preg)\
+    " ld1rqd  " #vec1 ".d, " #preg "/z"
+#define OA(areg,offset)\
+    ",[" #areg ", #" #offset"]"
+
+#define LOADVEC_QDIST_OFF(vec1,preg,areg,off)\
+    LDRQ_NOADDR(vec1,preg)OA(areg,off)"\n\t"
+
+#define LOADVEC_QDIST(vec1,preg,areg)\
+    LOADVEC_QDIST_OFF(vec1,preg,areg,0)"\n\t"
+
+#define LOAD2VEC_QDIST(vec1,vec2,preg,areg)\
+    LOADVEC_QDIST_OFF(vec1,preg,areg,0)"\n\t"\
+    LOADVEC_QDIST_OFF(vec2,preg,areg,16)"\n\t"
+
+#define LOAD4VEC_QDIST(vec1,vec2,vec3,vec4,preg,areg)\
+    LOADVEC_QDIST_OFF(vec1,preg,areg,0)"\n\t"\
+    LOADVEC_QDIST_OFF(vec2,preg,areg,16)"\n\t"\
+    LOADVEC_QDIST_OFF(vec3,preg,areg,32)"\n\t"\
+    LOADVEC_QDIST_OFF(vec4,preg,areg,48)"\n\t"
+
+#define LOAD6VEC_QDIST(vec1,vec2,vec3,vec4,vec5,vec6,preg,areg)\
+    LOADVEC_QDIST_OFF(vec1,preg,areg,0)"\n\t"\
+    LOADVEC_QDIST_OFF(vec2,preg,areg,16)"\n\t"\
+    LOADVEC_QDIST_OFF(vec3,preg,areg,32)"\n\t"\
+    LOADVEC_QDIST_OFF(vec4,preg,areg,48)"\n\t"\
+    LOADVEC_QDIST_OFF(vec5,preg,areg,64)"\n\t"\
+    LOADVEC_QDIST_OFF(vec6,preg,areg,80)"\n\t"
 
 #if defined(USE_SVE_CMLA_INSTRUCTION)
 // When using the fused complex mupliply-accumulate

@@ -70,6 +70,17 @@
     MLA2ROW(c1,c2,a1,a2,bvec,preg)\
     MLA2ROW(c3,c4,a3,a4,bvec,preg)
 
+#define MLA1ROW_I(cvec, avec, bvec, ind, preg)\
+    " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d[" #ind "]\n\t"
+
+#define MLA2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
+    MLA1ROW_I(c1,a1,bvec,ind,preg)\
+    MLA1ROW_I(c2,a2,bvec,ind,preg)
+
+#define MLA4ROW_I(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
+    MLA2ROW_I(c1,c2, a1,a2, bvec,ind,preg)\
+    MLA2ROW_I(c3,c4, a3,a4, bvec,ind,preg)
+
 
 #define MUL1ROW(c1, a1, bvec, preg)\
     " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d\n\t"
@@ -82,9 +93,29 @@
     MUL2ROW(c1,c2,a1,a2,bvec,preg)\
     MUL2ROW(c3,c4,a3,a4,bvec,preg)
 
+#define MUL1ROW_I(c1, a1, bvec, ind, preg)\
+    " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d["#ind"]\n\t"
+
+#define MUL2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
+    MUL1ROW_I(c1,a1,bvec,ind,preg)\
+    MUL1ROW_I(c2,a2,bvec,ind,preg)
+
+#define MUL4ROW_I(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
+    MUL2ROW_I(c1,c2, a1,a2, bvec,ind,preg)\
+    MUL2ROW_I(c3,c4, a3,a4, bvec,ind,preg)
+
 #define MLA2X2ROW(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg)\
     MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
     MLA2ROW(c21, c22, a1, a2, bvec2, preg)
+
+#define MLA2ROW_I_LA(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff)\
+    MLA2ROW_I(c1, c2, a1, a2, bvec, ind, preg)\
+    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"
+
+#define MLA2ROW_I_LA_LB(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA2ROW_I(c1, c2, a1, a2, bvec, ind, preg)\
+    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    LOADVEC_QDIST(bvec,preg,bareg)
 
 #define MLA1ROW_LA_LB(cvec, avec, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
     MLA1ROW(cvec, avec, bvec, preg)\
@@ -95,6 +126,7 @@
     MLA2ROW(c1, c2, a1, a2, bvec, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
+
 
 #define MLA2X2ROW_LA_LB(c11,c12,c21,c22, a1, a2, bvec1,bvec2, preg, nextavec, aareg, avoff, bareg, bboff1,bboff2)\
     MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
