@@ -68,13 +68,25 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
     }
     else
     {
-        if(9 == n_r)
+        if(12 == n_r)
+        {
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx12_ld1rqd;
+        }
+        else if(10 == n_r)
+        {
+            //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rqd;
+            //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rd;
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rd_aabb;
+        }
+        else if(9 == n_r)
         {
             kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx9;
         }
         else
         {
-            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8;
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8_ld1rd;
+            //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8_ld1rqd;
+            //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx8;
         }
     }
 #elif SVE_VECSIZE == SVE_VECSIZE_256

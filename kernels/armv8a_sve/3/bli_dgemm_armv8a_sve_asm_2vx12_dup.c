@@ -41,7 +41,7 @@
 
 /* 2 vectors in m_r, n_r = 12
 */
-void bli_dgemm_armv8a_sve_asm_2vx12
+void bli_dgemm_armv8a_sve_asm_2vx12_dup
      (
        dim_t               k0,
        double*    restrict alpha,

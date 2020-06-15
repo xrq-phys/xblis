@@ -52,7 +52,14 @@ uint64_t get_sve_byte_size()
 void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 {
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
+
     int onevec = (get_sve_byte_size())/8;
+
+#warning Testing 2vx10
+    *m_r = 2*onevec;
+    *n_r = 10;
+    return;
+
     if(*m_r > 2*onevec)
     {
         *m_r = 4*onevec;

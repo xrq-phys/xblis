@@ -37,6 +37,9 @@
 #define LOAD1VEC(vec,preg,areg)\
     " ld1d  " #vec ".d, " #preg "/z, [" #areg "]           \n\t"
 
+#define LOAD1VEC_VOFF(vec, preg, areg, off)\
+    " ld1d   " #vec ".d, " #preg "/z, [" #areg ", #" #off", MUL VL]\n\t"
+
 #define LOAD1VEC_CONT(vec,preg,areg,avec) LOAD1VEC(vec,preg,areg)
 
 #define LOAD1VEC_GENI(vec,preg,areg,avec)\
@@ -68,6 +71,9 @@
     " ld1rd  " #vec1 ".d, " #preg "/z"
 #define OA(areg,offset)\
     ",[" #areg ", #" #offset"]"
+
+#define LOADVEC_DIST_OFF(vec1,preg,areg,off)\
+    LDR_NOADDR(vec1,preg)OA(areg,off)"\n\t"
 
 #define LOADVEC_DIST(vec1,preg,areg)\
     LDR_NOADDR(vec1,preg)OA(areg,0)"\n\t"

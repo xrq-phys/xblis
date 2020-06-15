@@ -71,7 +71,7 @@
     MLA2ROW(c3,c4,a3,a4,bvec,preg)
 
 #define MLA1ROW_I(cvec, avec, bvec, ind, preg)\
-    " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d[" #ind "]\n\t"
+    " fmla " #cvec ".d, " #avec ".d, " #bvec ".d[" #ind "]\n\t"
 
 #define MLA2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
     MLA1ROW_I(c1,a1,bvec,ind,preg)\
@@ -94,7 +94,7 @@
     MUL2ROW(c3,c4,a3,a4,bvec,preg)
 
 #define MUL1ROW_I(c1, a1, bvec, ind, preg)\
-    " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d["#ind"]\n\t"
+    " fmul " #c1 ".d, " #a1 ".d, " #bvec ".d["#ind"]\n\t"
 
 #define MUL2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
     MUL1ROW_I(c1,a1,bvec,ind,preg)\
