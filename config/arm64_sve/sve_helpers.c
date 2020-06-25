@@ -55,10 +55,10 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 
     int onevec = (get_sve_byte_size())/8;
 
-#warning Testing 2vx10
-    *m_r = 2*onevec;
-    *n_r = 10;
-    return;
+//#warning Testing 2vx10
+//    *m_r = 2*onevec;
+//    *n_r = 10;
+//    return;
 
     if(*m_r > 2*onevec)
     {
@@ -68,10 +68,14 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
     else if (*m_r == 2*onevec)
     {
         *m_r = 2*onevec;
-        if(*n_r != 9)
+        // Ignore 2vx9 for now, it has terrible performance
+        if( ( 12 == *n_r) ||
+            ( 10 == *n_r))
         {
-            *n_r = 8;
+            return;
         }
+        *n_r = 8;
+        return;
     }
     else
     {
