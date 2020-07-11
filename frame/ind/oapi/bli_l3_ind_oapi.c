@@ -70,6 +70,8 @@ GENFRONT( gemm, ind )
 GENFRONT( gemmt, ind )
 GENFRONT( her2k, ind )
 GENFRONT( syr2k, ind )
+// [SK]
+GENFRONT( skr2k, ind )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------

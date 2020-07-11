@@ -61,6 +61,7 @@ GENTDEF( gemm )
 GENTDEF( gemmt )
 GENTDEF( her2k )
 GENTDEF( syr2k )
+GENTDEF( skr2k )
 
 
 // hemm, symm, trmm3

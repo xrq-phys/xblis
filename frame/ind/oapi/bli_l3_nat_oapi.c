@@ -83,6 +83,7 @@ GENFRONT( gemm, gemm, nat )
 GENFRONT( gemmt, gemm, nat )
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
+GENFRONT( skr2k, gemm, nat )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
