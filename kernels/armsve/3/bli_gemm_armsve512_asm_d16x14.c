@@ -47,7 +47,7 @@
 
    July 2020.
 */
-void bli_dgemm_armsve256_asm_16x14
+void bli_dgemm_armsve512_asm_16x14
      (
        dim_t               k0,
        double*    restrict alpha,
