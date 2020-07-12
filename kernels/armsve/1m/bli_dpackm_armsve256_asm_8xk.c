@@ -35,9 +35,6 @@
 
 #include "blis.h"
 
-// Clang-vendored arm_sve.h seems conflicting with blis.h.
-#if !defined(__clang__)
-
 #ifdef __ARM_FEATURE_SVE
 #include <arm_sve.h>
 #else
@@ -236,6 +233,3 @@ void bli_dpackm_armsve256_asm_8xk
         );
     }
 }
-
-#endif
-
