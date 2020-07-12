@@ -55,7 +55,7 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	uint64_t mr_d = 0, nr_d = 0, mc_d = 0, nc_d = 0;
 	switch (vlen) {
 		case 4:  bli_dgemm_armsve_asm_use = bli_dgemm_armsve256_asm_8x8;   mr_d = 8;  nr_d = 8;  mc_d = 160; nc_d = 3072; break;
-		case 8:  bli_dgemm_armsve_asm_use = bli_dgemm_armsve512_asm_16x14; mr_d = 16; nr_d = 14; mc_d = 160; nc_d = 3584; break;
+		case 8:  bli_dgemm_armsve_asm_use = bli_dgemm_armsve512_asm_16x12; mr_d = 16; nr_d = 12; mc_d = 160; nc_d = 3072; break;
 		default: bli_dgemm_armsve_asm_use = bli_dgemm_armv8a_asm_6x8;      mr_d = 6;  nr_d = 8;  mc_d = 120; nc_d = 3072; break;
 	}
 
