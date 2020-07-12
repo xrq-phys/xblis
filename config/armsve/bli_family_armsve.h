@@ -32,7 +32,15 @@
 
 */
 
-GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x14 )
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
-PACKM_KER_PROT( double,   d, packm_armsve256_asm_8xk )
+
+// -- MEMORY ALLOCATION --------------------------------------------------------
+
+#define BLIS_SIMD_ALIGN_SIZE 16
+
+
+
+//#endif
+
