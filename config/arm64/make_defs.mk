@@ -65,7 +65,11 @@ CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -march=armv8-a
 else
+ifeq ($(CC_VENDOR),clang)
+CKVECFLAGS     := -march=armv8-a
+else
 $(error gcc is required for this configuration.)
+endif
 endif
 
 # Flags specific to reference kernels.
