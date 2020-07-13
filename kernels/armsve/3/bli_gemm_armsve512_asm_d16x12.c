@@ -277,6 +277,15 @@ __asm__ volatile (
 " fmla            z29.d, z31.d, z5.d[1]           \n\t"
 " ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
 "                                                 \n\t"
+"                                                 \n\t" // Before third replica,
+" prfm            PLDL1STRM, [x2]                 \n\t" // Prefetch A (first-half)
+" prfm            PLDL1STRM, [x2, #64]            \n\t" //  for next microkernel
+" prfm            PLDL1STRM, [x2, #128]           \n\t"
+" prfm            PLDL1STRM, [x2, #192]           \n\t"
+" prfm            PLDL1STRM, [x4]                 \n\t" // Prefetch B (first-half)
+" prfm            PLDL1STRM, [x4, #64]            \n\t" //  for next microkernel
+" prfm            PLDL1STRM, [x4, #128]           \n\t"
+"                                                 \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // A columns
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
@@ -316,6 +325,14 @@ __asm__ volatile (
 " adds            x10, x10, x8                    \n\t" //  check if this iteration is final
 " b.eq            FIN_LOOP                        \n\t"
 "                                                 \n\t"
+" prfm            PLDL1STRM, [x2, #256]           \n\t" // Prefetch A (last-half)
+" prfm            PLDL1STRM, [x2, #320]           \n\t" //  for next microkernel
+" prfm            PLDL1STRM, [x2, #384]           \n\t"
+" prfm            PLDL1STRM, [x2, #448]           \n\t"
+" prfm            PLDL1STRM, [x4, #192]           \n\t" // Prefetch B (last-half)
+" prfm            PLDL1STRM, [x4, #256]           \n\t" //  for next microkernel
+" prfm            PLDL1STRM, [x4, #320]           \n\t"
+"                                                 \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // A columns
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
@@ -353,23 +370,8 @@ __asm__ volatile (
 "                                                 \n\t"
 "                                                 \n\t" // End of repeating.
 "                                                 \n\t"
-" prfm            PLDL1STRM, [x2]                 \n\t" // Prefetch A for next microkernel
-" prfm            PLDL1STRM, [x2, #64]            \n\t"
-" prfm            PLDL1STRM, [x2, #128]           \n\t"
-" prfm            PLDL1STRM, [x2, #192]           \n\t"
-" prfm            PLDL1STRM, [x2, #256]           \n\t"
-" prfm            PLDL1STRM, [x2, #320]           \n\t"
-" prfm            PLDL1STRM, [x2, #384]           \n\t"
-" prfm            PLDL1STRM, [x2, #448]           \n\t"
-" prfm            PLDL1STRM, [x4]                 \n\t" // Prefetch B for next microkernel
-" prfm            PLDL1STRM, [x4, #64]            \n\t"
-" prfm            PLDL1STRM, [x4, #128]           \n\t"
-" prfm            PLDL1STRM, [x4, #192]           \n\t"
-" prfm            PLDL1STRM, [x4, #256]           \n\t"
-" prfm            PLDL1STRM, [x4, #320]           \n\t"
-"                                                 \n\t"
 " subs            x21, x21, #1                    \n\t" // Decrease counter.
-" b.ne            K_MKER_LOOP                     \n\t" // Decrease counter.
+" b.ne            K_MKER_LOOP                     \n\t"
 "                                                 \n\t"
 " K_LEFT_LOOP:                                    \n\t"
 "                                                 \n\t"
