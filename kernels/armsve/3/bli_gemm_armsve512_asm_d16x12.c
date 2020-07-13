@@ -38,8 +38,9 @@
 /*
    o 16x12 Double precision micro-kernel
    o Runnable on ARMv8a with SVE 512 feature, compiled with aarch64 GCC.
-   x Tested on armie for SVE.
+   o Tested on armie for SVE.
    x To be tested & benchmarked on A64fx.
+   x Gather-load / Scatter-store is not optimized.
 
    July 2020.
 */
@@ -146,16 +147,11 @@ __asm__ volatile (
 "                                                 \n\t"
 "                                                 \n\t" // SVE Register configuration:
 "                                                 \n\t" // Z[30-31]: A columns
-"                                                 \n\t" // Z[0-1]: B elements broadcasted
-"                                                 \n\t" // Z[26-29]: Not used
-"                                                 \n\t" // Z[2-25]: C change buffer
+"                                                 \n\t" // Z[0-5]: B elements broadcasted
+"                                                 \n\t" // Z[6-29]: C change buffer
 "                                                 \n\t"
 " prfm            PLDL1KEEP, [x2]                 \n\t" // Prefetch A column
 " prfm            PLDL1KEEP, [x16]                \n\t" // Prefetch B column
-" fmov            z2.d, p0/m, #0.0                \n\t"
-" fmov            z3.d, p0/m, #0.0                \n\t"
-" fmov            z4.d, p0/m, #0.0                \n\t"
-" fmov            z5.d, p0/m, #0.0                \n\t"
 " fmov            z6.d, p0/m, #0.0                \n\t"
 " fmov            z7.d, p0/m, #0.0                \n\t"
 " fmov            z8.d, p0/m, #0.0                \n\t"
@@ -176,6 +172,10 @@ __asm__ volatile (
 " fmov            z23.d, p0/m, #0.0               \n\t"
 " fmov            z24.d, p0/m, #0.0               \n\t"
 " fmov            z25.d, p0/m, #0.0               \n\t"
+" fmov            z26.d, p0/m, #0.0               \n\t"
+" fmov            z27.d, p0/m, #0.0               \n\t"
+" fmov            z28.d, p0/m, #0.0               \n\t"
+" fmov            z29.d, p0/m, #0.0               \n\t"
 "                                                 \n\t"
 " K_LOOP:                                         \n\t"
 "                                                 \n\t" // Load columns from A.
@@ -197,36 +197,36 @@ __asm__ volatile (
 "                                                 \n\t" //  Should cause no problem at this moment
 "                                                 \n\t" //  as outer frame allocates padding.
 "                                                 \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // row L column 0 and 1
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // row L column 2 and 3
-" fmla            z2.d, z30.d, z0.d[0]            \n\t"
-" fmla            z3.d, z31.d, z0.d[0]            \n\t"
-" fmla            z4.d, z30.d, z0.d[1]            \n\t"
-" fmla            z5.d, z31.d, z0.d[1]            \n\t"
-" fmla            z6.d, z30.d, z1.d[0]            \n\t"
-" fmla            z7.d, z31.d, z1.d[0]            \n\t"
-" fmla            z8.d, z30.d, z1.d[1]            \n\t"
-" fmla            z9.d, z31.d, z1.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #32]           \n\t" // row L column 4 and 5
-" ld1rqd          z1.d, p0/z, [x4, #48]           \n\t" // row L column 6 and 7
-" fmla            z10.d, z30.d, z0.d[0]           \n\t"
-" fmla            z11.d, z31.d, z0.d[0]           \n\t"
-" fmla            z12.d, z30.d, z0.d[1]           \n\t"
-" fmla            z13.d, z31.d, z0.d[1]           \n\t"
-" fmla            z14.d, z30.d, z1.d[0]           \n\t"
-" fmla            z15.d, z31.d, z1.d[0]           \n\t"
-" fmla            z16.d, z30.d, z1.d[1]           \n\t"
-" fmla            z17.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #64]           \n\t" // row L column 8 and 9
-" ld1rqd          z1.d, p0/z, [x4, #80]           \n\t" // row L column 10 and 11
-" fmla            z18.d, z30.d, z0.d[0]           \n\t"
-" fmla            z19.d, z31.d, z0.d[0]           \n\t"
-" fmla            z20.d, z30.d, z0.d[1]           \n\t"
-" fmla            z21.d, z31.d, z0.d[1]           \n\t"
-" fmla            z22.d, z30.d, z1.d[0]           \n\t"
-" fmla            z23.d, z31.d, z1.d[0]           \n\t"
-" fmla            z24.d, z30.d, z1.d[1]           \n\t"
-" fmla            z25.d, z31.d, z1.d[1]           \n\t"
+" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t"
+" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t"
+" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t"
+" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t"
+" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t"
+" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t"
+" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row L column 0 and 1
+" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row L column 2 and 3
+" fmla            z8.d, z30.d, z0.d[1]            \n\t"
+" fmla            z9.d, z31.d, z0.d[1]            \n\t"
+" fmla            z10.d, z30.d, z1.d[0]           \n\t"
+" fmla            z11.d, z31.d, z1.d[0]           \n\t"
+" fmla            z12.d, z30.d, z1.d[1]           \n\t"
+" fmla            z13.d, z31.d, z1.d[1]           \n\t"
+" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row L column 4 and 5
+" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row L column 6 and 7
+" fmla            z16.d, z30.d, z2.d[1]           \n\t"
+" fmla            z17.d, z31.d, z2.d[1]           \n\t"
+" fmla            z18.d, z30.d, z3.d[0]           \n\t"
+" fmla            z19.d, z31.d, z3.d[0]           \n\t"
+" fmla            z20.d, z30.d, z3.d[1]           \n\t"
+" fmla            z21.d, z31.d, z3.d[1]           \n\t"
+" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row L column 8 and 9
+" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row L column 10 and 11
+" fmla            z24.d, z30.d, z4.d[1]           \n\t"
+" fmla            z25.d, z31.d, z4.d[1]           \n\t"
+" fmla            z26.d, z30.d, z5.d[0]           \n\t"
+" fmla            z27.d, z31.d, z5.d[0]           \n\t"
+" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z29.d, z31.d, z5.d[1]           \n\t"
 "                                                 \n\t"
 " NEXT_ROW:                                       \n\t"
 " mov             x4, x16                         \n\t" // Move forward
@@ -247,12 +247,8 @@ __asm__ volatile (
 " cmp             x14, x15                        \n\t" // (R&)Write data back to C memory.
 " b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
-" fmul            z2.d, z2.d, z30.d               \n\t" // Non-unit alpha case.
-" fmul            z3.d, z3.d, z30.d               \n\t" // Scale all C change buffers.
-" fmul            z4.d, z4.d, z30.d               \n\t"
-" fmul            z5.d, z5.d, z30.d               \n\t"
-" fmul            z6.d, z6.d, z30.d               \n\t"
-" fmul            z7.d, z7.d, z30.d               \n\t"
+" fmul            z6.d, z6.d, z30.d               \n\t" // Non-unit alpha case.
+" fmul            z7.d, z7.d, z30.d               \n\t" // Scale all C change buffers.
 " fmul            z8.d, z8.d, z30.d               \n\t"
 " fmul            z9.d, z9.d, z30.d               \n\t"
 " fmul            z10.d, z10.d, z30.d             \n\t"
@@ -271,6 +267,10 @@ __asm__ volatile (
 " fmul            z23.d, z23.d, z30.d             \n\t"
 " fmul            z24.d, z24.d, z30.d             \n\t"
 " fmul            z25.d, z25.d, z30.d             \n\t"
+" fmul            z26.d, z26.d, z30.d             \n\t"
+" fmul            z27.d, z27.d, z30.d             \n\t"
+" fmul            z28.d, z28.d, z30.d             \n\t"
+" fmul            z29.d, z29.d, z30.d             \n\t"
 "                                                 \n\t"
 " UNIT_ALPHA:                                     \n\t" // Unit alpha case.
 " cmp             x20, #1                         \n\t"
@@ -282,29 +282,13 @@ __asm__ volatile (
 " madd            x16, x7, x12, x6                \n\t" // next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 0
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z2.d         \n\t"
-" fmad            z1.d, p1/m, z31.d, z3.d         \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 1
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z4.d         \n\t"
-" fmad            z1.d, p1/m, z31.d, z5.d         \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 2
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z6.d         \n\t"
 " fmad            z1.d, p1/m, z31.d, z7.d         \n\t"
 " st1d            z0.d, p0, [x6]                  \n\t"
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 3
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 1
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z8.d         \n\t"
 " fmad            z1.d, p1/m, z31.d, z9.d         \n\t"
@@ -312,7 +296,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 4
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 2
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z10.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z11.d        \n\t"
@@ -320,7 +304,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 5
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 3
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z12.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z13.d        \n\t"
@@ -328,7 +312,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 6
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 4
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z14.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z15.d        \n\t"
@@ -336,7 +320,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 7
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 5
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z16.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z17.d        \n\t"
@@ -344,7 +328,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 8
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 6
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z18.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z19.d        \n\t"
@@ -352,7 +336,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 9
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 7
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z20.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z21.d        \n\t"
@@ -360,7 +344,7 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 10
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 8
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z22.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z23.d        \n\t"
@@ -368,12 +352,29 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 11
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 9
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z24.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z25.d        \n\t"
 " st1d            z0.d, p0, [x6]                  \n\t"
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
+" mov             x6, x16                         \n\t" // move forward
+" madd            x16, x7, x12, x6                \n\t" // next column
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 10
+" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
+" fmad            z0.d, p0/m, z31.d, z26.d        \n\t"
+" fmad            z1.d, p1/m, z31.d, z27.d        \n\t"
+" st1d            z0.d, p0, [x6]                  \n\t"
+" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
+" mov             x6, x16                         \n\t" // move forward
+" madd            x16, x7, x12, x6                \n\t" // next column
+" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 11
+" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
+" fmad            z0.d, p0/m, z31.d, z28.d        \n\t"
+" fmad            z1.d, p1/m, z31.d, z29.d        \n\t"
+" st1d            z0.d, p0, [x6]                  \n\t"
+" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
+" mov             x6, x16                         \n\t" // move forward
 "                                                 \n\t"
 "                                                 \n\t"
 " b               END_WRITE_MEM                   \n\t"
@@ -388,29 +389,13 @@ __asm__ volatile (
 " add             x16, x17, x6                    \n\t"
 " ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 0
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
-" fmad            z0.d, p0/m, z31.d, z2.d         \n\t"
-" fmad            z0.d, p1/m, z31.d, z3.d         \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
-" madd            x6, x7, x12, x6                 \n\t"
-" add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 1
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
-" fmad            z0.d, p0/m, z31.d, z4.d         \n\t"
-" fmad            z0.d, p1/m, z31.d, z5.d         \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
-" madd            x6, x7, x12, x6                 \n\t"
-" add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 2
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z6.d         \n\t"
 " fmad            z0.d, p1/m, z31.d, z7.d         \n\t"
 " st1d            z0.d, p0, [x6, z30.d]           \n\t"
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 3
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 1
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z8.d         \n\t"
 " fmad            z0.d, p1/m, z31.d, z9.d         \n\t"
@@ -418,7 +403,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 4
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 2
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z10.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z11.d        \n\t"
@@ -426,7 +411,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 5
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 3
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z12.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z13.d        \n\t"
@@ -434,7 +419,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 6
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 4
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z14.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z15.d        \n\t"
@@ -442,7 +427,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 7
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 5
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z16.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z17.d        \n\t"
@@ -450,7 +435,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 8
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 6
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z18.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z19.d        \n\t"
@@ -458,7 +443,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 9
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 7
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z20.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z21.d        \n\t"
@@ -466,7 +451,7 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 10
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 8
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z22.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z23.d        \n\t"
@@ -474,12 +459,29 @@ __asm__ volatile (
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 11
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 9
 " ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
 " fmad            z0.d, p0/m, z31.d, z24.d        \n\t"
 " fmad            z0.d, p1/m, z31.d, z25.d        \n\t"
 " st1d            z0.d, p0, [x6, z30.d]           \n\t"
 " st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" madd            x6, x7, x12, x6                 \n\t"
+" add             x16, x17, x6                    \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 10
+" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" fmad            z0.d, p0/m, z31.d, z26.d        \n\t"
+" fmad            z0.d, p1/m, z31.d, z27.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d]           \n\t"
+" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" madd            x6, x7, x12, x6                 \n\t"
+" add             x16, x17, x6                    \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // column vector 11
+" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" fmad            z0.d, p0/m, z31.d, z28.d        \n\t"
+" fmad            z0.d, p1/m, z31.d, z29.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d]           \n\t"
+" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" madd            x6, x7, x12, x6                 \n\t"
 "                                                 \n\t"
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t" // End of computation.
