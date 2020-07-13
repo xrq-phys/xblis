@@ -66,8 +66,13 @@ void bli_dgemm_armsve512_asm_16x12
 
 __asm__ volatile (
 " mov             x9, #16                         \n\t" // Shape M, can be input
-" mov             x10, #12                        \n\t" // Shape N, fixed to be 12
+"                                                 \n\t" // Shape N is fixed to be 12
 " ldr             x8, %[k]                        \n\t" // Shape K to be contracted
+"                                                 \n\t"
+" ldr             x20, %[rs_c]                    \n\t" // Row-skip of C
+" ldr             x6, %[caddr]                    \n\t" // Load address of C
+" ldr             x7, %[cs_c]                     \n\t" // LdC, which is called column-skip in BLIS
+" cmp             x20, #1                         \n\t"
 "                                                 \n\t"
 " ldr             x0, %[alpha]                    \n\t" // Alpha address
 " ldr             x1, %[beta]                     \n\t" // Beta address
@@ -77,9 +82,55 @@ __asm__ volatile (
 " ldr             x4, %[baddr]                    \n\t" // Load address of B
 " mov             x5, #12                         \n\t" // LdB is 12 from packing, can be input
 "                                                 \n\t"
-" ldr             x6, %[caddr]                    \n\t" // Load address of C
-" ldr             x7, %[cs_c]                     \n\t" // LdC, which is called column-skip in BLIS
-" ldr             x20, %[rs_c]                    \n\t" // Row-skip
+" b.ne            NO_C_PRFM                       \n\t" // C cannot be effectively prefetched if 
+"                                                 \n\t" //   stored strided.
+"                                                 \n\t" // Registers occupied: X0-9, X20(=1)
+" mov             x10, #8                         \n\t" // Double in bytes, will be destroyed.
+" madd            x20, x7, x10, xzr               \n\t"
+"                                                 \n\t" // A64fx has 64KiB-4way L1 per core
+"                                                 \n\t" // Should be able to hold all 16Dx12=1.5KiB
+"                                                 \n\t"
+"                                                 \n\t" // C column 0 is x6
+" add             x11, x6, x20                    \n\t" // C column 1
+" add             x12, x11, x20                   \n\t" // C column 2
+" add             x13, x12, x20                   \n\t" // C column 3
+" add             x14, x13, x20                   \n\t" // C column 4
+" add             x15, x14, x20                   \n\t" // C column 5
+" prfm            PSTL1KEEP, [x6]                 \n\t" // Prefetch C column 0
+" prfm            PSTL1KEEP, [x6, #64]            \n\t"
+" prfm            PSTL1KEEP, [x11]                \n\t" // Prefetch C column 1
+" prfm            PSTL1KEEP, [x11,#64]            \n\t"
+" prfm            PSTL1KEEP, [x12]                \n\t" // Prefetch C column 2
+" prfm            PSTL1KEEP, [x12,#64]            \n\t"
+" prfm            PSTL1KEEP, [x13]                \n\t" // Prefetch C column 3
+" prfm            PSTL1KEEP, [x13,#64]            \n\t"
+" prfm            PSTL1KEEP, [x14]                \n\t" // Prefetch C column 4
+" prfm            PSTL1KEEP, [x14,#64]            \n\t"
+" prfm            PSTL1KEEP, [x15]                \n\t" // Prefetch C column 5
+" prfm            PSTL1KEEP, [x15,#64]            \n\t"
+"                                                 \n\t"
+" add             x10, x15, x20                   \n\t" // C column 6
+" add             x11, x10, x20                   \n\t" // C column 7
+" add             x12, x11, x20                   \n\t" // C column 8
+" add             x13, x12, x20                   \n\t" // C column 9
+" add             x14, x13, x20                   \n\t" // C column 10
+" add             x15, x14, x20                   \n\t" // C column 11
+" prfm            PSTL1KEEP, [x10]                \n\t" // Prefetch C column 6
+" prfm            PSTL1KEEP, [x10,#64]            \n\t"
+" prfm            PSTL1KEEP, [x11]                \n\t" // Prefetch C column 7
+" prfm            PSTL1KEEP, [x11,#64]            \n\t"
+" prfm            PSTL1KEEP, [x12]                \n\t" // Prefetch C column 8
+" prfm            PSTL1KEEP, [x12,#64]            \n\t"
+" prfm            PSTL1KEEP, [x13]                \n\t" // Prefetch C column 9
+" prfm            PSTL1KEEP, [x13,#64]            \n\t"
+" prfm            PSTL1KEEP, [x14]                \n\t" // Prefetch C column 10
+" prfm            PSTL1KEEP, [x14,#64]            \n\t"
+" prfm            PSTL1KEEP, [x15]                \n\t" // Prefetch C column 11
+" prfm            PSTL1KEEP, [x15,#64]            \n\t"
+"                                                 \n\t"
+" mov             x20, #1                         \n\t" // Restore X20.
+"                                                 \n\t"
+" NO_C_PRFM:                                      \n\t"
 "                                                 \n\t"
 " ldr             x18, %[a_next]                  \n\t" // Pointer to next A pack
 " ldr             x19, %[b_next]                  \n\t" // Pointer to next B pack
@@ -125,6 +176,7 @@ __asm__ volatile (
 " fmov            z23.d, p0/m, #0.0               \n\t"
 " fmov            z24.d, p0/m, #0.0               \n\t"
 " fmov            z25.d, p0/m, #0.0               \n\t"
+"                                                 \n\t"
 " K_LOOP:                                         \n\t"
 "                                                 \n\t" // Load columns from A.
 " ld1d            z30.d, p0/z, [x2]               \n\t"
@@ -139,7 +191,6 @@ __asm__ volatile (
 " prfm            PLDL1KEEP, [x16]                \n\t" // Prefetch next B column
 " prfm            PLDL1KEEP, [x16, #64]           \n\t" // Prefetch next B column
 "                                                 \n\t"
-" mov             x13, x10                        \n\t" // Counter, not used after size fixing.
 "                                                 \n\t" // Possible BUG:
 "                                                 \n\t" //  When N is odd and loop reaches end,
 "                                                 \n\t" //  one more doubleword could be loaded.
@@ -226,10 +277,9 @@ __asm__ volatile (
 " b.ne            CS_CCOL                         \n\t"
 "                                                 \n\t"
 " CT_CCOL:                                        \n\t" // Contiguous columns.
-"                                                 \n\t" // X10 counter no longer used.
+"                                                 \n\t" // X10=12 counter no longer used.
 "                                                 \n\t"
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 0
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z2.d         \n\t"
@@ -238,7 +288,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 1
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z4.d         \n\t"
@@ -247,7 +296,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 2
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z6.d         \n\t"
@@ -256,7 +304,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 3
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z8.d         \n\t"
@@ -265,7 +312,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 4
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z10.d        \n\t"
@@ -274,7 +320,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 5
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z12.d        \n\t"
@@ -283,7 +328,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 6
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z14.d        \n\t"
@@ -292,7 +336,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 7
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z16.d        \n\t"
@@ -301,7 +344,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 8
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z18.d        \n\t"
@@ -310,7 +352,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 9
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z20.d        \n\t"
@@ -319,7 +360,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 10
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z22.d        \n\t"
@@ -328,7 +368,6 @@ __asm__ volatile (
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
 " mov             x6, x16                         \n\t" // move forward
 " madd            x16, x7, x12, x6                \n\t" // next column
-" prfm            PSTL1KEEP, [x16]                \n\t" // prefetch next column
 " ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 11
 " ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
 " fmad            z0.d, p0/m, z31.d, z24.d        \n\t"
@@ -463,8 +502,8 @@ __asm__ volatile (
  [b_next] "m" (b_next)  // 9
 :// Register clobber list
  "x0","x1","x2","x3","x4","x5","x6","x7","x8",
- "x9","x10","x11","x12","x13","x14","x15",
- "x16","x17","x18","x19","x20","x21","x22","x23","x24","x25","x26","x27",
+ "x9",/*"x10,"*/"x11","x12","x14","x15",
+ "x16","x17","x18","x19","x20","x21",
  "z0","z1","z2","z3","z4","z5","z6","z7",
  "z8","z9","z10","z11","z12","z13","z14","z15",
  "z16","z17","z18","z19",
