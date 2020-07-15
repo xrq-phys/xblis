@@ -501,102 +501,124 @@ __asm__ volatile (
 " CT_CCOL:                                        \n\t" // Contiguous columns.
 "                                                 \n\t" // X10=12 counter no longer used.
 "                                                 \n\t"
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 0
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z6.d         \n\t"
-" fmad            z1.d, p1/m, z31.d, z7.d         \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
+"                                                 \n\t" // Update C[:, 0:2]
+"                                                 \n\t" // Z[0, 2, 4] = C[0:7,  0, 1, 2]
+"                                                 \n\t" // Z[1, 3, 5] = C[8:15, 0, 1, 2]
+"                                                 \n\t" // After Z[6-11] are used:
+"                                                 \n\t" // Z[6, 8, 10] = C[0:7,  3, 4, 5]
+"                                                 \n\t" // Z[7, 9, 11] = C[8:15, 3, 4, 5]
+"                                                 \n\t"
+" mov             x0, x6                          \n\t" // Clone address for R/W.
+" ld1d            z0.d, p0/z, [x0]                \n\t" // Read C[:, 0]
+" ld1d            z1.d, p1/z, [x0, x11, lsl #3]   \n\t"
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" ld1d            z2.d, p0/z, [x0]                \n\t" // Read C[:, 1]
+" ld1d            z3.d, p1/z, [x0, x11, lsl #3]   \n\t"
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" ld1d            z4.d, p0/z, [x0]                \n\t" // Read C[:, 2]
+" ld1d            z5.d, p1/z, [x0, x11, lsl #3]   \n\t"
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+"                                                 \n\t"
+" fmad            z0.d, p0/m, z31.d, z6.d         \n\t" // Z6 used
+" ld1d            z6.d, p0/z, [x0]                \n\t" // Read C[0:7, 3]
+" fmad            z1.d, p1/m, z31.d, z7.d         \n\t" // Z7 used
+" ld1d            z7.d, p1/z, [x0, x11, lsl #3]   \n\t" // Read C[8:15, 3]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" fmad            z2.d, p0/m, z31.d, z8.d         \n\t" // Z8 used
+" ld1d            z8.d, p0/z, [x0]                \n\t" // Read C[0:7, 4]
+" fmad            z3.d, p1/m, z31.d, z9.d         \n\t" // Z9 used
+" ld1d            z9.d, p1/z, [x0, x11, lsl #3]   \n\t" // Read C[8:15, 4]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" fmad            z4.d, p0/m, z31.d, z10.d        \n\t" // Z10 used
+" ld1d            z10.d, p0/z, [x0]               \n\t" // Read C[0:7, 5]
+" fmad            z5.d, p1/m, z31.d, z11.d        \n\t" // Z11 used
+" ld1d            z11.d, p1/z, [x0, x11, lsl #3]  \n\t" // Read C[8:15, 5]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+"                                                 \n\t"
+" st1d            z0.d, p0, [x6]                  \n\t" // Write C[:, 0]
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 1
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z8.d         \n\t"
-" fmad            z1.d, p1/m, z31.d, z9.d         \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 2
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z10.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z11.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 3
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z12.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z13.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 4
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z14.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z15.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 5
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z16.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z17.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 6
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z2.d, p0, [x6]                  \n\t" // Write C[:, 1]
+" st1d            z3.d, p1, [x6, x11, lsl #3]     \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z4.d, p0, [x6]                  \n\t" // Write C[:, 2]
+" st1d            z5.d, p1, [x6, x11, lsl #3]     \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+"                                                 \n\t"
+"                                                 \n\t" // After Z[0-5], Z[12-17] are used:
+"                                                 \n\t" // Z[0, 2, 4] = C[0:7,  6, 7, 8]
+"                                                 \n\t" // Z[1, 3, 5] = C[8:15, 6, 7, 8]
+"                                                 \n\t" // Z[12, 14, 16] = C[0:7,  9, 10, 11]
+"                                                 \n\t" // Z[13, 15, 17] = C[8:15, 9, 10, 11]
+"                                                 \n\t"
+" fmad            z6.d, p0/m, z31.d, z12.d        \n\t" // Z12 used
+" ld1d            z0.d, p0/z, [x0]                \n\t" // Read C[0:7, 6]
+" fmad            z7.d, p1/m, z31.d, z13.d        \n\t" // Z13 used
+" ld1d            z1.d, p1/z, [x0, x11, lsl #3]   \n\t" // Read C[8:15, 6]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" fmad            z8.d, p0/m, z31.d, z14.d        \n\t" // Z14 used
+" ld1d            z2.d, p0/z, [x0]                \n\t" // Read C[0:7, 7]
+" fmad            z9.d, p1/m, z31.d, z15.d        \n\t" // Z15 used
+" ld1d            z3.d, p1/z, [x0, x11, lsl #3]   \n\t" // Read C[8:15, 7]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" fmad            z10.d, p0/m, z31.d, z16.d       \n\t" // Z16 used
+" ld1d            z4.d, p0/z, [x0]                \n\t" // Read C[0:7, 8]
+" fmad            z11.d, p1/m, z31.d, z17.d       \n\t" // Z17 used
+" ld1d            z5.d, p1/z, [x0, x11, lsl #3]   \n\t" // Read C[8:15, 8]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+"                                                 \n\t"
+" st1d            z6.d, p0, [x6]                  \n\t" // Write C[0:7, 3]
+" ld1d            z12.d, p0/z, [x0]               \n\t" // Read C[0:7, 9]
+" st1d            z7.d, p1, [x6, x11, lsl #3]     \n\t" // Write C[8:15, 3]
+" ld1d            z13.d, p1/z, [x0, x11, lsl #3]  \n\t" // Read C[8:15, 9]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z8.d, p0, [x6]                  \n\t" // Write C[0:7, 4]
+" ld1d            z14.d, p0/z, [x0]               \n\t" // Read C[0:7, 10]
+" st1d            z9.d, p1, [x6, x11, lsl #3]     \n\t" // Write C[8:15, 4]
+" ld1d            z15.d, p1/z, [x0, x11, lsl #3]  \n\t" // Read C[8:15, 10]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z10.d, p0, [x6]                 \n\t" // Write C[0:7, 5]
+" ld1d            z16.d, p0/z, [x0]               \n\t" // Read C[0:7, 11]
+" st1d            z11.d, p1, [x6, x11, lsl #3]    \n\t" // Write C[8:15, 5]
+" ld1d            z17.d, p1/z, [x0, x11, lsl #3]  \n\t" // Read C[8:15, 11]
+" madd            x0, x7, x12, x0                 \n\t" // Next column
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+
 " fmad            z0.d, p0/m, z31.d, z18.d        \n\t"
 " fmad            z1.d, p1/m, z31.d, z19.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
+" fmad            z2.d, p0/m, z31.d, z20.d        \n\t"
+" fmad            z3.d, p1/m, z31.d, z21.d        \n\t"
+" fmad            z4.d, p0/m, z31.d, z22.d        \n\t"
+" fmad            z5.d, p1/m, z31.d, z23.d        \n\t"
+"                                                 \n\t"
+" fmad            z12.d, p0/m, z31.d, z24.d       \n\t"
+" fmad            z13.d, p1/m, z31.d, z25.d       \n\t"
+" fmad            z14.d, p0/m, z31.d, z26.d       \n\t"
+" fmad            z15.d, p1/m, z31.d, z27.d       \n\t"
+" fmad            z16.d, p0/m, z31.d, z28.d       \n\t"
+" fmad            z17.d, p1/m, z31.d, z29.d       \n\t"
+
+" st1d            z0.d, p0, [x6]                  \n\t" // Write C[:, 6]
 " st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 7
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z20.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z21.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 8
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z22.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z23.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 9
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z24.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z25.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 10
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z26.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z27.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
-" madd            x16, x7, x12, x6                \n\t" // next column
-" ld1d            z0.d, p0/z, [x6]                \n\t" // column vector 11
-" ld1d            z1.d, p1/z, [x6, x11, lsl #3]   \n\t"
-" fmad            z0.d, p0/m, z31.d, z28.d        \n\t"
-" fmad            z1.d, p1/m, z31.d, z29.d        \n\t"
-" st1d            z0.d, p0, [x6]                  \n\t"
-" st1d            z1.d, p1, [x6, x11, lsl #3]     \n\t"
-" mov             x6, x16                         \n\t" // move forward
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z2.d, p0, [x6]                  \n\t" // Write C[:, 7]
+" st1d            z3.d, p1, [x6, x11, lsl #3]     \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z4.d, p0, [x6]                  \n\t" // Write C[:, 8]
+" st1d            z5.d, p1, [x6, x11, lsl #3]     \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+"                                                 \n\t"
+" st1d            z12.d, p0, [x6]                 \n\t" // Write C[:, 9]
+" st1d            z13.d, p1, [x6, x11, lsl #3]    \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z14.d, p0, [x6]                 \n\t" // Write C[:, 10]
+" st1d            z15.d, p1, [x6, x11, lsl #3]    \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
+" st1d            z16.d, p0, [x6]                 \n\t" // Write C[:, 11]
+" st1d            z17.d, p1, [x6, x11, lsl #3]    \n\t"
+" madd            x6, x7, x12, x6                 \n\t" // Next column
 "                                                 \n\t"
 "                                                 \n\t"
 " b               END_WRITE_MEM                   \n\t"
