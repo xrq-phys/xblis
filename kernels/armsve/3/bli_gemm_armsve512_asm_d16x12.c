@@ -181,13 +181,13 @@ __asm__ volatile (
 " fmov            z17.d, p0/m, #0.0               \n\t"
 " fmov            z18.d, p0/m, #0.0               \n\t"
 "                                                 \n\t"
-" FIRST_BCOL:                                     \n\t" // Load of first column of B.
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t"
+" FIRST_BCOL:                                     \n\t" // Load B[0:5, 0].
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t"
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t"
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t"
 " FIRST_ACOL:                                     \n\t" // Load of first column of A.
 " ld1d            z30.d, p0/z, [x2]               \n\t"
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t"
@@ -209,76 +209,90 @@ __asm__ volatile (
 "                                                 \n\t"
 " K_MKER_LOOP:                                    \n\t" // Unroll the 4-loop.
 "                                                 \n\t"
-"                                                 \n\t" // [BEGIN] This block will be repeated 4 times
+"                                                 \n\t" // [MKER][BEGIN] This block will be repeated
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, j]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, j]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, j]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, j]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, j]
+"                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // Load the next Z0.
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // Load the next Z1.
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t" // Load the next Z2.
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t" // Load the next Z3.
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t" // Load the next Z4.
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
-"                                                 \n\t" // [END] This block will be repeated 4 times
+"                                                 \n\t" // [MKER][END] This block will be repeated
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, j]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, j]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, j]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, j]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, j]
+"                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // Load the next Z0.
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // Load the next Z1.
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t" // Load the next Z2.
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t" // Load the next Z3.
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t" // Load the next Z4.
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 "                                                 \n\t" // Before third replica,
@@ -295,38 +309,45 @@ __asm__ volatile (
 " prfm            PLDL1STRM, [x4, #320]           \n\t"
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, j]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, j]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, j]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, j]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, j]
+"                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // Load the next Z0.
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // Load the next Z1.
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t" // Load the next Z2.
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t" // Load the next Z3.
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t" // Load the next Z4.
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " sub             x10, x21, #1                    \n\t" // Before final replica, 
@@ -342,42 +363,49 @@ __asm__ volatile (
 " prfm            PLDL1STRM, [x4, #416]           \n\t"
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, j]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, j]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, j]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, j]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, j]
+"                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // Load the next Z0.
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // Load the next Z1.
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t" // Load the next Z2.
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t" // Load the next Z3.
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t" // Load the next Z4.
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
-"                                                 \n\t" // End of repeating.
-"                                                 \n\t"
+"                                                 \n\t" // [MKER]One more repeat for looping over
+"                                                 \n\t" //   non-mker k values.
 " subs            x21, x21, #1                    \n\t" // Decrease counter.
 " b.ne            K_MKER_LOOP                     \n\t"
 "                                                 \n\t"
@@ -387,39 +415,47 @@ __asm__ volatile (
 " b.eq            FIN_LOOP                        \n\t"
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, j]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, j]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, j]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, j]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, j]
+"                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" ld1rqd          z0.d, p0/z, [x4, #0]            \n\t" // Load the next Z0.
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" ld1rqd          z1.d, p0/z, [x4, #16]           \n\t" // Load the next Z1.
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" ld1rqd          z2.d, p0/z, [x4, #32]           \n\t" // Load the next Z2.
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" ld1rqd          z3.d, p0/z, [x4, #48]           \n\t" // Load the next Z3.
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" ld1rqd          z4.d, p0/z, [x4, #64]           \n\t" // Load the next Z4.
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
-" ld1rqd          z5.d, p0/z, [x4, #80]           \n\t" // Load the next Z5.
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
+"                                                 \n\t" // [MKER]End of repeating.
 "                                                 \n\t"
 " NEXT_ROW:                                       \n\t"
 " sub             x8, x8, #1                      \n\t"
@@ -428,31 +464,38 @@ __asm__ volatile (
 "                                                 \n\t"
 " FIN_LOOP:                                       \n\t" // Final K-loop
 "                                                 \n\t"
-"                                                 \n\t" // Final A & B are already loaded.
-" fmla            z6.d, z30.d, z0.d[0]            \n\t" // Row 1:8 column 0 and 1
-" fmla            z8.d, z30.d, z0.d[1]            \n\t"
-" fmla            z10.d, z30.d, z1.d[0]           \n\t" // Row 1:8 column 2 and 3
-" fmla            z12.d, z30.d, z1.d[1]           \n\t"
-" fmla            z14.d, z30.d, z2.d[0]           \n\t" // Row 1:8 column 4 and 5
-" fmla            z16.d, z30.d, z2.d[1]           \n\t"
-" fmla            z18.d, z30.d, z3.d[0]           \n\t" // Row 1:8 column 6 and 7
-" fmla            z20.d, z30.d, z3.d[1]           \n\t"
-" fmla            z22.d, z30.d, z4.d[0]           \n\t" // Row 1:8 column 8 and 9
-" fmla            z24.d, z30.d, z4.d[1]           \n\t"
-" fmla            z26.d, z30.d, z5.d[0]           \n\t" // Row 1:8 column 10 and 11
-" fmla            z28.d, z30.d, z5.d[1]           \n\t"
-" fmla            z7.d, z31.d, z0.d[0]            \n\t" // Row 9:15 column 0 and 1
-" fmla            z9.d, z31.d, z0.d[1]            \n\t"
-" fmla            z11.d, z31.d, z1.d[0]           \n\t" // Row 9:15 column 2 and 3
-" fmla            z13.d, z31.d, z1.d[1]           \n\t"
-" fmla            z15.d, z31.d, z2.d[0]           \n\t" // Row 9:15 column 4 and 5
-" fmla            z17.d, z31.d, z2.d[1]           \n\t"
-" fmla            z19.d, z31.d, z3.d[0]           \n\t" // Row 9:15 column 6 and 7
-" fmla            z21.d, z31.d, z3.d[1]           \n\t"
-" fmla            z23.d, z31.d, z4.d[0]           \n\t" // Row 9:15 column 8 and 9
-" fmla            z25.d, z31.d, z4.d[1]           \n\t"
-" fmla            z27.d, z31.d, z5.d[0]           \n\t" // Row 9:15 column 10 and 11
-" fmla            z29.d, z31.d, z5.d[1]           \n\t"
+"                                                 \n\t" // Final A & B[0:5, end] are already loaded
+" fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
+" fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
+" fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
+" fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
+" ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, end]
+" fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
+" ld1rd           z1.d, p0/z, [x4, #56]           \n\t" // Load B[7, end]
+" fmla            z11.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 2 and 3
+" ld1rd           z2.d, p0/z, [x4, #64]           \n\t" // Load B[8, end]
+" fmla            z13.d, p0/m, z31.d, z3.d        \n\t"
+" ld1rd           z3.d, p0/z, [x4, #72]           \n\t" // Load B[9, end]
+" fmla            z15.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 4 and 5
+" ld1rd           z4.d, p0/z, [x4, #80]           \n\t" // Load B[10, end]
+" fmla            z17.d, p0/m, z31.d, z5.d        \n\t"
+" ld1rd           z5.d, p0/z, [x4, #88]           \n\t" // Load B[11, end]
+"                                                 \n\t"
+" fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
+" fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
+" fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
+" fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
+" fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
+" fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
+" fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
+" fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
+" fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
 "                                                 \n\t"
 " WRITE_MEM:                                      \n\t"
 "                                                 \n\t" // Override A and B buffers:
@@ -463,8 +506,31 @@ __asm__ volatile (
 " ld1rd           z30.d, p0/z, [x0]               \n\t" // Alpha, to the vector.
 " ld1rd           z31.d, p0/z, [x1]               \n\t" // Beta, to the vector.
 "                                                 \n\t"
-" prfm            PLDL2KEEP, [x18]                \n\t" // Prefetch next A and B.
+" ldr             x21, %[k_mker]                  \n\t" // Load number of K again for prefetching.
+" mov             x12, #32                        \n\t" // K_micro * double in bytes.
+"                                                 \n\t"
+" PRFM_NEXT:                                      \n\t" // Prefetch next A and B.
+" prfm            PLDL2KEEP, [x18]                \n\t"
+" prfm            PLDL2KEEP, [x18, #64]           \n\t"
+" prfm            PLDL2KEEP, [x18, #128]          \n\t"
+" prfm            PLDL2KEEP, [x18, #192]          \n\t"
+" prfm            PLDL2KEEP, [x18, #256]          \n\t"
+" prfm            PLDL2KEEP, [x18, #320]          \n\t"
+" prfm            PLDL2KEEP, [x18, #384]          \n\t"
+" prfm            PLDL2KEEP, [x18, #512]          \n\t"
 " prfm            PLDL2KEEP, [x19]                \n\t"
+" prfm            PLDL2KEEP, [x19, #64]           \n\t"
+" prfm            PLDL2KEEP, [x19, #128]          \n\t"
+" prfm            PLDL2KEEP, [x19, #256]          \n\t"
+" prfm            PLDL2KEEP, [x19, #320]          \n\t"
+" prfm            PLDL2KEEP, [x19, #384]          \n\t"
+"                                                 \n\t"
+" subs            x21, x21, #1                    \n\t"
+" madd            x18, x3, x12, x18               \n\t"
+" madd            x19, x5, x12, x19               \n\t"
+" b.ne            PRFM_NEXT                       \n\t"
+"                                                 \n\t"
+" mov             x12, #8                         \n\t" // Restore x12 to double in bytes.
 "                                                 \n\t"
 " cmp             x14, x15                        \n\t" // (R&)Write data back to C memory.
 " b.eq            UNIT_ALPHA                      \n\t"
