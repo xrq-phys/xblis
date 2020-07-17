@@ -41,6 +41,8 @@
    o Tested on armie for SVE.
    x To be tested & benchmarked on A64fx.
    x Gather-load / Scatter-store is not optimized.
+   ! This kernel is spetialized for A64fx. 
+   ! Suggested to be separated to kernel/a64fx before pull request.
 
    July 2020.
 */
