@@ -90,6 +90,12 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
+                    if ( k > 8 )
+                    {
+                        svprfd( all_active, alpha1 + lda * 8, SV_PLDL2STRM );
+                        svprfd( all_active, alpha1 + lda * 8 + 8 * inca, SV_PLDL2STRM );
+                    }
+
                     // svld1_f64 retrieves all zero's into z_a0 and z_a8,
                     //   which is not correct.
                     //   qemu-aarch64 or gcc interpretation of svld1_f64
@@ -142,6 +148,12 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
+                    if ( k > 8 )
+                    {
+                        svprfd( all_active, alpha1 + lda * 8, SV_PLDL2STRM );
+                        svprfd( all_active, alpha1 + lda * 8 + 8 * inca, SV_PLDL2STRM );
+                    }
+
                     // load 16 continuous elments from *a
                     z_a0 = svld1_f64( all_active, alpha1 );
                     z_a8 = svld1_vnum_f64( all_active, alpha1, 1 );
