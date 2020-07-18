@@ -143,6 +143,9 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_ARMSVE
 	id = BLIS_ARCH_ARMSVE;
 #endif
+#ifdef BLIS_FAMILY_A64FX
+	id = BLIS_ARCH_A64FX;
+#endif
 #ifdef BLIS_FAMILY_CORTEXA15
 	id = BLIS_ARCH_CORTEXA15;
 #endif
@@ -200,6 +203,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa57",
     "cortexa53",
     "armsve",
+    "a64fx",
     "cortexa15",
     "cortexa9",
 
