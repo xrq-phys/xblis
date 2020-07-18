@@ -87,13 +87,11 @@ __asm__ volatile (
 " ldr             x4, %[baddr]                    \n\t" // Load address of B
 " mov             x5, #12                         \n\t" // LdB is 12 from packing, can be input
 "                                                 \n\t"
-" b.ne            NO_C_PRFM                       \n\t" // C cannot be effectively prefetched if 
+" b.ne            NO_C_PRFML2                     \n\t" // C cannot be prefetched with PRFM if
 "                                                 \n\t" //   stored strided.
 "                                                 \n\t" // Registers occupied: X0-9, X20(=1), X21
 " mov             x10, #8                         \n\t" // Double in bytes, will be destroyed.
 " madd            x20, x7, x10, xzr               \n\t"
-"                                                 \n\t" // A64fx has 64KiB-4way L1 per core
-"                                                 \n\t" // Should be able to hold all 16Dx12=1.5KiB
 "                                                 \n\t"
 "                                                 \n\t" // C column 0 is x6
 " add             x11, x6, x20                    \n\t" // C column 1
@@ -101,18 +99,18 @@ __asm__ volatile (
 " add             x13, x12, x20                   \n\t" // C column 3
 " add             x14, x13, x20                   \n\t" // C column 4
 " add             x15, x14, x20                   \n\t" // C column 5
-" prfm            PSTL1KEEP, [x6]                 \n\t" // Prefetch C column 0
-" prfm            PSTL1KEEP, [x6, #64]            \n\t"
-" prfm            PSTL1KEEP, [x11]                \n\t" // Prefetch C column 1
-" prfm            PSTL1KEEP, [x11,#64]            \n\t"
-" prfm            PSTL1KEEP, [x12]                \n\t" // Prefetch C column 2
-" prfm            PSTL1KEEP, [x12,#64]            \n\t"
-" prfm            PSTL1KEEP, [x13]                \n\t" // Prefetch C column 3
-" prfm            PSTL1KEEP, [x13,#64]            \n\t"
-" prfm            PSTL1KEEP, [x14]                \n\t" // Prefetch C column 4
-" prfm            PSTL1KEEP, [x14,#64]            \n\t"
-" prfm            PSTL1KEEP, [x15]                \n\t" // Prefetch C column 5
-" prfm            PSTL1KEEP, [x15,#64]            \n\t"
+" prfm            PSTL2STRM, [x6]                 \n\t" // Prefetch C column 0
+" prfm            PSTL2STRM, [x6, #64]            \n\t"
+" prfm            PSTL2STRM, [x11]                \n\t" // Prefetch C column 1
+" prfm            PSTL2STRM, [x11,#64]            \n\t"
+" prfm            PSTL2STRM, [x12]                \n\t" // Prefetch C column 2
+" prfm            PSTL2STRM, [x12,#64]            \n\t"
+" prfm            PSTL2STRM, [x13]                \n\t" // Prefetch C column 3
+" prfm            PSTL2STRM, [x13,#64]            \n\t"
+" prfm            PSTL2STRM, [x14]                \n\t" // Prefetch C column 4
+" prfm            PSTL2STRM, [x14,#64]            \n\t"
+" prfm            PSTL2STRM, [x15]                \n\t" // Prefetch C column 5
+" prfm            PSTL2STRM, [x15,#64]            \n\t"
 "                                                 \n\t"
 " add             x10, x15, x20                   \n\t" // C column 6
 " add             x11, x10, x20                   \n\t" // C column 7
@@ -120,22 +118,22 @@ __asm__ volatile (
 " add             x13, x12, x20                   \n\t" // C column 9
 " add             x14, x13, x20                   \n\t" // C column 10
 " add             x15, x14, x20                   \n\t" // C column 11
-" prfm            PSTL1KEEP, [x10]                \n\t" // Prefetch C column 6
-" prfm            PSTL1KEEP, [x10,#64]            \n\t"
-" prfm            PSTL1KEEP, [x11]                \n\t" // Prefetch C column 7
-" prfm            PSTL1KEEP, [x11,#64]            \n\t"
-" prfm            PSTL1KEEP, [x12]                \n\t" // Prefetch C column 8
-" prfm            PSTL1KEEP, [x12,#64]            \n\t"
-" prfm            PSTL1KEEP, [x13]                \n\t" // Prefetch C column 9
-" prfm            PSTL1KEEP, [x13,#64]            \n\t"
-" prfm            PSTL1KEEP, [x14]                \n\t" // Prefetch C column 10
-" prfm            PSTL1KEEP, [x14,#64]            \n\t"
-" prfm            PSTL1KEEP, [x15]                \n\t" // Prefetch C column 11
-" prfm            PSTL1KEEP, [x15,#64]            \n\t"
+" prfm            PSTL2STRM, [x10]                \n\t" // Prefetch C column 6
+" prfm            PSTL2STRM, [x10,#64]            \n\t"
+" prfm            PSTL2STRM, [x11]                \n\t" // Prefetch C column 7
+" prfm            PSTL2STRM, [x11,#64]            \n\t"
+" prfm            PSTL2STRM, [x12]                \n\t" // Prefetch C column 8
+" prfm            PSTL2STRM, [x12,#64]            \n\t"
+" prfm            PSTL2STRM, [x13]                \n\t" // Prefetch C column 9
+" prfm            PSTL2STRM, [x13,#64]            \n\t"
+" prfm            PSTL2STRM, [x14]                \n\t" // Prefetch C column 10
+" prfm            PSTL2STRM, [x14,#64]            \n\t"
+" prfm            PSTL2STRM, [x15]                \n\t" // Prefetch C column 11
+" prfm            PSTL2STRM, [x15,#64]            \n\t"
 "                                                 \n\t"
 " mov             x20, #1                         \n\t" // Restore X20.
 "                                                 \n\t"
-" NO_C_PRFM:                                      \n\t"
+" NO_C_PRFML2:                                    \n\t"
 "                                                 \n\t"
 " ldr             x18, %[a_next]                  \n\t" // Pointer to next A pack
 " ldr             x19, %[b_next]                  \n\t" // Pointer to next B pack
@@ -182,6 +180,13 @@ __asm__ volatile (
 " fmov            z16.d, p0/m, #0.0               \n\t"
 " fmov            z17.d, p0/m, #0.0               \n\t"
 " fmov            z18.d, p0/m, #0.0               \n\t"
+" fmov            z19.d, p0/m, #0.0               \n\t"
+" fmov            z20.d, p0/m, #0.0               \n\t"
+" fmov            z21.d, p0/m, #0.0               \n\t"
+" fmov            z22.d, p0/m, #0.0               \n\t"
+" fmov            z23.d, p0/m, #0.0               \n\t"
+" fmov            z24.d, p0/m, #0.0               \n\t"
+" fmov            z25.d, p0/m, #0.0               \n\t"
 "                                                 \n\t"
 " FIRST_BCOL:                                     \n\t" // Load B[0:5, 0].
 " ld1rd           z0.d, p0/z, [x4, #0]            \n\t"
@@ -194,13 +199,6 @@ __asm__ volatile (
 " ld1d            z30.d, p0/z, [x2]               \n\t"
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t"
 "                                                 \n\t"
-" fmov            z19.d, p0/m, #0.0               \n\t"
-" fmov            z20.d, p0/m, #0.0               \n\t"
-" fmov            z21.d, p0/m, #0.0               \n\t"
-" fmov            z22.d, p0/m, #0.0               \n\t"
-" fmov            z23.d, p0/m, #0.0               \n\t"
-" fmov            z24.d, p0/m, #0.0               \n\t"
-" fmov            z25.d, p0/m, #0.0               \n\t"
 " fmov            z26.d, p0/m, #0.0               \n\t"
 " fmov            z27.d, p0/m, #0.0               \n\t"
 " fmov            z28.d, p0/m, #0.0               \n\t"
@@ -532,6 +530,57 @@ __asm__ volatile (
 " b.ne            PRFM_NEXT                       \n\t"
 "                                                 \n\t"
 " mov             x12, #8                         \n\t" // Restore x12 to double in bytes.
+"                                                 \n\t"
+" cmp             x20, #1                         \n\t"
+" b.ne            NO_C_PRFM                       \n\t" // C cannot be prefetched with PRFM if
+"                                                 \n\t" //   stored strided.
+"                                                 \n\t" // TODO: Prefetch strided w/ PRFD.
+" madd            x20, x7, x12, xzr               \n\t"
+"                                                 \n\t" // A64fx has 64KiB-4way L1 per core
+"                                                 \n\t" // Should be able to hold all 16Dx12=1.5KiB
+"                                                 \n\t" // TODO: Move to end of program.
+" mov             x12, x6                         \n\t" // C column 0 is x6
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 0
+" prfm            PSTL1STRM, [x12, #64]           \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 1
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 2
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 3
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 4
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 5
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 6
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 7
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 8
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 9
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 10
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+" add             x12, x12, x20                   \n\t" // C column forward
+" prfm            PSTL1STRM, [x12]                \n\t" // Prefetch C column 11
+" prfm            PSTL1STRM, [x12,#64]            \n\t"
+"                                                 \n\t"
+" mov             x20, #1                         \n\t" // Restore X20.
+" mov             x12, #8                         \n\t" // Restore X12.
+"                                                 \n\t"
+" NO_C_PRFM:                                      \n\t"
+"                                                 \n\t"
 "                                                 \n\t"
 " cmp             x14, x15                        \n\t" // (R&)Write data back to C memory.
 " b.eq            UNIT_ALPHA                      \n\t"
