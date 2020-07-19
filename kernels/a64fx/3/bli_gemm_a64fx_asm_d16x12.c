@@ -216,17 +216,17 @@ __asm__ volatile (
 "                                                 \n\t" // [MKER][BEGIN] This block will be repeated
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
-" prfm            PLDL1STRM, [x2, #384]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #384]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
-" prfm            PLDL1STRM, [x2, #448]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #448]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
-" prfm            PLDL1STRM, [x2, #512]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #512]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
-" prfm            PLDL1STRM, [x2, #576]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #576]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
-" prfm            PLDL1STRM, [x2, #640]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #640]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
-" prfm            PLDL1STRM, [x2, #704]           \n\t" // [NO_PREFETCH] Prefetch A
+" prfm            PLDL1STRM, [x2, #704]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
 " ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
 " fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
@@ -242,13 +242,11 @@ __asm__ volatile (
 "                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
 " fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
-" prfm            PLDL1STRM, [x4, #288]           \n\t" // [NO_PREFETCH] Prefetch B
+" prfm            PLDL1STRM, [x2, #768]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
-" prfm            PLDL1STRM, [x4, #352]           \n\t" // [NO_PREFETCH] Prefetch B
+" prfm            PLDL1STRM, [x2, #832]           \n\t" // [NO_REPEAT] Prefetch A
 " fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
-" prfm            PLDL1STRM, [x4, #416]           \n\t" // [NO_PREFETCH] Prefetch B
 " fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
-" prfm            PLDL1STRM, [x4, #480]           \n\t" // [NO_PREFETCH] Prefetch B
 " fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
@@ -269,15 +267,14 @@ __asm__ volatile (
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
-" prfm            PLDL1STRM, [x2, #640]           \n\t" // [NO_PREFETCH] Prefetch A
 " fmla            z8.d, p0/m, z30.d, z1.d         \n\t"
-" prfm            PLDL1STRM, [x2, #704]           \n\t" // [NO_PREFETCH] Prefetch A
 " fmla            z10.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 2 and 3
-" prfm            PLDL1STRM, [x4, #544]           \n\t" // [NO_PREFETCH] Prefetch B
 " fmla            z12.d, p0/m, z30.d, z3.d        \n\t"
-" prfm            PLDL1STRM, [x4, #608]           \n\t" // [NO_PREFETCH] Prefetch B
+" prfm            PLDL1STRM, [x4, #288]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z14.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 4 and 5
+" prfm            PLDL1STRM, [x4, #352]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z16.d, p0/m, z30.d, z5.d        \n\t"
+" prfm            PLDL1STRM, [x4, #416]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z7.d, p0/m, z31.d, z0.d         \n\t" // Row 9:15 column 0 and 1
 " ld1rd           z0.d, p0/z, [x4, #48]           \n\t" // Load B[6, j]
 " fmla            z9.d, p0/m, z31.d, z1.d         \n\t"
@@ -293,8 +290,11 @@ __asm__ volatile (
 "                                                 \n\t"
 " madd            x4, x5, x12, x4                 \n\t" // B address forward
 " fmla            z18.d, p0/m, z30.d, z0.d        \n\t" // Row 1:8 column 6 and 7
+" prfm            PLDL1STRM, [x4, #384]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z20.d, p0/m, z30.d, z1.d        \n\t"
+" prfm            PLDL1STRM, [x4, #448]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z22.d, p0/m, z30.d, z2.d        \n\t" // Row 1:8 column 8 and 9
+" prfm            PLDL1STRM, [x4, #512]           \n\t" // [NO_REPEAT] Prefetch B
 " fmla            z24.d, p0/m, z30.d, z3.d        \n\t"
 " fmla            z26.d, p0/m, z30.d, z4.d        \n\t" // Row 1:8 column 10 and 11
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
@@ -361,7 +361,7 @@ __asm__ volatile (
 " ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
-" sub             x10, x21, #1                    \n\t" // Before final replica, 
+" sub             x10, x21, #1                    \n\t" // Before final replica,
 " adds            x10, x10, x8                    \n\t" //  check if this iteration is final
 " b.eq            FIN_LOOP                        \n\t"
 "                                                 \n\t"
@@ -509,31 +509,11 @@ __asm__ volatile (
 " ld1rd           z30.d, p0/z, [x0]               \n\t" // Alpha, to the vector.
 " ld1rd           z31.d, p0/z, [x1]               \n\t" // Beta, to the vector.
 "                                                 \n\t"
-" ldr             x21, %[k_mker]                  \n\t" // Load number of K again for prefetching.
-" mov             x12, #32                        \n\t" // K_micro * double in bytes.
-"                                                 \n\t"
 " PRFM_NEXT:                                      \n\t" // Prefetch next A and B.
-" prfm            PLDL2STRM, [x18]                \n\t"
-" prfm            PLDL2STRM, [x18, #64]           \n\t"
-" prfm            PLDL2STRM, [x18, #128]          \n\t"
-" prfm            PLDL2STRM, [x18, #192]          \n\t"
-" prfm            PLDL2STRM, [x18, #256]          \n\t"
-" prfm            PLDL2STRM, [x18, #320]          \n\t"
-" prfm            PLDL2STRM, [x18, #384]          \n\t"
-" prfm            PLDL2STRM, [x18, #512]          \n\t"
+" prfm            PLDL2STRM, [x18]                \n\t" // Prefetch 2 panels to
+" prfm            PLDL2STRM, [x18, #64]           \n\t" //   "confirm" the stream prefetcher.
 " prfm            PLDL2STRM, [x19]                \n\t"
 " prfm            PLDL2STRM, [x19, #64]           \n\t"
-" prfm            PLDL2STRM, [x19, #128]          \n\t"
-" prfm            PLDL2STRM, [x19, #256]          \n\t"
-" prfm            PLDL2STRM, [x19, #320]          \n\t"
-" prfm            PLDL2STRM, [x19, #384]          \n\t"
-"                                                 \n\t"
-" subs            x21, x21, #1                    \n\t"
-" madd            x18, x3, x12, x18               \n\t"
-" madd            x19, x5, x12, x19               \n\t"
-" b.ne            PRFM_NEXT                       \n\t"
-"                                                 \n\t"
-" mov             x12, #8                         \n\t" // Restore x12 to double in bytes.
 "                                                 \n\t"
 " cmp             x20, #1                         \n\t"
 " b.ne            NO_C_PRFM                       \n\t" // C cannot be prefetched with PRFM if
