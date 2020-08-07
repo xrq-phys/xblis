@@ -32,48 +32,53 @@
 
 */
 
-#ifndef BLIS_THRCOMM_SINGLE_H
-#define BLIS_THRCOMM_SINGLE_H
+#include "blis.h"
 
-// Define thrcomm_t for situations when multithreading is disabled.
-#ifndef BLIS_ENABLE_MULTITHREADING 
-
-//thread communicators may be implementation dependent
-#ifdef BLIS_TREE_BARRIER
-struct barrier_s
-{   
-	int               arity;
-	int               count;
-	struct barrier_s* dad;
-	int               signal;
-};  
-typedef struct barrier_s barrier_t;
-
-struct thrcomm_s
-{   
-	void*       sent_object;
-	dim_t       n_threads;
-	barrier_t** barriers;
-}; 
-#else
-struct thrcomm_s
+cntl_t* blx_packm_cntl_create_node
+     (
+	   rntm_t*   rntm,
+       void_fp   var_func,
+       void_fp   packm_var_func,
+       bszid_t   bmid_m,
+       bszid_t   bmid_n,
+       bool_t    does_invert_diag,
+       bool_t    rev_iter_if_upper,
+       bool_t    rev_iter_if_lower,
+       pack_t    pack_schema,
+       packbuf_t pack_buf_type,
+       cntl_t*   sub_node
+     )
 {
-	void*   sent_object;
-	dim_t   n_threads;
+	cntl_t*         cntl;
+	packm_params_t* params;
 
-	// NOTE: barrier_sense was originally a bool_t, but upon redefining bool_t
-	// as bool we discovered that some gcc __atomic built-ins don't allow the
-	// use of bool for the variables being operated upon. (Specifically, this
-	// was observed of __atomic_fetch_xor(), but it likely applies to all other
-	// related built-ins.) Thus, we get around this by redefining barrier_sense
-	// as a gint_t.
-	gint_t  barrier_sense;
-	dim_t   barrier_threads_arrived;
-};
-#endif
-typedef struct thrcomm_s thrcomm_t;
+	// Allocate a packm_params_t struct.
+	params = bli_malloc_intl( sizeof( packm_params_t ) );
 
-#endif
+	// Initialize the packm_params_t struct.
+	params->size              = sizeof( packm_params_t );
+	params->var_func          = packm_var_func;
+	params->bmid_m            = bmid_m;
+	params->bmid_n            = bmid_n;
+	params->does_invert_diag  = does_invert_diag;
+	params->rev_iter_if_upper = rev_iter_if_upper;
+	params->rev_iter_if_lower = rev_iter_if_lower;
+	params->pack_schema       = pack_schema;
+	params->pack_buf_type     = pack_buf_type;
 
-#endif
+	// It's important that we set the bszid field to BLIS_NO_PART to indicate
+	// that no blocksize partitioning is performed. bli_cntl_free() will rely
+	// on this information to know how to step through the thrinfo_t tree in
+	// sync with the cntl_t tree.
+	cntl = bli_cntl_create_node
+	(
+	  BLIS_NOID,
+	  BLIS_NO_PART,
+	  var_func,
+	  params,
+	  sub_node
+	);
+
+	return cntl;
+}
 
