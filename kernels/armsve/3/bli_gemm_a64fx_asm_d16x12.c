@@ -91,19 +91,17 @@ __asm__ volatile (
 " ldr             x4, %[baddr]                    \n\t" // Load address of B
 " mov             x5, #12                         \n\t" // LdB is 12 from packing, can be input
 "                                                 \n\t"
-" b.ne            NO_C_PRFML2                     \n\t" // C cannot be prefetched with PRFM if
-"                                                 \n\t" //   stored strided.
-"                                                 \n\t" // TODO: Prefetch strided w/ PRFD.
-"                                                 \n\t" // Registers occupied: X0-9, X20(=1), X21
+" b.ne            C_PRFML2_STRIDED                \n\t"
+"                                                 \n\t" // Registers occupied: X0-9, X20, X21
 " mov             x10, #8                         \n\t" // Double in bytes, will be destroyed.
-" madd            x20, x7, x10, xzr               \n\t"
+" madd            x22, x7, x10, xzr               \n\t"
 "                                                 \n\t"
 "                                                 \n\t" // C column 0 is x6
-" add             x11, x6, x20                    \n\t" // C column 1
-" add             x12, x11, x20                   \n\t" // C column 2
-" add             x13, x12, x20                   \n\t" // C column 3
-" add             x14, x13, x20                   \n\t" // C column 4
-" add             x15, x14, x20                   \n\t" // C column 5
+" add             x11, x6, x22                    \n\t" // C column 1
+" add             x12, x11, x22                   \n\t" // C column 2
+" add             x13, x12, x22                   \n\t" // C column 3
+" add             x14, x13, x22                   \n\t" // C column 4
+" add             x15, x14, x22                   \n\t" // C column 5
 " prfm            PSTL2STRM, [x6]                 \n\t" // Prefetch C column 0
 " prfm            PSTL2STRM, [x6, #64]            \n\t"
 " prfm            PSTL2STRM, [x11]                \n\t" // Prefetch C column 1
@@ -117,12 +115,12 @@ __asm__ volatile (
 " prfm            PSTL2STRM, [x15]                \n\t" // Prefetch C column 5
 " prfm            PSTL2STRM, [x15,#64]            \n\t"
 "                                                 \n\t"
-" add             x10, x15, x20                   \n\t" // C column 6
-" add             x11, x10, x20                   \n\t" // C column 7
-" add             x12, x11, x20                   \n\t" // C column 8
-" add             x13, x12, x20                   \n\t" // C column 9
-" add             x14, x13, x20                   \n\t" // C column 10
-" add             x15, x14, x20                   \n\t" // C column 11
+" add             x10, x15, x22                   \n\t" // C column 6
+" add             x11, x10, x22                   \n\t" // C column 7
+" add             x12, x11, x22                   \n\t" // C column 8
+" add             x13, x12, x22                   \n\t" // C column 9
+" add             x14, x13, x22                   \n\t" // C column 10
+" add             x15, x14, x22                   \n\t" // C column 11
 " prfm            PSTL2STRM, [x10]                \n\t" // Prefetch C column 6
 " prfm            PSTL2STRM, [x10,#64]            \n\t"
 " prfm            PSTL2STRM, [x11]                \n\t" // Prefetch C column 7
@@ -136,9 +134,75 @@ __asm__ volatile (
 " prfm            PSTL2STRM, [x15]                \n\t" // Prefetch C column 11
 " prfm            PSTL2STRM, [x15,#64]            \n\t"
 "                                                 \n\t"
-" mov             x20, #1                         \n\t" // Restore X20.
+" b               END_C_PRFML2                    \n\t"
 "                                                 \n\t"
-" NO_C_PRFML2:                                    \n\t"
+" C_PRFML2_STRIDED:                               \n\t"
+"                                                 \n\t" // TODO: Prefetch strided w/ PRFD.
+" mov             x10, #8                         \n\t" // Double in bytes, will be destroyed.
+"                                                 \n\t" //  == vector length in doubles.
+" madd            x23, x20, x10, xzr              \n\t" // Column stride in bytes
+" madd            x23, x23, x10, xzr              \n\t" // Vector length in memory
+" madd            x22, x7, x10, xzr               \n\t"
+" ptrue           p0.d, all                       \n\t"
+"                                                 \n\t"
+"                                                 \n\t" // Z30: index for prefetching C columns.
+" index           z30.d, xzr, x20                 \n\t" // Generate indices.
+"                                                 \n\t"
+"                                                 \n\t" // 0:7  Column 0 is X6
+" add             x11, x6, x23                    \n\t" // 8:16 Column 0
+" add             x12, x6, x22                    \n\t" // 0:7  Column 1
+" add             x13, x12, x23                   \n\t" // 8:16 Column 1
+" add             x14, x12, x22                   \n\t" // 0:7  Column 2
+" add             x15, x14, x23                   \n\t" // 8:16 Column 2
+" prfd        PSTL2STRM, p0, [x6, z30.d, lsl #3]  \n\t" // Prefetch C column 0
+" prfd        PSTL2STRM, p0, [x11, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x12, z30.d, lsl #3] \n\t" // Prefetch C column 1
+" prfd        PSTL2STRM, p0, [x13, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x14, z30.d, lsl #3] \n\t" // Prefetch C column 2
+" prfd        PSTL2STRM, p0, [x15, z30.d, lsl #3] \n\t"
+"                                                 \n\t"
+" add             x10, x14, x22                   \n\t" // 0:7  Column 3
+" add             x11, x10, x23                   \n\t" // 8:16 Column 3
+" add             x12, x10, x22                   \n\t" // 0:7  Column 4
+" add             x13, x12, x23                   \n\t" // 8:16 Column 4
+" add             x14, x12, x22                   \n\t" // 0:7  Column 5
+" add             x15, x14, x23                   \n\t" // 8:16 Column 5
+" prfd        PSTL2STRM, p0, [x10, z30.d, lsl #3] \n\t" // Prefetch C column 3
+" prfd        PSTL2STRM, p0, [x11, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x12, z30.d, lsl #3] \n\t" // Prefetch C column 4
+" prfd        PSTL2STRM, p0, [x13, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x14, z30.d, lsl #3] \n\t" // Prefetch C column 5
+" prfd        PSTL2STRM, p0, [x15, z30.d, lsl #3] \n\t"
+"                                                 \n\t"
+" add             x10, x14, x22                   \n\t" // 0:7  Column 6
+" add             x11, x10, x23                   \n\t" // 8:16 Column 6
+" add             x12, x10, x22                   \n\t" // 0:7  Column 7
+" add             x13, x12, x23                   \n\t" // 8:16 Column 7
+" add             x14, x12, x22                   \n\t" // 0:7  Column 8
+" add             x15, x14, x23                   \n\t" // 8:16 Column 8
+" prfd        PSTL2STRM, p0, [x10, z30.d, lsl #3] \n\t" // Prefetch C column 6
+" prfd        PSTL2STRM, p0, [x11, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x12, z30.d, lsl #3] \n\t" // Prefetch C column 7
+" prfd        PSTL2STRM, p0, [x13, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x14, z30.d, lsl #3] \n\t" // Prefetch C column 8
+" prfd        PSTL2STRM, p0, [x15, z30.d, lsl #3] \n\t"
+"                                                 \n\t"
+" add             x10, x14, x22                   \n\t" // 0:7  Column 9
+" add             x11, x10, x23                   \n\t" // 8:16 Column 9
+" add             x12, x10, x22                   \n\t" // 0:7  Column 10
+" add             x13, x12, x23                   \n\t" // 8:16 Column 10
+" add             x14, x12, x22                   \n\t" // 0:7  Column 11
+" add             x15, x14, x23                   \n\t" // 8:16 Column 11
+" prfd        PSTL2STRM, p0, [x10, z30.d, lsl #3] \n\t" // Prefetch C column 9
+" prfd        PSTL2STRM, p0, [x11, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x12, z30.d, lsl #3] \n\t" // Prefetch C column 10
+" prfd        PSTL2STRM, p0, [x13, z30.d, lsl #3] \n\t"
+" prfd        PSTL2STRM, p0, [x14, z30.d, lsl #3] \n\t" // Prefetch C column 11
+" prfd        PSTL2STRM, p0, [x15, z30.d, lsl #3] \n\t"
+"                                                 \n\t"
+" b               END_C_PRFML2                    \n\t"
+"                                                 \n\t"
+" END_C_PRFML2:                                   \n\t"
 "                                                 \n\t"
 " ldr             x18, %[a_next]                  \n\t" // Pointer to next A pack
 " ldr             x19, %[b_next]                  \n\t" // Pointer to next B pack
@@ -900,103 +964,103 @@ __asm__ volatile (
 " mul             x17, x21, x11                   \n\t" // Vector length in memory
 "                                                 \n\t"
 "                                                 \n\t" // Z30: index for loading C columns.
-" index           z30.d, xzr, x21                 \n\t" // Generate indices.
+" index           z30.d, xzr, x20                 \n\t" // Generate indices.
 "                                                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 0
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 0
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z6.d         \n\t"
-" fmad            z0.d, p1/m, z31.d, z7.d         \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z7.d         \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 1
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 1
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z8.d         \n\t"
-" fmad            z0.d, p1/m, z31.d, z9.d         \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z9.d         \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 2
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 2
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z10.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z11.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z11.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 3
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 3
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z12.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z13.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z13.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 4
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 4
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z14.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z15.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z15.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 5
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 5
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z16.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z17.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z17.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 6
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 6
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z18.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z19.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z19.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 7
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 7
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z20.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z21.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z21.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 8
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 8
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z22.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z23.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z23.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 9
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 9
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z24.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z25.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z25.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 10
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 10
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z26.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z27.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z27.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 " add             x16, x17, x6                    \n\t"
-" ld1d            z0.d, p0/z, [x6, z30.d]         \n\t" // Column vector 11
-" ld1d            z0.d, p1/z, [x16, z30.d]        \n\t"
+" ld1d            z0.d, p0/z, [x6, z30.d, lsl #3] \n\t" // Column vector 11
+" ld1d            z1.d, p1/z, [x16, z30.d, lsl #3]\n\t"
 " fmad            z0.d, p0/m, z31.d, z28.d        \n\t"
-" fmad            z0.d, p1/m, z31.d, z29.d        \n\t"
-" st1d            z0.d, p0, [x6, z30.d]           \n\t"
-" st1d            z0.d, p1, [x16, z30.d]          \n\t"
+" fmad            z1.d, p1/m, z31.d, z29.d        \n\t"
+" st1d            z0.d, p0, [x6, z30.d, lsl #3]   \n\t"
+" st1d            z1.d, p1, [x16, z30.d, lsl #3]  \n\t"
 " madd            x6, x7, x12, x6                 \n\t"
 "                                                 \n\t"
 "                                                 \n\t"
