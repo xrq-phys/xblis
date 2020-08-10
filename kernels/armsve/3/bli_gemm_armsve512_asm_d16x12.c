@@ -383,6 +383,9 @@ __asm__ volatile (
 "                                                 \n\t"
 " K_LEFT_LOOP:                                    \n\t"
 "                                                 \n\t"
+" cmp             x8, #0                          \n\t" // Spetial handler only for k0 == 0.
+" b.eq            WRITE_MEM                       \n\t"
+"                                                 \n\t"
 " cmp             x8, #1                          \n\t" // If K=1.
 " b.eq            FIN_LOOP                        \n\t"
 "                                                 \n\t"
