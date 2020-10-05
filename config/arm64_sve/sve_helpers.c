@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include "sve_architecture.h"
+#include "sve_kernels.h"
 
 uint64_t get_sve_byte_size()
 {
@@ -54,6 +55,13 @@ void  adjust_sve_mr_nr_d(int* m_r, int* n_r)
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
 
     int onevec = (get_sve_byte_size())/8;
+
+    int kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_D",0);
+    if(0 != kernel_override_idx)
+    {
+        sve_override_mr_nr_d(kernel_override_idx, onevec, m_r, n_r);
+        return;
+    }
 
 //#warning Testing 2vx10
 //    *m_r = 2*onevec;

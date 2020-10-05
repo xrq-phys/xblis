@@ -36,6 +36,7 @@
 #include "blis.h"
 
 #include "sve_architecture.h"
+#include "sve_kernels.h"
 #include "sve_helpers.h"
 
 void* get_sve_sgemm_bli_kernel(int m_r, int n_r)
@@ -57,7 +58,13 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
     void* kptr = NULL;
     int sve_bit_size = get_sve_byte_size()*8;
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    // TODO: More VLA kernels + selection depending on m_r/n_r
+    gint_t kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_D",0);
+    if(0 != kernel_override_idx)
+    {
+        kptr = sve_get_override_kernel_d(kernel_override_idx);
+        return kptr;
+    }
+
     if(sve_bit_size == m_r*64)
     {
         kptr = (void*) bli_dgemm_armv8a_sve_asm_1vx8;
@@ -76,7 +83,7 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
         {
             //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rqd;
             //kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rd;
-            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rd_aabb;
+            kptr = (void*) bli_dgemm_armv8a_sve_asm_2vx10_ld1rd_colwise;
         }
         else if(9 == n_r)
         {

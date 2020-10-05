@@ -90,7 +90,7 @@ MLA1ROW_D(z31, cur_avec1, bvec9, p0)
 
 /* 2 vectors in m_r, n_r = 10
 */
-void bli_dgemm_armv8a_sve_asm_2vx10_ld1rd_aabb
+void bli_dgemm_armv8a_sve_asm_2vx10_ld1rd_colwise
      (
        dim_t               k0,
        double*    restrict alpha,
