@@ -36,8 +36,7 @@
 
 
 #include "blis.h"
-#include "bli_dgemm_sve_asm_macros.h"
-#include "bli_sve_asm_debug.h"
+#include "bli_sve_asm_mla_d.h"
 
 /* 2 vectors in m_r, n_r = 12
 */
@@ -118,19 +117,19 @@ __asm__ volatile
  * DUP has 6 cycles latency, but uses FLA pipeline, might slow down
  *
  *************************************************/
-LOAD2VEC(z0,z1,p0,x0)
+LOAD2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 "                                            \n\t"
 " dup z5.q, z4.q[0] \n\t"
 " dup z6.q, z4.q[1] \n\t"
 "                                            \n\t"
-ZERO4VEC(z7,z8,z9,z10)                             // c columns 0-1
-ZERO4VEC(z11,z12,z13,z14)                          // c columns 2-3
-ZERO4VEC(z15,z16,z17,z18)                          // c columns 4-5
-ZERO4VEC(z19,z20,z21,z22)                          // c columns 6-7
-ZERO4VEC(z23,z24,z25,z26)                          // c columns 8-9
-ZERO4VEC(z27,z28,z29,z30)                          // c columns 10-11
+ZERO4VEC_D(z7,z8,z9,z10)                             // c columns 0-1
+ZERO4VEC_D(z11,z12,z13,z14)                          // c columns 2-3
+ZERO4VEC_D(z15,z16,z17,z18)                          // c columns 4-5
+ZERO4VEC_D(z19,z20,z21,z22)                          // c columns 6-7
+ZERO4VEC_D(z23,z24,z25,z26)                          // c columns 8-9
+ZERO4VEC_D(z27,z28,z29,z30)                          // c columns 10-11
 
 "                                            \n\t"
 "                                            \n\t"
@@ -145,92 +144,92 @@ ZERO4VEC(z27,z28,z29,z30)                          // c columns 10-11
 "                                            \n\t" 
 "                                            \n\t"
 " .D2VX12LOOP:                               \n\t" // Body
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z11,z12, z0,z1, z6, 0, p0)
-MLA2ROW_I(z13,z14, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z15,z16, z0,z1, z5, 0, p0)
-MLA2ROW_I(z17,z18, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z19,z20, z0,z1, z6, 0, p0)
-MLA2ROW_I(z21,z22, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z23,z24, z0,z1, z5, 0, p0)
-MLA2ROW_I(z25,z26, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z27,z28, z0,z1, z6, 0, p0)
-MLA2ROW_I(z29,z30, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end first 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z11,z12, z2,z3, z6, 0, p0)
-MLA2ROW_I(z13,z14, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z15,z16, z2,z3, z5, 0, p0)
-MLA2ROW_I(z17,z18, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z19,z20, z2,z3, z6, 0, p0)
-MLA2ROW_I(z21,z22, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z23,z24, z2,z3, z5, 0, p0)
-MLA2ROW_I(z25,z26, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z27,z28, z2,z3, z6, 0, p0)
-MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"                              // end second 2vx12 block
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // third 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // third 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z11,z12, z0,z1, z6, 0, p0)
-MLA2ROW_I(z13,z14, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z15,z16, z0,z1, z5, 0, p0)
-MLA2ROW_I(z17,z18, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z19,z20, z0,z1, z6, 0, p0)
-MLA2ROW_I(z21,z22, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z23,z24, z0,z1, z5, 0, p0)
-MLA2ROW_I(z25,z26, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z27,z28, z0,z1, z6, 0, p0)
-MLA2ROW_I(z29,z30, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end third 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // fourth 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // fourth 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z11,z12, z2,z3, z6, 0, p0)
-MLA2ROW_I(z13,z14, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z15,z16, z2,z3, z5, 0, p0)
-MLA2ROW_I(z17,z18, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z19,z20, z2,z3, z6, 0, p0)
-MLA2ROW_I(z21,z22, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z23,z24, z2,z3, z5, 0, p0)
-MLA2ROW_I(z25,z26, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z27,z28, z2,z3, z6, 0, p0)
-MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"                              // end fourth 2vx12 block
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
 // " add x1, x1, #256                           \n\t" // B = B+4*8*sizeof(double)
@@ -240,91 +239,91 @@ MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)
 " bne .D2VX12LOOP                             \n\t"
 " .D2VX12LASTITER:                            \n\t" // Body
 
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z11,z12, z0,z1, z6, 0, p0)
-MLA2ROW_I(z13,z14, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z15,z16, z0,z1, z5, 0, p0)
-MLA2ROW_I(z17,z18, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z19,z20, z0,z1, z6, 0, p0)
-MLA2ROW_I(z21,z22, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z23,z24, z0,z1, z5, 0, p0)
-MLA2ROW_I(z25,z26, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z27,z28, z0,z1, z6, 0, p0)
-MLA2ROW_I(z29,z30, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end first 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z11,z12, z2,z3, z6, 0, p0)
-MLA2ROW_I(z13,z14, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z15,z16, z2,z3, z5, 0, p0)
-MLA2ROW_I(z17,z18, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z19,z20, z2,z3, z6, 0, p0)
-MLA2ROW_I(z21,z22, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z23,z24, z2,z3, z5, 0, p0)
-MLA2ROW_I(z25,z26, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z27,z28, z2,z3, z6, 0, p0)
-MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"                              // end second 2vx12 block
 "                                                \n\t"
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,4)    // third 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,5)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,4)    // third 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,5)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z11,z12, z0,z1, z6, 0, p0)
-MLA2ROW_I(z13,z14, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"
-MLA2ROW_I(z15,z16, z0,z1, z5, 0, p0)
-MLA2ROW_I(z17,z18, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z19,z20, z0,z1, z6, 0, p0)
-MLA2ROW_I(z21,z22, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z23,z24, z0,z1, z5, 0, p0)
-MLA2ROW_I(z25,z26, z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z23,z24, z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z27,z28, z0,z1, z6, 0, p0)
-MLA2ROW_I(z29,z30, z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z27,z28, z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end third 2vx12 block
 "                                            \n\t"
-MLA2ROW_I(z7,z8,  z2,z3, z5, 0, p0)    // fourth 2vx12 block
-MLA2ROW_I(z9,z10, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z7,z8,  z2,z3, z5, 0, p0)    // fourth 2vx12 block
+MLA2ROW_I_D(z9,z10, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[0] \n\t"
-MLA2ROW_I(z11,z12, z2,z3, z6, 0, p0)
-MLA2ROW_I(z13,z14, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"
-MLA2ROW_I(z15,z16, z2,z3, z5, 0, p0)
-MLA2ROW_I(z17,z18, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z15,z16, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z17,z18, z2,z3, z5, 1, p0)
 " dup z5.q, z4.q[2] \n\t"
-MLA2ROW_I(z19,z20, z2,z3, z6, 0, p0)
-MLA2ROW_I(z21,z22, z2,z3, z6, 1, p0)
+MLA2ROW_I_D(z19,z20, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z21,z22, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[3] \n\t"
-//LOAD1VEC(z4,p0,x1)
+//LOAD1VEC_D(z4,p0,x1)
 //" add x1, x1, #64 \n\t"
-MLA2ROW_I(z23,z24, z2,z3, z5, 0, p0)
-MLA2ROW_I(z25,z26, z2,z3, z5, 1, p0)
-MLA2ROW_I(z27,z28, z2,z3, z6, 0, p0)
-MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)             // end fourth 2vx12 block
+MLA2ROW_I_D(z23,z24, z2,z3, z5, 0, p0)
+MLA2ROW_I_D(z25,z26, z2,z3, z5, 1, p0)
+MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
+MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)             // end fourth 2vx12 block
 "                                            \n\t"
 
 " incb x0, ALL, MUL #6                       \n\t" // 6 Vectors loaded
@@ -336,10 +335,10 @@ MLA2ROW_I(z29,z30, z2,z3, z6, 1, p0)             // end fourth 2vx12 block
 "                                            \n\t"
 ".D2VX12LOOPKLEFT:                            \n\t"
 "                                            \n\t"
-LOAD2VEC(z0,z1,p0,x0)
+LOAD2VEC_D(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
-LOAD1VEC(z4,p0,x1)
+LOAD1VEC_D(z4,p0,x1)
 " dup z5.q, z4.q[0]                          \n\t"
 " dup z6.q, z4.q[1]                          \n\t"
 " add x1, x1, #64                            \n\t" // advance b pointer by 8 doubles
@@ -348,20 +347,20 @@ LOAD2VEC_QDIST(z2,z3,p0,x1)
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
 "                                            \n\t"
-MLA2ROW_I(z7,z8,    z0,z1, z5, 0, p0)
-MLA2ROW_I(z9,z10,   z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z7,z8,    z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z9,z10,   z0,z1, z5, 1, p0)
 " dup z5.q, z4.q[2]                          \n\t"
-MLA2ROW_I(z11,z12,  z0,z1, z6, 0, p0)
-MLA2ROW_I(z13,z14,  z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z11,z12,  z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z13,z14,  z0,z1, z6, 1, p0)
 " dup z6.q, z4.q[3]                          \n\t"
-MLA2ROW_I(z15,z16,  z0,z1, z5, 0, p0)
-MLA2ROW_I(z17,z18,  z0,z1, z5, 1, p0)
-MLA2ROW_I(z19,z20,  z0,z1, z6, 0, p0)
-MLA2ROW_I(z21,z22,  z0,z1, z6, 1, p0)
-MLA2ROW_I(z23,z24,  z0,z1, z2, 0, p0)
-MLA2ROW_I(z25,z26,  z0,z1, z2, 1, p0)
-MLA2ROW_I(z27,z28,  z0,z1, z3, 0, p0)
-MLA2ROW_I(z29,z30,  z0,z1, z3, 1, p0)
+MLA2ROW_I_D(z15,z16,  z0,z1, z5, 0, p0)
+MLA2ROW_I_D(z17,z18,  z0,z1, z5, 1, p0)
+MLA2ROW_I_D(z19,z20,  z0,z1, z6, 0, p0)
+MLA2ROW_I_D(z21,z22,  z0,z1, z6, 1, p0)
+MLA2ROW_I_D(z23,z24,  z0,z1, z2, 0, p0)
+MLA2ROW_I_D(z25,z26,  z0,z1, z2, 1, p0)
+MLA2ROW_I_D(z27,z28,  z0,z1, z3, 0, p0)
+MLA2ROW_I_D(z29,z30,  z0,z1, z3, 1, p0)
 
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
@@ -395,110 +394,110 @@ MLA2ROW_I(z29,z30,  z0,z1, z3, 1, p0)
 " trn1 z0.d, z0.d, z31.d                 \n\t" // splice here
 " beq .D2VX12BETAZEROCONTCOLSTOREDS      \n\t" // multiply with beta if beta isn't zero
 "                                        \n\t"
-LOAD2VEC (z1,z2,p0,x2)                         // Load Column 0
-LOAD2VEC (z3,z4,p0,x20)                        // Load Column 1
-LOAD2VEC (z5,z6,p0,x21)                        // Load Column 2
+LOAD2VEC_D(z1,z2,p0,x2)                         // Load Column 0
+LOAD2VEC_D(z3,z4,p0,x20)                        // Load Column 1
+LOAD2VEC_D(z5,z6,p0,x21)                        // Load Column 2
 "                                            \n\t"
 
 // Let's do Accum=Accum*alpha, then Accum=Accum+C*beta and add some interleaving
-MUL4ROW_I(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
+MUL4ROW_I_D(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //  ^   ^   ^   ^
 // x2 x20 x21 x22
 
-MUL4ROW_I(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
-MLA4ROW_I(z7,z8,z9,z10,    z1,z2,z3,z4,     z0, 1, p0)
-STOR2VEC(z7,z8,  p0, x2)                                // Store Column 0
+MUL4ROW_I_D(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
+MLA4ROW_I_D(z7,z8,z9,z10,    z1,z2,z3,z4,     z0, 1, p0)
+STOR2VEC_D(z7,z8,  p0, x2)                                // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC(z9,z10, p0, x20)                               // Store Column 1
+STOR2VEC_D(z9,z10, p0, x20)                               // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
-LOAD2VEC(z7,z8, p0,x22)                                 // Load Column 3
-LOAD2VEC(z9,z10, p0,x2)                                 // Load Column 4
+LOAD2VEC_D(z7,z8, p0,x22)                                 // Load Column 3
+LOAD2VEC_D(z9,z10, p0,x2)                                 // Load Column 4
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //          ^   ^   ^   ^
 //        x21 x22  x2 x20
 
-MUL4ROW_I(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
-MLA4ROW_I(z11,z12,z13,z14, z5,z6,z7,z8,     z0, 1, p0)
-STOR2VEC(z11,z12, p0, x21)                                  // Store Column 2
+MUL4ROW_I_D(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
+MLA4ROW_I_D(z11,z12,z13,z14, z5,z6,z7,z8,     z0, 1, p0)
+STOR2VEC_D(z11,z12, p0, x21)                                  // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC(z13,z14, p0, x22)                                  // Store Column 3
+STOR2VEC_D(z13,z14, p0, x22)                                  // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
-LOAD2VEC(z11,z12, p0,x20)                               // Load Column 5 
-LOAD2VEC(z13,z14, p0,x21)                               // Load Column 6
+LOAD2VEC_D(z11,z12, p0,x20)                               // Load Column 5 
+LOAD2VEC_D(z13,z14, p0,x21)                               // Load Column 6
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                  ^   ^   ^   ^
 //                 x2 x20 x21 x22
 
-MUL4ROW_I(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
-MLA4ROW_I(z15,z16,z17,z18, z9,z10,z11,z12,  z0, 1, p0)
-STOR2VEC(z15,z16, p0, x2)                                   // Store Column 4
+MUL4ROW_I_D(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
+MLA4ROW_I_D(z15,z16,z17,z18, z9,z10,z11,z12,  z0, 1, p0)
+STOR2VEC_D(z15,z16, p0, x2)                                   // Store Column 4
 " add x2,x22,x10                            \n\t"       // Load address Column 8 of C
-STOR2VEC(z17,z18, p0, x20)                                  // Store Column 5
+STOR2VEC_D(z17,z18, p0, x20)                                  // Store Column 5
 " add x20,x2,x10                            \n\t"       // Load address Column 9 of C
-LOAD2VEC(z15,z16,p0,x22)                                // Load Column 7
-LOAD2VEC(z17,z18,p0,x2)                                 // Load Column 8
+LOAD2VEC_D(z15,z16,p0,x22)                                // Load Column 7
+LOAD2VEC_D(z17,z18,p0,x2)                                 // Load Column 8
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                          ^   ^   ^   ^
 //                        x21 x22  x2 x20
 
-MUL4ROW_I(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
-MLA4ROW_I(z19,z20,z21,z22, z13,z14,z15,z16, z0, 1, p0)
-STOR2VEC(z19,z20, p0, x21)                                  // Store Column 6
+MUL4ROW_I_D(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
+MLA4ROW_I_D(z19,z20,z21,z22, z13,z14,z15,z16, z0, 1, p0)
+STOR2VEC_D(z19,z20, p0, x21)                                  // Store Column 6
 " add x21,x20,x10                           \n\t"       // Load address Column 10 of C
-STOR2VEC(z21,z22, p0, x22)                                  // Store Column 7
+STOR2VEC_D(z21,z22, p0, x22)                                  // Store Column 7
 " add x22,x21,x10                           \n\t"       // Load address Column 11 of C
-LOAD2VEC(z19,z20,p0,x20)                                // Load Column 9
-LOAD2VEC(z21,z22,p0,x21)                                // Load Column 10
+LOAD2VEC_D(z19,z20,p0,x20)                                // Load Column 9
+LOAD2VEC_D(z21,z22,p0,x21)                                // Load Column 10
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                                  ^   ^   ^   ^
 //                                 x2 x20 x21 x22
 
-MUL4ROW_I(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
-MLA4ROW_I(z23,z24,z25,z26, z17,z18,z19,z20, z0, 1, p0)
-STOR2VEC(z23,z24, p0, x2)                                   // Store Column 8
-STOR2VEC(z25,z26, p0, x20)                                  // Store Column 9
-LOAD2VEC(z23,z24, p0, x22)                                // Load Column 11
+MUL4ROW_I_D(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
+MLA4ROW_I_D(z23,z24,z25,z26, z17,z18,z19,z20, z0, 1, p0)
+STOR2VEC_D(z23,z24, p0, x2)                                   // Store Column 8
+STOR2VEC_D(z25,z26, p0, x20)                                  // Store Column 9
+LOAD2VEC_D(z23,z24, p0, x22)                                // Load Column 11
 
-MLA4ROW_I(z27,z28,z29,z30, z21,z22,z23,z24, z0, 1, p0)
-STOR2VEC(z27,z28, p0, x21)                                   // Store Column 10
-STOR2VEC(z29,z30, p0, x22)                                  // Store Column 11
+MLA4ROW_I_D(z27,z28,z29,z30, z21,z22,z23,z24, z0, 1, p0)
+STOR2VEC_D(z27,z28, p0, x21)                                   // Store Column 10
+STOR2VEC_D(z29,z30, p0, x22)                                  // Store Column 11
 
 " b .D2VX12END                              \n\t"       // Duplicate code for stores required due to lack of registers
 "                                           \n\t"
 " .D2VX12BETAZEROCONTCOLSTOREDS:            \n\t"
 // No need to zero anything as we are storing the scaled accumulated A*B values
-MUL4ROW_I(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
-MUL4ROW_I(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
-MUL4ROW_I(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
-MUL4ROW_I(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
-MUL4ROW_I(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
-MUL4ROW_I(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
-STOR2VEC(z7,z8,p0,x2)                                   // Store Column 0
+MUL4ROW_I_D(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
+MUL4ROW_I_D(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
+MUL4ROW_I_D(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
+MUL4ROW_I_D(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
+MUL4ROW_I_D(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
+MUL4ROW_I_D(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
+STOR2VEC_D(z7,z8,p0,x2)                                   // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC(z9,z10,p0,x20)                                 // Store Column 1
+STOR2VEC_D(z9,z10,p0,x20)                                 // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
-STOR2VEC(z11,z12,p0,x21)                                // Store Column 2
+STOR2VEC_D(z11,z12,p0,x21)                                // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC(z13,z14,p0,x22)                                // Store Column 3
+STOR2VEC_D(z13,z14,p0,x22)                                // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
-STOR2VEC(z15,z16,p0,x2)                                 // Store Column 4
+STOR2VEC_D(z15,z16,p0,x2)                                 // Store Column 4
 " add x2,x22,x10                            \n\t"       // Load address Column 8 of C
-STOR2VEC(z17,z18,p0,x20)                                // Store Column 5
+STOR2VEC_D(z17,z18,p0,x20)                                // Store Column 5
 " add x20,x2,x10                            \n\t"       // Load address Column 9 of C
-STOR2VEC(z19,z20,p0,x21)                                // Store Column 6
+STOR2VEC_D(z19,z20,p0,x21)                                // Store Column 6
 " add x21,x20,x10                           \n\t"       // Load address Column 10 of C
-STOR2VEC(z21,z22,p0,x22)                                // Store Column 7
+STOR2VEC_D(z21,z22,p0,x22)                                // Store Column 7
 " add x22,x21,x10                           \n\t"       // Load address Column 11 of C
-STOR2VEC(z23,z24,p0,x2)                                 // Store Column 8
-STOR2VEC(z25,z26,p0,x20)                                // Store Column 9
-STOR2VEC(z27,z28,p0,x21)                                // Store Column 10
-STOR2VEC(z29,z30,p0,x22)                                // Store Column 11
+STOR2VEC_D(z23,z24,p0,x2)                                 // Store Column 8
+STOR2VEC_D(z25,z26,p0,x20)                                // Store Column 9
+STOR2VEC_D(z27,z28,p0,x21)                                // Store Column 10
+STOR2VEC_D(z29,z30,p0,x22)                                // Store Column 11
 
 "                                            \n\t"
 " b .D2VX12END                                \n\t"
@@ -514,8 +513,8 @@ STOR2VEC(z29,z30,p0,x22)                                // Store Column 11
 " trn1 z0.d, z0.d, z31.d                 \n\t" // splice here
 " beq .D2VX12BETAZEROGENSTOREDS      \n\t" // multiply with beta if beta isn't zero
 "                                            \n\t"
-LOAD2VEC_GENI (z3,z4, p0, x2, z1,z2)                    // Load Column 0
-LOAD2VEC_GENI (z5,z6, p0,x20, z1,z2)                    // Load Column 1
+LOAD2VEC_GENI_D (z3,z4, p0, x2, z1,z2)                    // Load Column 0
+LOAD2VEC_GENI_D (z5,z6, p0,x20, z1,z2)                    // Load Column 1
 "                                            \n\t"
 
 // Let's do Accum=Accum*alpha, then Accum=Accum+C*beta and add some interleaving
@@ -524,100 +523,100 @@ LOAD2VEC_GENI (z5,z6, p0,x20, z1,z2)                    // Load Column 1
 //  ^   ^   ^   ^
 // x2 x20 x21 x22
 
-MUL4ROW_I(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
-MLA4ROW_I(z7,z8,z9,z10,    z3,z4,z5,z6,     z0, 1, p0)
-STOR2VEC_GENI(z7,z8,  p0, x2,  z1,z2)                   // Store Column 0
+MUL4ROW_I_D(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
+MLA4ROW_I_D(z7,z8,z9,z10,    z3,z4,z5,z6,     z0, 1, p0)
+STOR2VEC_GENI_D(z7,z8,  p0, x2,  z1,z2)                   // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC_GENI(z9,z10, p0, x20, z1,z2)                   // Store Column 1
+STOR2VEC_GENI_D(z9,z10, p0, x20, z1,z2)                   // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
-LOAD2VEC_GENI(z7,z8,  p0,x21, z1,z2)                    // Load Column 2
-LOAD2VEC_GENI(z9,z10, p0,x22, z1,z2)                    // Load Column 3
+LOAD2VEC_GENI_D(z7,z8,  p0,x21, z1,z2)                    // Load Column 2
+LOAD2VEC_GENI_D(z9,z10, p0,x22, z1,z2)                    // Load Column 3
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //          ^   ^   ^   ^
 //        x21 x22  x2 x20
 
-MUL4ROW_I(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
-MLA4ROW_I(z11,z12,z13,z14, z7,z8,z9,z10,    z0, 1, p0)
-STOR2VEC_GENI(z11,z12, p0, x21, z1,z2)                  // Store Column 2
+MUL4ROW_I_D(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
+MLA4ROW_I_D(z11,z12,z13,z14, z7,z8,z9,z10,    z0, 1, p0)
+STOR2VEC_GENI_D(z11,z12, p0, x21, z1,z2)                  // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC_GENI(z13,z14, p0, x22, z1,z2)                  // Store Column 3
+STOR2VEC_GENI_D(z13,z14, p0, x22, z1,z2)                  // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
-LOAD2VEC_GENI(z11,z12, p0,x2,  z1,z2)                   // Load Column 4
-LOAD2VEC_GENI(z13,z14, p0,x20, z1,z2)                   // Load Column 5
+LOAD2VEC_GENI_D(z11,z12, p0,x2,  z1,z2)                   // Load Column 4
+LOAD2VEC_GENI_D(z13,z14, p0,x20, z1,z2)                   // Load Column 5
 
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                  ^   ^   ^   ^
 //                 x2 x20 x21 x22
 
-MUL4ROW_I(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
-MLA4ROW_I(z15,z16,z17,z18, z11,z12,z13,z14, z0, 1, p0)
-STOR2VEC_GENI(z15,z16, p0, x2,  z1,z2)                  // Store Column 4
+MUL4ROW_I_D(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
+MLA4ROW_I_D(z15,z16,z17,z18, z11,z12,z13,z14, z0, 1, p0)
+STOR2VEC_GENI_D(z15,z16, p0, x2,  z1,z2)                  // Store Column 4
 " add x2,x22,x10                            \n\t"       // Load address Column 8 of C
-STOR2VEC_GENI(z17,z18, p0, x20, z1,z2)                  // Store Column 5
+STOR2VEC_GENI_D(z17,z18, p0, x20, z1,z2)                  // Store Column 5
 " add x20,x2,x10                            \n\t"       // Load address Column 9 of C
-LOAD2VEC_GENI(z15,z16, p0,x21, z1,z2)                   // Load Column 6
-LOAD2VEC_GENI(z17,z18, p0,x22, z1,z2)                   // Load Column 7
+LOAD2VEC_GENI_D(z15,z16, p0,x21, z1,z2)                   // Load Column 6
+LOAD2VEC_GENI_D(z17,z18, p0,x22, z1,z2)                   // Load Column 7
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                          ^   ^   ^   ^
 //                        x21 x22  x2 x20
 
-MUL4ROW_I(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
-MLA4ROW_I(z19,z20,z21,z22, z15,z16,z17,z18, z0, 1, p0)
-STOR2VEC_GENI(z19,z20, p0, x21, z1,z2)                  // Store Column 6
+MUL4ROW_I_D(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
+MLA4ROW_I_D(z19,z20,z21,z22, z15,z16,z17,z18, z0, 1, p0)
+STOR2VEC_GENI_D(z19,z20, p0, x21, z1,z2)                  // Store Column 6
 " add x21,x20,x10                           \n\t"       // Load address Column 10 of C
-STOR2VEC_GENI(z21,z22, p0, x22, z1,z2)                  // Store Column 7
+STOR2VEC_GENI_D(z21,z22, p0, x22, z1,z2)                  // Store Column 7
 " add x22,x21,x10                           \n\t"       // Load address Column 11 of C
-LOAD2VEC_GENI(z19,z20,p0,x2,  z1,z2)                    // Load Column 8
-LOAD2VEC_GENI(z21,z22,p0,x20, z1,z2)                    // Load Column 9
+LOAD2VEC_GENI_D(z19,z20,p0,x2,  z1,z2)                    // Load Column 8
+LOAD2VEC_GENI_D(z21,z22,p0,x20, z1,z2)                    // Load Column 9
 
 //  0   1   2   3   4   5   6   7   8   9  10  11
 //                                  ^   ^   ^   ^
 //                                 x2 x20 x21 x22
 
-MUL4ROW_I(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
-MLA4ROW_I(z23,z24,z25,z26, z19,z20,z21,z22, z0, 1, p0)
-STOR2VEC_GENI(z23,z24,p0, x2,  z1,z2)                   // Store Column 8
-STOR2VEC_GENI(z25,z26,p0, x20, z1,z2)                   // Store Column 9
-LOAD2VEC_GENI(z23,z24,p0, x21, z1,z2)                   // Load Column 10
-LOAD2VEC_GENI(z25,z26,p0, x22, z1,z2)                   // Load Column 11
+MUL4ROW_I_D(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
+MLA4ROW_I_D(z23,z24,z25,z26, z19,z20,z21,z22, z0, 1, p0)
+STOR2VEC_GENI_D(z23,z24,p0, x2,  z1,z2)                   // Store Column 8
+STOR2VEC_GENI_D(z25,z26,p0, x20, z1,z2)                   // Store Column 9
+LOAD2VEC_GENI_D(z23,z24,p0, x21, z1,z2)                   // Load Column 10
+LOAD2VEC_GENI_D(z25,z26,p0, x22, z1,z2)                   // Load Column 11
 
-MUL4ROW_I(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
-MLA4ROW_I(z27,z28,z29,z30, z23,z24,z25,z26, z0, 1, p0)
-STOR2VEC_GENI(z27,z28, p0, x21, z1,z2)                              // Store Column 10
-STOR2VEC_GENI(z29,z30, p0, x22, z1,z2)                              // Store Column 11
+MUL4ROW_I_D(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
+MLA4ROW_I_D(z27,z28,z29,z30, z23,z24,z25,z26, z0, 1, p0)
+STOR2VEC_GENI_D(z27,z28, p0, x21, z1,z2)                              // Store Column 10
+STOR2VEC_GENI_D(z29,z30, p0, x22, z1,z2)                              // Store Column 11
 
 " b .D2VX12END                          \n\t"
 " .D2VX12BETAZEROGENSTOREDS:            \n\t"
 // No need to zero anything as we are storing the scaled accumulated A*B values
-MUL4ROW_I(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
-MUL4ROW_I(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
-MUL4ROW_I(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
-MUL4ROW_I(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
-MUL4ROW_I(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
-MUL4ROW_I(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
-STOR2VEC_GENI(z7,z8,  p0,x2,  z1,z2)                                   // Store Column 0
+MUL4ROW_I_D(z7,z8,z9,z10,    z7,z8,z9,z10,    z0, 0, p0)
+MUL4ROW_I_D(z11,z12,z13,z14, z11,z12,z13,z14, z0, 0, p0)
+MUL4ROW_I_D(z15,z16,z17,z18, z15,z16,z17,z18, z0, 0, p0)
+MUL4ROW_I_D(z19,z20,z21,z22, z19,z20,z21,z22, z0, 0, p0)
+MUL4ROW_I_D(z23,z24,z25,z26, z23,z24,z25,z26, z0, 0, p0)
+MUL4ROW_I_D(z27,z28,z29,z30, z27,z28,z29,z30, z0, 0, p0)
+STOR2VEC_GENI_D(z7,z8,  p0,x2,  z1,z2)                                   // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC_GENI(z9,z10, p0,x20, z1,z2)                                 // Store Column 1
+STOR2VEC_GENI_D(z9,z10, p0,x20, z1,z2)                                 // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
-STOR2VEC_GENI(z11,z12,p0,x21, z1,z2)                                // Store Column 2
+STOR2VEC_GENI_D(z11,z12,p0,x21, z1,z2)                                // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC_GENI(z13,z14,p0,x22, z1,z2)                                // Store Column 3
+STOR2VEC_GENI_D(z13,z14,p0,x22, z1,z2)                                // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
-STOR2VEC_GENI(z15,z16,p0,x2,  z1,z2)                                 // Store Column 4
+STOR2VEC_GENI_D(z15,z16,p0,x2,  z1,z2)                                 // Store Column 4
 " add x2,x22,x10                            \n\t"       // Load address Column 8 of C
-STOR2VEC_GENI(z17,z18,p0,x20, z1,z2)                                // Store Column 5
+STOR2VEC_GENI_D(z17,z18,p0,x20, z1,z2)                                // Store Column 5
 " add x20,x2,x10                            \n\t"       // Load address Column 9 of C
-STOR2VEC_GENI(z19,z20,p0,x21, z1,z2)                                // Store Column 6
+STOR2VEC_GENI_D(z19,z20,p0,x21, z1,z2)                                // Store Column 6
 " add x21,x20,x10                           \n\t"       // Load address Column 10 of C
-STOR2VEC_GENI(z21,z22,p0,x22, z1,z2)                                // Store Column 7
+STOR2VEC_GENI_D(z21,z22,p0,x22, z1,z2)                                // Store Column 7
 " add x22,x21,x10                           \n\t"       // Load address Column 11 of C
-STOR2VEC_GENI(z23,z24,p0,x2,  z1,z2)                                 // Store Column 8
-STOR2VEC_GENI(z25,z26,p0,x20, z1,z2)                                // Store Column 9
-STOR2VEC_GENI(z27,z28,p0,x21, z1,z2)                                // Store Column 10
-STOR2VEC_GENI(z29,z30,p0,x22, z1,z2)                                // Store Column 11
+STOR2VEC_GENI_D(z23,z24,p0,x2,  z1,z2)                                 // Store Column 8
+STOR2VEC_GENI_D(z25,z26,p0,x20, z1,z2)                                // Store Column 9
+STOR2VEC_GENI_D(z27,z28,p0,x21, z1,z2)                                // Store Column 10
+STOR2VEC_GENI_D(z29,z30,p0,x22, z1,z2)                                // Store Column 11
 "                                            \n\t"
 " .D2VX12END:                                \n\t" // Done!
 "                                            \n\t"

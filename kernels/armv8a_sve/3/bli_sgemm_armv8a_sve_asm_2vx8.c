@@ -36,7 +36,7 @@
 
 
 #include "blis.h"
-#include "bli_sgemm_sve_asm_macros.h"
+#include "bli_sve_finc_s.h"
 
 /* 2 vectors in m_r, n_r = 8
 */
@@ -111,17 +111,17 @@ __asm__ volatile
 "                                            \n\t"
 " ptrue p0.s                                 \n\t" // Creating all true predicate
 "                                            \n\t"
-LOAD2VEC(z0,z1,p0,x0)
+LOAD2VEC_S(z0,z1,p0,x0)
 "                                            \n\t"
-LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
+LOAD8VEC_DIST_S(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
 "                                            \n\t"
 "                                            \n\t"
-ZERO4VEC(z10,z11,z12,z13)                          // c columns 0-1
+ZERO4VEC_S(z10,z11,z12,z13)                          // c columns 0-1
 " prfm PLDL1KEEP, [x1, #64]                  \n\t"
-ZERO4VEC(z14,z15,z16,z17)                          // c columns 2-3
-ZERO4VEC(z18,z19,z20,z21)                          // c columns 4-5
+ZERO4VEC_S(z14,z15,z16,z17)                          // c columns 2-3
+ZERO4VEC_S(z18,z19,z20,z21)                          // c columns 4-5
 " prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // prefetch next a vector
-ZERO4VEC(z22,z23,z24,z25)                          // c columns 6-7
+ZERO4VEC_S(z22,z23,z24,z25)                          // c columns 6-7
 " prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
 "                                            \n\t"
 "                                            \n\t"
@@ -136,51 +136,51 @@ ZERO4VEC(z22,z23,z24,z25)                          // c columns 6-7
 "                                            \n\t" 
 "                                            \n\t"
 " .S2VX8LOOP:                                \n\t" // Body
-MLA2ROW_LA_LB(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,0) 
+MLA2ROW_LA_LB_S(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,0) 
 " prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,4) 
+MLA2ROW_LA_LB_S(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,4) 
 " prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,8)
+MLA2ROW_LB_S(z14, z15, z0, z1, z4, p0, x1,8)
 " prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,12)
+MLA2ROW_LB_S(z16, z17, z0, z1, z5, p0, x1,12)
 " prfd pldl1keep,p0, [x0, #5, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z18, z19, z0, z1, z6, p0, x1,16)
+MLA2ROW_LB_S(z18, z19, z0, z1, z6, p0, x1,16)
 " prfd pldl1keep,p0, [x0, #6, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,20)
+MLA2ROW_LB_S(z20, z21, z0, z1, z7, p0, x1,20)
 " prfd pldl1keep,p0, [x0, #7, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,24)
+MLA2ROW_LB_S(z22, z23, z0, z1, z8, p0, x1,24)
 " prfd pldl1keep,p0, [x0, #8, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,28)
+MLA2ROW_LB_S(z24, z25, z0, z1, z9, p0, x1,28)
 " prfd pldl1keep,p0, [x0, #9, MUL VL]        \n\t" // prefetch next a vector
 "                                            \n\t"
-MLA2ROW_LA_LB(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,32) 
-MLA2ROW_LA_LB(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,36) 
+MLA2ROW_LA_LB_S(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,32) 
+MLA2ROW_LA_LB_S(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,36) 
 " prfm PLDL1KEEP, [x1, #96]                 \n\t"
-MLA2ROW_LB(z14, z15, z26, z27, z4, p0, x1,40)
-MLA2ROW_LB(z16, z17, z26, z27, z5, p0, x1,44)
+MLA2ROW_LB_S(z14, z15, z26, z27, z4, p0, x1,40)
+MLA2ROW_LB_S(z16, z17, z26, z27, z5, p0, x1,44)
 " prfm PLDL1KEEP, [x1, #160]                 \n\t"
-MLA2ROW_LB(z18, z19, z26, z27, z6, p0, x1,48)
-MLA2ROW_LB(z20, z21, z26, z27, z7, p0, x1,52)
-MLA2ROW_LB(z22, z23, z26, z27, z8, p0, x1,56)
-MLA2ROW_LB(z24, z25, z26, z27, z9, p0, x1,60)
+MLA2ROW_LB_S(z18, z19, z26, z27, z6, p0, x1,48)
+MLA2ROW_LB_S(z20, z21, z26, z27, z7, p0, x1,52)
+MLA2ROW_LB_S(z22, z23, z26, z27, z8, p0, x1,56)
+MLA2ROW_LB_S(z24, z25, z26, z27, z9, p0, x1,60)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-MLA2ROW_LA_LB(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,64) 
-MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,68) 
-MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,72)
-MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,76)
-MLA2ROW_LB(z18, z19, z0, z1, z6, p0, x1,80)
-MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,84)
-MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,88)
-MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,92)
+MLA2ROW_LA_LB_S(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,64) 
+MLA2ROW_LA_LB_S(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,68) 
+MLA2ROW_LB_S(z14, z15, z0, z1, z4, p0, x1,72)
+MLA2ROW_LB_S(z16, z17, z0, z1, z5, p0, x1,76)
+MLA2ROW_LB_S(z18, z19, z0, z1, z6, p0, x1,80)
+MLA2ROW_LB_S(z20, z21, z0, z1, z7, p0, x1,84)
+MLA2ROW_LB_S(z22, z23, z0, z1, z8, p0, x1,88)
+MLA2ROW_LB_S(z24, z25, z0, z1, z9, p0, x1,92)
 "                                            \n\t"
-MLA2ROW_LA_LB(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,96) 
-MLA2ROW_LA_LB(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,100) 
-MLA2ROW_LB(z14, z15, z26, z27, z4, p0, x1,104)
-MLA2ROW_LB(z16, z17, z26, z27, z5, p0, x1,108)
-MLA2ROW_LB(z18, z19, z26, z27, z6, p0, x1,112)
-MLA2ROW_LB(z20, z21, z26, z27, z7, p0, x1,116)
-MLA2ROW_LB(z22, z23, z26, z27, z8, p0, x1,120)
-MLA2ROW_LB(z24, z25, z26, z27, z9, p0, x1,124)
+MLA2ROW_LA_LB_S(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,96) 
+MLA2ROW_LA_LB_S(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,100) 
+MLA2ROW_LB_S(z14, z15, z26, z27, z4, p0, x1,104)
+MLA2ROW_LB_S(z16, z17, z26, z27, z5, p0, x1,108)
+MLA2ROW_LB_S(z18, z19, z26, z27, z6, p0, x1,112)
+MLA2ROW_LB_S(z20, z21, z26, z27, z7, p0, x1,116)
+MLA2ROW_LB_S(z22, z23, z26, z27, z8, p0, x1,120)
+MLA2ROW_LB_S(z24, z25, z26, z27, z9, p0, x1,124)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
 " add x1, x1, #128                           \n\t" // B = B+4*8*sizeof(float)
 "                                            \n\t"
@@ -188,45 +188,45 @@ MLA2ROW_LB(z24, z25, z26, z27, z9, p0, x1,124)
 " cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
 " bne .S2VX8LOOP                             \n\t"
 " .S2VX8LASTITER:                            \n\t" // Body
-MLA2ROW_LA_LB(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,0)
+MLA2ROW_LA_LB_S(z10, z11, z0, z1, z2, p0, z26, x0,0,x1,0)
 " prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,4)
+MLA2ROW_LA_LB_S(z12, z13, z0, z1, z3, p0, z27, x0,1,x1,4)
 " prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,8)
+MLA2ROW_LB_S(z14, z15, z0, z1, z4, p0, x1,8)
 " prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,12)
+MLA2ROW_LB_S(z16, z17, z0, z1, z5, p0, x1,12)
 " prfd pldl1keep,p0, [x0, #5, MUL VL]        \n\t" // prefetch next a vector
-MLA2ROW_LB(z18, z19, z0, z1, z6, p0, x1,16)
-MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,20)
-MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,24)
-MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,28)
+MLA2ROW_LB_S(z18, z19, z0, z1, z6, p0, x1,16)
+MLA2ROW_LB_S(z20, z21, z0, z1, z7, p0, x1,20)
+MLA2ROW_LB_S(z22, z23, z0, z1, z8, p0, x1,24)
+MLA2ROW_LB_S(z24, z25, z0, z1, z9, p0, x1,28)
 "                                            \n\t"
-MLA2ROW_LA_LB(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,32)
-MLA2ROW_LA_LB(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,36)
-MLA2ROW_LB(z14, z15, z26, z27, z4, p0, x1,40)
-MLA2ROW_LB(z16, z17, z26, z27, z5, p0, x1,44)
-MLA2ROW_LB(z18, z19, z26, z27, z6, p0, x1,48)
-MLA2ROW_LB(z20, z21, z26, z27, z7, p0, x1,52)
-MLA2ROW_LB(z22, z23, z26, z27, z8, p0, x1,56)
-MLA2ROW_LB(z24, z25, z26, z27, z9, p0, x1,60)
+MLA2ROW_LA_LB_S(z10, z11, z26, z27, z2, p0, z0, x0,2,x1,32)
+MLA2ROW_LA_LB_S(z12, z13, z26, z27, z3, p0, z1, x0,3,x1,36)
+MLA2ROW_LB_S(z14, z15, z26, z27, z4, p0, x1,40)
+MLA2ROW_LB_S(z16, z17, z26, z27, z5, p0, x1,44)
+MLA2ROW_LB_S(z18, z19, z26, z27, z6, p0, x1,48)
+MLA2ROW_LB_S(z20, z21, z26, z27, z7, p0, x1,52)
+MLA2ROW_LB_S(z22, z23, z26, z27, z8, p0, x1,56)
+MLA2ROW_LB_S(z24, z25, z26, z27, z9, p0, x1,60)
 "                                            \n\t"
-MLA2ROW_LA_LB(z10, z11, z0, z1, z2, p0, z26, x0,4,x1,64)
-MLA2ROW_LA_LB(z12, z13, z0, z1, z3, p0, z27, x0,5,x1,68)
-MLA2ROW_LB(z14, z15, z0, z1, z4, p0, x1,72)
-MLA2ROW_LB(z16, z17, z0, z1, z5, p0, x1,76)
-MLA2ROW_LB(z18, z19, z0, z1, z6, p0, x1,80)
-MLA2ROW_LB(z20, z21, z0, z1, z7, p0, x1,84)
-MLA2ROW_LB(z22, z23, z0, z1, z8, p0, x1,88)
-MLA2ROW_LB(z24, z25, z0, z1, z9, p0, x1,92)
+MLA2ROW_LA_LB_S(z10, z11, z0, z1, z2, p0, z26, x0,4,x1,64)
+MLA2ROW_LA_LB_S(z12, z13, z0, z1, z3, p0, z27, x0,5,x1,68)
+MLA2ROW_LB_S(z14, z15, z0, z1, z4, p0, x1,72)
+MLA2ROW_LB_S(z16, z17, z0, z1, z5, p0, x1,76)
+MLA2ROW_LB_S(z18, z19, z0, z1, z6, p0, x1,80)
+MLA2ROW_LB_S(z20, z21, z0, z1, z7, p0, x1,84)
+MLA2ROW_LB_S(z22, z23, z0, z1, z8, p0, x1,88)
+MLA2ROW_LB_S(z24, z25, z0, z1, z9, p0, x1,92)
 "                                            \n\t"
-MLA2ROW(z10, z11, z26, z27, z2, p0)
-MLA2ROW(z12, z13, z26, z27, z3, p0)
-MLA2ROW(z14, z15, z26, z27, z4, p0)
-MLA2ROW(z16, z17, z26, z27, z5, p0)
-MLA2ROW(z18, z19, z26, z27, z6, p0)
-MLA2ROW(z20, z21, z26, z27, z7, p0)
-MLA2ROW(z22, z23, z26, z27, z8, p0)
-MLA2ROW(z24, z25, z26, z27, z9, p0)
+MLA2ROW_S(z10, z11, z26, z27, z2, p0)
+MLA2ROW_S(z12, z13, z26, z27, z3, p0)
+MLA2ROW_S(z14, z15, z26, z27, z4, p0)
+MLA2ROW_S(z16, z17, z26, z27, z5, p0)
+MLA2ROW_S(z18, z19, z26, z27, z6, p0)
+MLA2ROW_S(z20, z21, z26, z27, z7, p0)
+MLA2ROW_S(z22, z23, z26, z27, z8, p0)
+MLA2ROW_S(z24, z25, z26, z27, z9, p0)
 " incb x0, ALL, MUL #6                       \n\t" // 6 Vectors loaded
 " add x1, x1, #96                            \n\t" // B = B+3*8*sizeof(float)
 "                                            \n\t"
@@ -236,22 +236,22 @@ MLA2ROW(z24, z25, z26, z27, z9, p0)
 "                                            \n\t"
 ".S2VX8LOOPKLEFT:                            \n\t"
 "                                            \n\t"
-LOAD2VEC(z0,z1,p0,x0)
+LOAD2VEC_S(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
-LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
+LOAD8VEC_DIST_S(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
 " add x1, x1, #32                            \n\t" // advance b pointer by 8 floats
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
 "                                            \n\t"
-MLA2ROW(z10,z11,z0,z1,z2,p0)
-MLA2ROW(z12,z13,z0,z1,z3,p0)
-MLA2ROW(z14,z15,z0,z1,z4,p0)
-MLA2ROW(z16,z17,z0,z1,z5,p0)
-MLA2ROW(z18,z19,z0,z1,z6,p0)
-MLA2ROW(z20,z21,z0,z1,z7,p0)
-MLA2ROW(z22,z23,z0,z1,z8,p0)
-MLA2ROW(z24,z25,z0,z1,z9,p0)
+MLA2ROW_S(z10,z11,z0,z1,z2,p0)
+MLA2ROW_S(z12,z13,z0,z1,z3,p0)
+MLA2ROW_S(z14,z15,z0,z1,z4,p0)
+MLA2ROW_S(z16,z17,z0,z1,z5,p0)
+MLA2ROW_S(z18,z19,z0,z1,z6,p0)
+MLA2ROW_S(z20,z21,z0,z1,z7,p0)
+MLA2ROW_S(z22,z23,z0,z1,z8,p0)
+MLA2ROW_S(z24,z25,z0,z1,z9,p0)
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
 " bne .S2VX8LOOPKLEFT                        \n\t" // if i!=0.
@@ -272,8 +272,8 @@ MLA2ROW(z24,z25,z0,z1,z9,p0)
 //FINC_2COL(2VX8,CONT,z4,z5,z6,z7,     x21,x22, no,no, 29, 30, z14,z15,z16,z17,2)
 //FINC_2COL(2VX8,CONT,z8,z9,z10,z11,   x23,x24, no,no, 29, 30, z18,z19,z20,z21,3)
 //FINC_2COL(2VX8,CONT,z12,z13,z14,z15, x25,x26, no,no, 29, 30, z22,z23,z24,z25,4)
-FINC_4COL(2VX8,CONT, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-FINC_4COL(2VX8,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
+FINC_4COL_S(2VX8,CONT_D, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+FINC_4COL_S(2VX8,CONT_D, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
 "                                            \n\t"
 " b .S2VX8END                                \n\t"
 "                                            \n\t"
@@ -287,8 +287,8 @@ FINC_4COL(2VX8,CONT, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,3
 //FINC_2COL(2VX8,GENI,z4,z5,z6,z7,     x21,x22, z8,z9, 29, 30, z14,z15,z16,z17,2)
 //FINC_2COL(2VX8,GENI,z10,z11,z12,z13, x23,x24, z8,z9, 29, 30, z18,z19,z20,z21,3)
 //FINC_2COL(2VX8,GENI,z14,z15,z16,z17, x25,x26, z8,z9, 29, 30, z22,z23,z24,z25,4)
-FINC_4COL(2VX8,GENI, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, z8,z9, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-FINC_4COL(2VX8,GENI, z10,z11,z12,z13,z14,z15,z16,z17, x23,x24,x25,x26, z8,z9, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
+FINC_4COL_S(2VX8,GENI_S, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, z8,z9, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+FINC_4COL_S(2VX8,GENI_S, z10,z11,z12,z13,z14,z15,z16,z17, x23,x24,x25,x26, z8,z9, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
 "                                            \n\t"
 " .S2VX8END:                                 \n\t" // Done!
 "                                            \n\t"

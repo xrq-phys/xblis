@@ -36,7 +36,7 @@
 
 
 #include "blis.h"
-#include "bli_dgemm_sve_asm_macros.h"
+#include "bli_sve_finc_d.h"
 
 #if defined(DEBUG)
 // seen a compiler use the stack instead when it's inside the function
@@ -115,18 +115,18 @@ INASM_START_TRACE
 "                                            \n\t"
 " ptrue p0.d                                 \n\t" // Creating all true predicate
 "                                            \n\t"
-LOADC2VEC(z0,z1,p0,x0)
+LOADC2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
-LOADC8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
+LOADC8VEC_DIST_D(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
 "                                            \n\t"
 "                                            \n\t"
-ZERO2VEC(z10,z11)                                  // c column 0
+ZERO2VEC_D(z10,z11)                                  // c column 0
 " prfm PLDL1KEEP, [x1, #64]                  \n\t"
-ZERO2VEC(z12,z13)                                  // c column 1
+ZERO2VEC_D(z12,z13)                                  // c column 1
 " prfm PLDL1KEEP, [x1, #128]                  \n\t"
-ZERO2VEC(z14,z15)                                  // c column 2
+ZERO2VEC_D(z14,z15)                                  // c column 2
 PFL1(x0, p0, 2)                                    // prefetch next a vector
-ZERO2VEC(z16,z17)                                  // c column 3
+ZERO2VEC_D(z16,z17)                                  // c column 3
 PFL1(x0, p0, 3)
 "                                            \n\t"
 "                                            \n\t"
@@ -141,33 +141,33 @@ PFL1(x0, p0, 3)
 "                                            \n\t" 
 "                                            \n\t"
 " .Z2VX4LOOP:                                \n\t" // Body
-CMLA1ROW_ILV_LA_LB(z10, z11, z0, z1, z2, z3, p0, PFL1(x0, p0, 2), PFL1(x0, p0, 3), PFL1(x0, p0, 4), PFL1(x0, p0, 5), z26, z27, x0,0,1, x1,0,8) 
+CMLA1ROW_ILV_LA_LB_D(z10, z11, z0, z1, z2, z3, p0, PFL1(x0, p0, 2), PFL1(x0, p0, 3), PFL1(x0, p0, 4), PFL1(x0, p0, 5), z26, z27, x0,0,1, x1,0,8) 
 CMLA1ROW_ILV_LB   (z12, z13, z0, z1, z4, z5, p0, PFL1(x0, p0, 6), PFL1(x0, p0, 7), PFL1(x0, p0, 8), PFL1(x0, p0, 9), x1,16,24) 
-CMLA1ROW_LB       (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB       (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
+CMLA1ROW_LB_D       (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D       (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
 "                                            \n\t"
 " add x1, x1, #64                            \n\t" // B = B+4*sizeof(dcomplex)
-CMLA1ROW_LA_LB(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0, 2,3, x1,0,8) 
+CMLA1ROW_LA_LB_D(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0, 2,3, x1,0,8) 
 " prfm PLDL1KEEP, [x1, #64]                  \n\t"
-CMLA1ROW_LB   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
 " prfm PLDL1KEEP, [x1, #128]                 \n\t"
-CMLA1ROW_LB   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
 " prfm PLDL1KEEP, [x1, #192]                 \n\t"
-CMLA1ROW_LB   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
+CMLA1ROW_LB_D   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
 " prfm PLDL1KEEP, [x1, #256]                 \n\t"
 
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
 " add x1, x1, #64                            \n\t" // B = B+4*sizeof(dcomplex)
-CMLA1ROW_LA_LB(z10, z11, z0, z1, z2, z3, p0, z26, z27, x0,0,1, x1,0,8) 
-CMLA1ROW_LB   (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
-CMLA1ROW_LB   (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB   (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
+CMLA1ROW_LA_LB_D(z10, z11, z0, z1, z2, z3, p0, z26, z27, x0,0,1, x1,0,8) 
+CMLA1ROW_LB_D   (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D   (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D   (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
 "                                            \n\t"
 " add x1, x1, #64                            \n\t" // B = B+4*sizeof(dcomplex)
-CMLA1ROW_LA_LB(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0,2,3, x1,0,8) 
-CMLA1ROW_LB   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
-CMLA1ROW_LB   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
+CMLA1ROW_LA_LB_D(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0,2,3, x1,0,8) 
+CMLA1ROW_LB_D   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
 " add x1, x1, #64                           \n\t" // B = B+4*sizeof(dcomplex)
 "                                            \n\t"
@@ -175,26 +175,26 @@ CMLA1ROW_LB   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
 " cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
 " bne .Z2VX4LOOP                             \n\t"
 " .Z2VX4LASTITER:                            \n\t" // Body
-CMLA1ROW_ILV_LA_LB(z10, z11, z0, z1, z2, z3, p0, PFL1(x0, p0, 2), PFL1(x0, p0, 3), PFL1(x0, p0, 4), PFL1(x0, p0, 5), z26, z27, x0,0,1, x1,0,8) 
-CMLA1ROW_LB       (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
-CMLA1ROW_LB       (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB       (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
+CMLA1ROW_ILV_LA_LB_D(z10, z11, z0, z1, z2, z3, p0, PFL1(x0, p0, 2), PFL1(x0, p0, 3), PFL1(x0, p0, 4), PFL1(x0, p0, 5), z26, z27, x0,0,1, x1,0,8) 
+CMLA1ROW_LB_D       (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D       (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D       (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
 "                                            \n\t"
 " add x1, x1, #64                            \n\t" // B = B+8*sizeof(double)
-CMLA1ROW_LA_LB(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0,2,3, x1,0,8) 
-CMLA1ROW_LB   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
-CMLA1ROW_LB   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
+CMLA1ROW_LA_LB_D(z10, z11, z26, z27, z2, z3, p0, z0, z1, x0,2,3, x1,0,8) 
+CMLA1ROW_LB_D   (z12, z13, z26, z27, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D   (z14, z15, z26, z27, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D   (z16, z17, z26, z27, z8, z9, p0, x1,48,56)
 " add x1, x1, #64                            \n\t" // B = B+8*sizeof(double)
-CMLA1ROW_LA_LB(z10, z11, z0, z1, z2, z3, p0, z26, z27, x0,4,5, x1,0,8) 
-CMLA1ROW_LB   (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
-CMLA1ROW_LB   (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
-CMLA1ROW_LB   (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
+CMLA1ROW_LA_LB_D(z10, z11, z0, z1, z2, z3, p0, z26, z27, x0,4,5, x1,0,8) 
+CMLA1ROW_LB_D   (z12, z13, z0, z1, z4, z5, p0, x1,16,24) 
+CMLA1ROW_LB_D   (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
+CMLA1ROW_LB_D   (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
 "                                            \n\t"
-CMLA1ROW(z10, z11, z26, z27, z2, z3, p0) 
-CMLA1ROW(z12, z13, z26, z27, z4, z5, p0) 
-CMLA1ROW(z14, z15, z26, z27, z6, z7, p0)
-CMLA1ROW(z16, z17, z26, z27, z8, z9, p0)
+CMLA1ROW_D(z10, z11, z26, z27, z2, z3, p0) 
+CMLA1ROW_D(z12, z13, z26, z27, z4, z5, p0) 
+CMLA1ROW_D(z14, z15, z26, z27, z6, z7, p0)
+CMLA1ROW_D(z16, z17, z26, z27, z8, z9, p0)
 " incb x0, ALL, MUL #6                       \n\t" // 6 Vectors loaded
 " add x1, x1, #64                           \n\t" // B = B+8*sizeof(double)
 "                                            \n\t"
@@ -204,18 +204,18 @@ CMLA1ROW(z16, z17, z26, z27, z8, z9, p0)
 "                                            \n\t"
 ".Z2VX4LOOPKLEFT:                            \n\t"
 "                                            \n\t"
-LOADC2VEC(z0,z1,p0,x0)
+LOADC2VEC_D(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
-LOADC8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
+LOADC8VEC_DIST_D(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
 " add x1, x1, #64                            \n\t" // advance b pointer by 8 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
 "                                            \n\t"
-CMLA1ROW(z10, z11, z0, z1, z2, z3, p0) 
-CMLA1ROW(z12, z13, z0, z1, z4, z5, p0) 
-CMLA1ROW(z14, z15, z0, z1, z6, z7, p0)
-CMLA1ROW(z16, z17, z0, z1, z8, z9, p0)
+CMLA1ROW_D(z10, z11, z0, z1, z2, z3, p0) 
+CMLA1ROW_D(z12, z13, z0, z1, z4, z5, p0) 
+CMLA1ROW_D(z14, z15, z0, z1, z6, z7, p0)
+CMLA1ROW_D(z16, z17, z0, z1, z8, z9, p0)
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
 " bne .Z2VX4LOOPKLEFT                        \n\t" // if i!=0.
@@ -239,15 +239,15 @@ CMLA1ROW(z16, z17, z0, z1, z8, z9, p0)
 "                                            \n\t"
 " .Z2VX4COLSTORED:                           \n\t" // C is column-major.
 "                                            \n\t"
-CFINC_4COL(2VX4,CONT, z0,z1,z2,z3,z4,z5,z6,z7, z18,z19,z20,z21,z22,z23,z24,z25, x2,x20,x21,x22, z8,z9, 26,27,28,29, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+CFINC_4COL(2VX4,CONT_D, z0,z1,z2,z3,z4,z5,z6,z7, z18,z19,z20,z21,z22,z23,z24,z25, x2,x20,x21,x22, z8,z9, 26,27,28,29, z10,z11,z12,z13,z14,z15,z16,z17, 1)
 "                                            \n\t"
 " b .Z2VX4END                                \n\t"
 "                                            \n\t"
 " .Z2VX4GENSTORED:                           \n\t" // C is general-stride stored.
 "                                            \n\t" // Creating index for stride load&store access
-MKINDC_2VEC(z8,z9,x13,x11,x3)
+MKINDC_2VEC_D(z8,z9,x13,x11,x3)
 "                                            \n\t"
-CFINC_4COL(2VX4,GENI, z0,z1,z2,z3,z4,z5,z6,z7, z18,z19,z20,z21,z22,z23,z24,z25, x2,x20,x21,x22, z8,z9, 26,27,28,29, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+CFINC_4COL(2VX4,GENI_D, z0,z1,z2,z3,z4,z5,z6,z7, z18,z19,z20,z21,z22,z23,z24,z25, x2,x20,x21,x22, z8,z9, 26,27,28,29, z10,z11,z12,z13,z14,z15,z16,z17, 1)
 "                                            \n\t"
 " .Z2VX4END:                                 \n\t" // Done!
 "                                            \n\t"
