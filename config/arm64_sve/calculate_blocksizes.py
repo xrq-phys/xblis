@@ -47,6 +47,10 @@ def init_parser():
             required=True, help="Number of SIMD engines")
     parser.add_argument("-l","--fmalatency", metavar="cycles", type=int,
             required=True, help="Latency of an FMA instruction (when chained) in cpu cycles")
+    parser.add_argument("-m","--mr", metavar="mr_size", type=int,
+            help="Override m_r blocksize")
+    parser.add_argument("-n","--nr", metavar="nr_size", type=int,
+            help="Override n_r blocksize")
     parser.add_argument("-C","--cachelinesize", metavar="cacheline_size", type=int,
             required=True, help="Cache line size (assumed same for all cache levels)")
     parser.add_argument("-L","--l1dsize", metavar="l1_size", type=int,
@@ -94,15 +98,20 @@ def main():
     print(f"L_vfma: {L_vfma}")
     print(f"N_vfma: {N_vfma}")
 
-    m_r =ceil(sqrt(N_vec*L_vfma*N_vfma)/N_vec)*N_vec;
-    n_r =ceil((N_vec*L_vfma*N_vfma)/m_r);
+    m_r =ceil(sqrt(N_vec*L_vfma*N_vfma)/N_vec)*N_vec
+    if args.mr:
+        m_r = args.mr
+
+    n_r =ceil((N_vec*L_vfma*N_vfma)/m_r)
+    if args.nr:
+        n_r = args.nr
     # Reuse: B_r
     # Keep in L1: 1xB_r micropanel, 2xAr 2xCr
     # evict A_r:
     # A_r size: k_c*m_r
     # k_c*m_r*S_data = C_Ar * N_L1*C_L1
     # C_Ar = floor((W_L1-1.0)/(1.0+n_r/m_r)) (see paper)
-    k_c =floor((floor((W_L1-1.0)/(1.0+n_r/m_r)) * N_L1*C_L1)/(m_r*S_data));
+    k_c =floor((floor((W_L1-1.0)/(1.0+n_r/m_r)) * N_L1*C_L1)/(n_r*S_data))
 
     # Reuse: A_C
     # Keep in L2: 1x A_C, 2x m_c/m_r Cr microtiles, 2x B_r micropanel
@@ -111,8 +120,9 @@ def main():
     # size of A_C: k_c*m_c
     # 
     # 1 CL for C_r, calc how many for B_r, rest for A_C
-    C_Ac = W_L2-1 - ceil((k_c*m_r*S_data)/(C_L2*N_L2))
-    m_c = C_Ac *(N_L2*C_L2)/(k_c*S_data)
+    C_Ac = W_L2-1 - ceil((2*k_c*n_r*S_data)/(C_L2*N_L2))
+    m_c = floor(C_Ac *(N_L2*C_L2)/(k_c*S_data))
+    m_c -= (m_c % m_r) 
 
 
     # Reuse: B_C
@@ -121,8 +131,9 @@ def main():
     # size B_C: k_c*n_c
     #
     # 1 CL for C_r, calc how many for A_C, rest for B_C
-    C_Bc = W_L3-1 - ceil((k_c*m_c*S_data)/(C_L3*N_L3))
-    n_c = C_Bc*(N_L3*C_L3)/(k_c*S_data)
+    C_Bc = W_L3-1 - ceil((2*k_c*m_c*S_data)/(C_L3*N_L3))
+    n_c = floor(C_Bc*(N_L3*C_L3)/(k_c*S_data))
+    n_c -= (n_c % n_r)
 
     print("Double precision: ")
     print(f"m_r = {m_r}")
@@ -149,11 +160,24 @@ def main():
     C_L3   = args.cachelinesize
     N_L3   = args.l3size/W_L3/C_L3
 
-    m_r =ceil(sqrt(N_vec*L_vfma*N_vfma)/N_vec)*N_vec;
-    n_r =ceil((N_vec*L_vfma*N_vfma)/m_r);
-    k_c =(floor((W_L1-1.0)/(1.0+n_r/m_r)) * N_L1*C_L1)/(m_r*S_data);
-    m_c =floor(N_L2*C_L2*(W_L2-1)/(k_c*S_data))-n_r;
-    n_c =floor(N_L3*C_L3*(W_L3-1)/(k_c*S_data))-m_c;
+
+    m_r =ceil(sqrt(N_vec*L_vfma*N_vfma)/N_vec)*N_vec
+    if args.mr:
+        m_r = args.mr
+
+    n_r =ceil((N_vec*L_vfma*N_vfma)/m_r)
+    if args.nr:
+        n_r = args.nr
+
+    k_c = floor((floor((W_L1-1.0)/(1.0+n_r/m_r)) * N_L1*C_L1)/(n_r*S_data))
+
+    C_Ac = W_L2-1 - ceil((2*k_c*n_r*S_data)/(C_L2*N_L2))
+    m_c = floor(C_Ac *(N_L2*C_L2)/(k_c*S_data))
+    m_c -= (m_c % m_r) 
+
+    C_Bc = W_L3-1 - ceil((2*k_c*m_c*S_data)/(C_L3*N_L3))
+    n_c = floor(C_Bc*(N_L3*C_L3)/(k_c*S_data))
+    n_c -= (n_c % n_r)
 
     print("Single precision: ")
     print(f"m_r = {m_r}")

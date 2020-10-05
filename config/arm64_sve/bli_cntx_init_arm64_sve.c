@@ -160,13 +160,13 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 
     adjust_sve_mr_nr_d(&m_r_d,&n_r_d);
 
-    int k_c_d = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_d)/m_r_d)) * n_l1*c_l1)/(m_r_d*S_Data);
+    int k_c_d = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_d)/m_r_d)) * n_l1*c_l1)/(n_r_d*S_Data);
 
-    int C_Ac = w_l2 - 1 - ceil(((double)k_c_d*m_r_d*S_Data)/(c_l2*n_l2));
+    int C_Ac = w_l2 - 1 - ceil((2.0*(double)k_c_d*n_r_d*S_Data)/(c_l2*n_l2));
     int m_c_d = C_Ac * (n_l2 * c_l2)/(k_c_d*S_Data);
     m_c_d -= (m_c_d%m_r_d);
 
-    int C_Bc = w_l3 - 1 - ceil(((double)k_c_d*m_c_d*S_Data)/(c_l3*n_l3));
+    int C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_d*m_c_d*S_Data)/(c_l3*n_l3));
     int n_c_d = C_Bc * (n_l3 * c_l3)/(k_c_d*S_Data);
     n_c_d -= (n_c_d%n_r_d);
     
@@ -180,13 +180,13 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 
     adjust_sve_mr_nr_s(&m_r_s,&n_r_s);
 
-    int k_c_s = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_s)/m_r_s)) * n_l1*c_l1)/(m_r_s*S_Data);
+    int k_c_s = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_s)/m_r_s)) * n_l1*c_l1)/(n_r_s*S_Data);
 
-    C_Ac = w_l2 - 1 - ceil(((double)k_c_s*m_r_s*S_Data)/(c_l2*n_l2));
+    C_Ac = w_l2 - 1 - ceil((2.0*(double)k_c_s*n_r_s*S_Data)/(c_l2*n_l2));
     int m_c_s = C_Ac * (n_l2 * c_l2)/(k_c_s*S_Data);
     m_c_s -= (m_c_s%m_r_s);
 
-    C_Bc = w_l3 - 1 - ceil(((double)k_c_s*m_c_s*S_Data)/(c_l3*n_l3));
+    C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_s*m_c_s*S_Data)/(c_l3*n_l3));
     int n_c_s = C_Bc * (n_l3 * c_l3)/(k_c_s*S_Data);
     n_c_s -= (n_c_s%n_r_s);
 
@@ -203,13 +203,13 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 
     adjust_sve_mr_nr_z(&m_r_z,&n_r_z);
 
-    int k_c_z = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_z)/m_r_z)) * n_l1*c_l1)/(m_r_z*S_Data);
+    int k_c_z = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_z)/m_r_z)) * n_l1*c_l1)/(n_r_z*S_Data);
 
-    C_Ac = w_l2 - 1 - ceil(((double)k_c_z*m_r_z*S_Data)/(c_l2*n_l2));
+    C_Ac = w_l2 - 1 - ceil((2.0*(double)k_c_z*n_r_z*S_Data)/(c_l2*n_l2));
     int m_c_z = C_Ac * (n_l2 * c_l2)/(k_c_z*S_Data);
     m_c_z -= (m_c_z%m_r_z);
 
-    C_Bc = w_l3 - 1 - ceil(((double)k_c_z*m_c_z*S_Data)/(c_l3*n_l3));
+    C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_z*m_c_z*S_Data)/(c_l3*n_l3));
     int n_c_z = C_Bc * (n_l3 * c_l3)/(k_c_z*S_Data);
     n_c_z -= (n_c_z%n_r_z);
 
