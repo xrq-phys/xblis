@@ -113,7 +113,7 @@ __asm__ volatile
 LOAD4VEC_D(z0,z1,z2,z3, p0,x0)
 "                                            \n\t"
 LOAD4VEC_DIST_D(z4,z5,z6,z7,p0,x1)
-LDR_NOADDR_D(z8,p0)OA(x1,32)"\n\t"
+LDR_NOADDR_D(z8,p0)OA_D(x1,32)"\n\t"
 "                                            \n\t"
 "                                            \n\t"
 ZERO4VEC_D(z9,z10,z11,z12)                          // c column 0
@@ -315,7 +315,7 @@ LOAD4VEC_D(z0,z1,z2,z3,p0,x0)
 " incb x0, ALL, MUL #4                       \n\t" // Advance a pointer by 4 vectors
 "                                            \n\t"
 LOAD4VEC_DIST_D(z4,z5,z6,z7,p0,x1)
-LDR_NOADDR_D(z8,p0)OA(x1,32)"\n\t"
+LDR_NOADDR_D(z8,p0)OA_D(x1,32)"\n\t"
 " add x1, x1, #40                            \n\t" // advance b pointer by 5 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"

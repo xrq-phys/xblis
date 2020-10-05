@@ -194,9 +194,9 @@ __asm__ volatile
 LOAD2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
 "                                            \n\t"
-LOAD4VEC_QDIST(z4,z5,z6,z7,p0,x1)
+LOAD4VEC_QDIST_D(z4,z5,z6,z7,p0,x1)
 " add x1, x1, #64                           \n\t" // B = B+8*sizeof(double)
-LOAD4VEC_QDIST(z8,z9,z10,z11,p0,x1)
+LOAD4VEC_QDIST_D(z8,z9,z10,z11,p0,x1)
 "                                            \n\t"
 ZERO4VEC_D(z12,z13,z14,z15)                          // c columns 0-1
 ZERO4VEC_D(z16,z17,z18,z19)                          // c columns 2-3

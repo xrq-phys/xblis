@@ -349,7 +349,7 @@ LDR_BVEC_D(z10, z11, p0, x1, 0, 8)                   // Load beta
 " dup z26.d, #0                              \n\t" 
 " dup z27.d, #0                              \n\t" 
 "                                            \n\t"
-CMPCZB(z10, z11, ".C256BETAZEROCOLSTOREDS1")
+CMPCZB_D(z10, z11, ".C256BETAZEROCOLSTOREDS1")
 "                                            \n\t"
 LD_AVEC_D(z0, z1, p0, x2)  // Load column 0 of C
 LD_AVEC_D(z2, z3, p0, x20) // Load column 1 of C

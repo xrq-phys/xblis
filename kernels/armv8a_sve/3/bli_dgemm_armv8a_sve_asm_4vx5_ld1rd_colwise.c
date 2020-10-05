@@ -36,36 +36,35 @@
 
 
 #include "blis.h"
-#include "bli_dgemm_sve_asm_macros.h"
-#include "bli_sve_asm_debug.h"
+#include "bli_sve_asm_mla_d.h"
 
 
 #define BLOCK_4VX5_Z12_Z31(cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, avec0,avec1,avec2,avec3, next_bvec0,next_bvec1,next_bvec2,next_bvec3,next_bvec4, aoff0,aoff1,aoff2,aoff3)\
-MLA4COL_D(z12,z16,z20,z24,z28, cur_avec0, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
-LOAD1VEC_VOFF_D(next_avec0, p0, x0, aoff0)\
-MLA4COL_D(z13,z17,z21,z25,z29, cur_avec1, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
-LOAD1VEC_VOFF_D(next_avec1, p0, x0, aoff1)\
-MLA4COL_D(z14,z18,z22,z26,z30, cur_avec2, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
-LOAD1VEC_VOFF_D(next_avec2, p0, x0, aoff2)\
-/*MLA4COL_D(z15,z19,z23,z27,z31, cur_avec3, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\*/\
-MLA1COL_D(z15, cur_avec3, cur_bvec0, p0)\
+MLA5COL_D(z12,z16,z20,z24,z28, avec0, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
+LOAD1VEC_VOFF_D(avec0, p0, x0, aoff0)\
+MLA5COL_D(z13,z17,z21,z25,z29, avec1, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
+LOAD1VEC_VOFF_D(avec1, p0, x0, aoff1)\
+MLA5COL_D(z14,z18,z22,z26,z30, avec2, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\
+LOAD1VEC_VOFF_D(avec2, p0, x0, aoff2)\
+/*MLA4COL_D(z15,z19,z23,z27,z31, avec3, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\*/\
+MLA1COL_D(z15, avec3, cur_bvec0, p0)\
 LOAD1VEC_DIST_OFF_D(next_bvec0, p0, x0, 0)\
-MLA1COL_D(z19, cur_avec3, cur_bvec1, p0)\
+MLA1COL_D(z19, avec3, cur_bvec1, p0)\
 LOAD1VEC_DIST_OFF_D(next_bvec1, p0, x0, 8)\
-MLA1COL_D(z23, cur_avec3, cur_bvec2, p0)\
+MLA1COL_D(z23, avec3, cur_bvec2, p0)\
 LOAD1VEC_DIST_OFF_D(next_bvec2, p0, x0, 16)\
-MLA1COL_D(z27, cur_avec3, cur_bvec3, p0)\
+MLA1COL_D(z27, avec3, cur_bvec3, p0)\
 LOAD1VEC_DIST_OFF_D(next_bvec3, p0, x0, 24)\
-MLA1COL_D(z31, cur_avec3, cur_bvec4, p0)\
+MLA1COL_D(z31, avec3, cur_bvec4, p0)\
 LOAD1VEC_DIST_OFF_D(next_bvec4, p0, x0, 32)\
-LOAD1VEC_VOFF_D(next_avec3, p0, x0, aoff3)\
+LOAD1VEC_VOFF_D(avec3, p0, x0, aoff3)\
 " add x1, x1, #40 \n\t"
 
-#define ENDBLOCK_4VX5_Z12_Z31(bvec0,bvec1,bvec2,bvec3,bvec4, cur_avec0,cur_avec1,cur_avec2,cur_avec3)\
-MLA4COL_D(z12,z16,z20,z24,z28, cur_avec0, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
-MLA4COL_D(z13,z17,z21,z25,z29, cur_avec1, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
-MLA4COL_D(z14,z18,z22,z26,z30, cur_avec2, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
-MLA4COL_D(z15,z19,z23,z27,z31, cur_avec3, bvec0,bvec1,bvec2,bvec3,bvec4, p0)
+#define ENDBLOCK_4VX5_Z12_Z31(bvec0,bvec1,bvec2,bvec3,bvec4, avec0,avec1,avec2,avec3)\
+MLA5COL_D(z12,z16,z20,z24,z28, avec0, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
+MLA5COL_D(z13,z17,z21,z25,z29, avec1, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
+MLA5COL_D(z14,z18,z22,z26,z30, avec2, bvec0,bvec1,bvec2,bvec3,bvec4, p0)\
+MLA5COL_D(z15,z19,z23,z27,z31, avec3, bvec0,bvec1,bvec2,bvec3,bvec4, p0)
 
 
 /* 4 vectors in m_r, n_r = 5
@@ -328,20 +327,20 @@ STOR4VEC_D(z28,z29,z30,z31, p0,x23)              // Store Column 4
 " beq .D4VX5BETAZEROGENSTOREDS             \n\t" // multiply with beta if beta isn't zero
 "                                        \n\t"
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x2, z2,z3,z4,z5)
-MUL4ROW_D(z12,z13,z14,z15,  z12,z13,z14,z15,  z32, p0)
-MLA4ROW_D(z12,z13,z14,z15,  z6,z7,z8,z9,     z33, p0)
+MUL4ROW_D(z12,z13,z14,z15,  z12,z13,z14,z15,  z0, p0)
+MLA4ROW_D(z12,z13,z14,z15,  z6,z7,z8,z9,     z1, p0)
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x20, z2,z3,z4,z5)
-MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z32, p0)
-MLA4ROW_D(z16,z17,z18,z19, z6,z7,z8,z9,     z33, p0)
+MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z0, p0)
+MLA4ROW_D(z16,z17,z18,z19, z6,z7,z8,z9,     z1, p0)
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x21, z2,z3,z4,z5)
-MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z32, p0)
-MLA4ROW_D(z20,z21,z22,z23, z6,z7,z8,z9,     z33, p0)
+MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z0, p0)
+MLA4ROW_D(z20,z21,z22,z23, z6,z7,z8,z9,     z1, p0)
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x22, z2,z3,z4,z5)
-MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z32, p0)
-MLA4ROW_D(z24,z25,z26,z27, z6,z7,z8,z9,     z33, p0)
+MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z0, p0)
+MLA4ROW_D(z24,z25,z26,z27, z6,z7,z8,z9,     z1, p0)
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x23, z2,z3,z4,z5)
-MUL4ROW_D(z28,z29,z30,z31, z28,z29,z30,z31, z32, p0)
-MLA4ROW_D(z28,z29,z30,z31, z6,z7,z8,z9,     z33, p0)
+MUL4ROW_D(z28,z29,z30,z31, z28,z29,z30,z31, z0, p0)
+MLA4ROW_D(z28,z29,z30,z31, z6,z7,z8,z9,     z1, p0)
 "                                            \n\t"
 STOR4VEC_GENI_D(z12,z13,z14,z15,  p0,x2, z2,z3,z4,z5)
 STOR4VEC_GENI_D(z16,z17,z18,z19, p0,x20, z2,z3,z4,z5)
@@ -353,11 +352,11 @@ STOR4VEC_GENI_D(z28,z29,z30,z31, p0,x23, z2,z3,z4,z5)
 "                                            \n\t"
 " .D4VX5BETAZEROGENSTOREDS:                  \n\t"
 // No need to zero anything as we are storing the scaled accumulated A*B values
-MUL4ROW_D(z12,z13,z14,z15, z12,z13,z14,z15, z32, p0)
-MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z32, p0)
-MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z32, p0)
-MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z32, p0)
-MUL4ROW_D(z28,z29,z30,z31, z28,z29,z30,z31, z32, p0)
+MUL4ROW_D(z12,z13,z14,z15, z12,z13,z14,z15, z0, p0)
+MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z0, p0)
+MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z0, p0)
+MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z0, p0)
+MUL4ROW_D(z28,z29,z30,z31, z28,z29,z30,z31, z0, p0)
 
 STOR4VEC_GENI_D(z12,z13,z14,z15,  p0,x2, z2,z3,z4,z5)
 STOR4VEC_GENI_D(z16,z17,z18,z19, p0,x20, z2,z3,z4,z5)

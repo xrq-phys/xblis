@@ -57,20 +57,20 @@
 #define OA_S(areg,offset)\
     ",[" #areg ", #" #offset"]"
 
-#define LOADVEC_SIST_S(vec1,preg,areg)\
+#define LOADVEC_DIST_S(vec1,preg,areg)\
     LDR_NOADDR_S(vec1,preg)OA_S(areg,0)"\n\t"
 
-#define LOAD2VEC_SIST_S(vec1,vec2,preg,areg)\
+#define LOAD2VEC_DIST_S(vec1,vec2,preg,areg)\
     LDR_NOADDR_S(vec1,preg)OA_S(areg,0)"\n\t"\
     LDR_NOADDR_S(vec2,preg)OA_S(areg,4)"\n\t"
 
-#define LOAD4VEC_SIST_S(vec1,vec2,vec3,vec4,preg,areg)\
+#define LOAD4VEC_DIST_S(vec1,vec2,vec3,vec4,preg,areg)\
     LDR_NOADDR_S(vec1,preg)OA_S(areg,0)"\n\t"\
     LDR_NOADDR_S(vec2,preg)OA_S(areg,4)"\n\t"\
     LDR_NOADDR_S(vec3,preg)OA_S(areg,8)"\n\t"\
     LDR_NOADDR_S(vec4,preg)OA_S(areg,12)"\n\t"
 
-#define LOAD8VEC_SIST_S(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8,preg,areg)\
+#define LOAD8VEC_DIST_S(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8,preg,areg)\
     LDR_NOADDR_S(vec1,preg)OA_S(areg,0)"\n\t"\
     LDR_NOADDR_S(vec2,preg)OA_S(areg,4)"\n\t"\
     LDR_NOADDR_S(vec3,preg)OA_S(areg,8)"\n\t"\
@@ -81,7 +81,7 @@
     LDR_NOADDR_S(vec8,preg)OA_S(areg,28)"\n\t"
 
 
-#if defined_S(USE_SVE_CMLA_INSTRUCTION)
+#if defined(USE_SVE_CMLA_INSTRUCTION)
 // When using the fused complex mupliply-accumulate
 // load {real, imag} into every 128 bit part of the vector
 
@@ -92,24 +92,24 @@
     " ld1w  " #vec1 ".s, " #preg "/z, [" #areg ",#"#off1",   MUL VL]           \n\t"\
     " ld1w  " #vec2 ".s, " #preg "/z, [" #areg ",#"#off2", MUL VL]\n\t"
 
-#define LDC2_SIST_NOADDR_S(vec1, vec2, preg)\
+#define LDC2_DIST_NOADDR_S(vec1, vec2, preg)\
     " ld1rd {" #vec1 ".d}, " #preg "/z"
-#define LOADC2VEC_SIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
-    LDC2_SIST_NOADDR_S(vec1, vec2, preg)OA_S(areg,off1)"\n\t"
+#define LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
+    LDC2_DIST_NOADDR_S(vec1, vec2, preg)OA_S(areg,off1)"\n\t"
 
 // Load 2 vectors and distribute the first complex number to all 128 parts
-#define LOADC2VEC_SIST_S(vec1, vec2, preg, areg) LOADC2VEC_SIST_OFF_S(vec1, vec2, preg, areg, 0)
+#define LOADC2VEC_DIST_S(vec1, vec2, preg, areg) LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, 0)
 
-#define LOADC4VEC_SIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, off1, off2, off3, off4)\
-    LOADC2VEC_SIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
-    LOADC2VEC_SIST_OFF_S(vec3, vec4, preg, areg, off3, off4)
+#define LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, off1, off2, off3, off4)\
+    LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
+    LOADC2VEC_DIST_OFF_S(vec3, vec4, preg, areg, off3, off4)
 
-#define LOADC4VEC_SIST_S(vec1, vec2, vec3, vec4, preg, areg)\
-    LOADC4VEC_SIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)
+#define LOADC4VEC_DIST_S(vec1, vec2, vec3, vec4, preg, areg)\
+    LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)
 
-#define LOADC8VEC_SIST_S(vec1, vec2, vec3, vec4, vec5, vec6, vec7, vec8, preg, areg)\
-    LOADC4VEC_SIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)\
-    LOADC4VEC_SIST_OFF_S(vec5, vec6, vec7, vec8, preg, areg, 16, 20, 24, 28)
+#define LOADC8VEC_DIST_S(vec1, vec2, vec3, vec4, vec5, vec6, vec7, vec8, preg, areg)\
+    LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)\
+    LOADC4VEC_DIST_OFF_S(vec5, vec6, vec7, vec8, preg, areg, 16, 20, 24, 28)
 
 // Make an index for gather-load/scatter-store
 // Here it has to be
@@ -140,15 +140,15 @@
 #define LOADC2VEC_VOFF_S(vec1, vec2, preg, areg, off1, off2)\
     " ld2w {" #vec1 ".s," #vec2 ".s}, " #preg "/z, [" #areg ",#"#off1", MUL VL]\n\t"
 
-#define LOADC2VEC_SIST_OFF_S(vec_r, vec_i, preg,areg,off1,off2)\
+#define LOADC2VEC_DIST_OFF_S(vec_r, vec_i, preg,areg,off1,off2)\
     LDR_NOADDR_S(vec_r,preg)OA_S(areg,off1)"\n\t"\
     LDR_NOADDR_S(vec_i,preg)OA_S(areg,off2)"\n\t"
 
-#define LOADC2VEC_SIST_S(vec_r, vec_i, preg, areg) LOAD2VEC_SIST_S(vec_r, vec_i, preg, areg)
-#define LOADC4VEC_SIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)\
-    LOAD4VEC_SIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)
-#define LOADC8VEC_SIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)\
-    LOAD8VEC_SIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)
+#define LOADC2VEC_DIST_S(vec_r, vec_i, preg, areg) LOAD2VEC_DIST_S(vec_r, vec_i, preg, areg)
+#define LOADC4VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)\
+    LOAD4VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)
+#define LOADC8VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)\
+    LOAD8VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)
 
 // Make an index for gather-load/scatter-store
 // Here it has to be
@@ -204,7 +204,7 @@
 
 // Some macros used for fixed size kernels
 
-#if defined_S(USE_SVE_CMLA_INSTRUCTION)
+#if defined(USE_SVE_CMLA_INSTRUCTION)
 #define LDR_BVEC_S(vec1, vec2, preg, reg, offset1, offset2)\
     " ld1rd  " #vec1 ".s, " #preg "/z, [" #reg ", #" #offset1 "]   \n\t"
 #else
@@ -213,7 +213,7 @@
     " ld1rw  " #vec2 ".s, " #preg "/z, [" #reg ", #" #offset2 "]   \n\t"
 #endif
 
-#if defined_S(USE_SVE_CMLA_INSTRUCTION)
+#if defined(USE_SVE_CMLA_INSTRUCTION)
 #define LD_AVEC_S(vec1, vec2, preg, reg)\
     " ld1w  " #vec1 ".s, " #preg "/z, [" #reg "]           \n\t"\
     " ld1w  " #vec2 ".s, " #preg "/z, [" #reg ",#1, MUL VL]\n\t"
@@ -222,7 +222,7 @@
     " ld2w {" #vec1 ".s," #vec2 ".s}, " #preg "/z, [" #reg "]\n\t"
 #endif
 
-#if defined_S(USE_SVE_CMLA_INSTRUCTION)
+#if defined(USE_SVE_CMLA_INSTRUCTION)
 #define ST_AVEC_S(vec1, vec2, preg, reg)\
     " st1w  " #vec1 ".s, " #preg ", [" #reg "]           \n\t"\
     " st1w  " #vec2 ".s, " #preg ", [" #reg ",#1, MUL VL]\n\t"

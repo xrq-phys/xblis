@@ -168,11 +168,11 @@ LOAD2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
 LOAD8VEC_DIST_D(z4,z5,z6,z7,z8,z9,z10,z11, p0,x1)
 "                                            \n\t"
-ZERO4VEC(z12,z13,z14,z15)                          // c columns 0-1
-ZERO4VEC(z16,z17,z18,z19)                          // c columns 2-3
-ZERO4VEC(z20,z21,z22,z23)                          // c columns 4-5
-ZERO4VEC(z24,z25,z26,z27)                          // c columns 6-7
-ZERO4VEC(z28,z29,z30,z31)                          // c columns 8-9
+ZERO4VEC_D(z12,z13,z14,z15)                          // c columns 0-1
+ZERO4VEC_D(z16,z17,z18,z19)                          // c columns 2-3
+ZERO4VEC_D(z20,z21,z22,z23)                          // c columns 4-5
+ZERO4VEC_D(z24,z25,z26,z27)                          // c columns 6-7
+ZERO4VEC_D(z28,z29,z30,z31)                          // c columns 8-9
 
 "                                            \n\t"
 "                                            \n\t"
@@ -278,9 +278,9 @@ MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z0, p0)
 
 MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z0, p0)
 MLA4ROW_D(z12,z13,z14,z15, z2,z3,z4,z5,     z1, p0)
-STOR2VEC(z12,z13,  p0,  x2)                             // Store Column 0
+STOR2VEC_D(z12,z13,  p0,  x2)                             // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC(z14,z15,  p0, x20)                             // Store Column 1
+STOR2VEC_D(z14,z15,  p0, x20)                             // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
 LOAD2VEC_D(z10,z11, p0,  x2)                             // Load Column 4
 LOAD2VEC_D(z12,z13, p0, x20)                             // Load Column 5
@@ -291,9 +291,9 @@ LOAD2VEC_D(z12,z13, p0, x20)                             // Load Column 5
 
 MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z0, p0)
 MLA4ROW_D(z16,z17,z18,z19, z6,z7,z8,z9,     z1, p0)
-STOR2VEC(z16,z17, p0, x21)                              // Store Column 2
+STOR2VEC_D(z16,z17, p0, x21)                              // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC(z18,z19, p0, x22)                              // Store Column 3
+STOR2VEC_D(z18,z19, p0, x22)                              // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
 LOAD2VEC_D(z14,z15, p0,x21)                               // Load Column 6
 LOAD2VEC_D(z16,z17, p0,x22)                               // Load Column 7
@@ -303,15 +303,15 @@ LOAD2VEC_D(z16,z17, p0,x22)                               // Load Column 7
 //                 x2 x20 x21 x22
 MUL4ROW_D(z28,z29,z30,z31, z28,z29,z30,z31, z0, p0)
 MLA4ROW_D(z20,z21,z22,z23, z10,z11,z12,z13, z1, p0)
-STOR2VEC(z20,z21, p0, x2)                               // Store Column 4
-STOR2VEC(z22,z23, p0, x20)                              // Store Column 5
+STOR2VEC_D(z20,z21, p0, x2)                               // Store Column 4
+STOR2VEC_D(z22,z23, p0, x20)                              // Store Column 5
 
 //  0   1   2   3   4   5   6   7   8   9
 //                          ^   ^   ^   ^
 //                        x21 x22  x2 x20
 MLA4ROW_D(z24,z25,z26,z27, z14,z15,z16,z17, z1, p0)
-STOR2VEC(z24,z25, p0, x21)                              // Store Column 6
-STOR2VEC(z26,z27, p0, x22)                              // Store Column 7
+STOR2VEC_D(z24,z25, p0, x21)                              // Store Column 6
+STOR2VEC_D(z26,z27, p0, x22)                              // Store Column 7
 
 " b .D2VX8END                              \n\t"       // Duplicate code for stores required due to lack of registers
 "                                           \n\t"
@@ -321,18 +321,18 @@ MUL4ROW_D(z12,z13,z14,z15, z12,z13,z14,z15, z0, p0)
 MUL4ROW_D(z16,z17,z18,z19, z16,z17,z18,z19, z0, p0)
 MUL4ROW_D(z20,z21,z22,z23, z20,z21,z22,z23, z0, p0)
 MUL4ROW_D(z24,z25,z26,z27, z24,z25,z26,z27, z0, p0)
-STOR2VEC(z12,z13,p0,x2)                                 // Store Column 0
+STOR2VEC_D(z12,z13,p0,x2)                                 // Store Column 0
 " add x2,x22,x10                            \n\t"       // Load address Column 4 of C
-STOR2VEC(z14,z15,p0,x20)                                // Store Column 1
+STOR2VEC_D(z14,z15,p0,x20)                                // Store Column 1
 " add x20,x2,x10                            \n\t"       // Load address Column 5 of C
-STOR2VEC(z16,z17,p0,x21)                                // Store Column 2
+STOR2VEC_D(z16,z17,p0,x21)                                // Store Column 2
 " add x21,x20,x10                           \n\t"       // Load address Column 6 of C
-STOR2VEC(z18,z19,p0,x22)                                // Store Column 3
+STOR2VEC_D(z18,z19,p0,x22)                                // Store Column 3
 " add x22,x21,x10                           \n\t"       // Load address Column 7 of C
-STOR2VEC(z20,z21,p0,x2)                                 // Store Column 4
-STOR2VEC(z22,z23,p0,x20)                                // Store Column 5
-STOR2VEC(z24,z25,p0,x21)                                // Store Column 6
-STOR2VEC(z26,z27,p0,x22)                                // Store Column 7
+STOR2VEC_D(z20,z21,p0,x2)                                 // Store Column 4
+STOR2VEC_D(z22,z23,p0,x20)                                // Store Column 5
+STOR2VEC_D(z24,z25,p0,x21)                                // Store Column 6
+STOR2VEC_D(z26,z27,p0,x22)                                // Store Column 7
 
 "                                           \n\t"
 " b .D2VX8END                              \n\t"

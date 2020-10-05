@@ -113,7 +113,7 @@ COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 #define CFINC_4COL(fsuf, addressing, c0,c1,c2,c3,c4,c5,c6,c7, cs0,cs1,cs2,cs3,cs4,cs5,cs6,cs7, ca0,ca1,ca2,ca3, avec1,avec2, alpha1,alpha2,beta1,beta2, acc0,acc1,acc2,acc3,acc4,acc5,acc6,acc7, labelnr)\
 ZERO8VEC_D(c0,c1,c2,c3,c4,c5,c6,c7)\
 "                                            \n\t"\
-CMPCZB(z ##beta1, z ##beta2, ".Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
+CMPCZB_D(z ##beta1, z ##beta2, ".Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
 "                                            \n\t"\
 COMBINE2(LOADC2VEC,addressing) (cs0,cs1,p0,ca0,avec1,avec2)\
 COMBINE2(LOADC2VEC,addressing) (cs2,cs3,p0,ca1,avec1,avec2)\

@@ -342,7 +342,7 @@ LOAD1VEC_D(z4,p0,x1)
 " dup z5.q, z4.q[0]                          \n\t"
 " dup z6.q, z4.q[1]                          \n\t"
 " add x1, x1, #64                            \n\t" // advance b pointer by 8 doubles
-LOAD2VEC_QDIST(z2,z3,p0,x1)
+LOAD2VEC_QDIST_D(z2,z3,p0,x1)
 " add x1, x1, #32                            \n\t" // advance b pointer by 8 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"

@@ -91,10 +91,10 @@
 #define OA_D(areg,offset)\
     ",[" #areg ", #" #offset"]"
 
-#define LOADVEC_DIST_OFF_D(vec1,preg,areg,off)\
+#define LOAD1VEC_DIST_OFF_D(vec1,preg,areg,off)\
     LDR_NOADDR_D(vec1,preg)OA_D(areg,off)"\n\t"
 
-#define LOADVEC_DIST_D(vec1,preg,areg)\
+#define LOAD1VEC_DIST_D(vec1,preg,areg)\
     LDR_NOADDR_D(vec1,preg)OA_D(areg,0)"\n\t"
 
 #define LOAD2VEC_DIST_D(vec1,vec2,preg,areg)\

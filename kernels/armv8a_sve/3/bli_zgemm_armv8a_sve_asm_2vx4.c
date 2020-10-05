@@ -142,7 +142,7 @@ PFL1(x0, p0, 3)
 "                                            \n\t"
 " .Z2VX4LOOP:                                \n\t" // Body
 CMLA1ROW_ILV_LA_LB_D(z10, z11, z0, z1, z2, z3, p0, PFL1(x0, p0, 2), PFL1(x0, p0, 3), PFL1(x0, p0, 4), PFL1(x0, p0, 5), z26, z27, x0,0,1, x1,0,8) 
-CMLA1ROW_ILV_LB   (z12, z13, z0, z1, z4, z5, p0, PFL1(x0, p0, 6), PFL1(x0, p0, 7), PFL1(x0, p0, 8), PFL1(x0, p0, 9), x1,16,24) 
+CMLA1ROW_ILV_LB_D   (z12, z13, z0, z1, z4, z5, p0, PFL1(x0, p0, 6), PFL1(x0, p0, 7), PFL1(x0, p0, 8), PFL1(x0, p0, 9), x1,16,24) 
 CMLA1ROW_LB_D       (z14, z15, z0, z1, z6, z7, p0, x1,32,40)
 CMLA1ROW_LB_D       (z16, z17, z0, z1, z8, z9, p0, x1,48,56)
 "                                            \n\t"

@@ -122,7 +122,7 @@ __asm__ volatile
 LOAD2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
 LOAD8VEC_DIST_D(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
-LDR_NOADDR_D(z10,p0)OA(x1,64)"\n\t"
+LDR_NOADDR_D(z10,p0)OA_D(x1,64)"\n\t"
 "                                            \n\t"
 "                                            \n\t"
 ZERO4VEC_D(z11,z12,z13,z14)                          // c columns 0-1
@@ -373,8 +373,8 @@ MLA2ROW_D(z27, z28, z29, z30, z10, p0)
 LOAD2VEC_D(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
-LOAD8VEC_DIST(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
-LDR_NOADDR(z10,p0)OA(x1,64)"\n\t"
+LOAD8VEC_DIST_D(z2,z3,z4,z5,z6,z7,z8,z9,p0,x1)
+LDR_NOADDR_D(z10,p0)OA_D(x1,64)"\n\t"
 " add x1, x1, #72                            \n\t" // advance b pointer by 9 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"

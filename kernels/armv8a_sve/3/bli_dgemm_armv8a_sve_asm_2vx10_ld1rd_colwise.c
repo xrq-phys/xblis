@@ -197,7 +197,7 @@ __asm__ volatile
 LOAD2VEC_D(z0,z1,p0,x0)
 "                                            \n\t"
 "                                            \n\t"
-LOAD8VEC_DIST(z4,z5,z6,z7,z8,z9,z10,z11, p0,x1)
+LOAD8VEC_DIST_D(z4,z5,z6,z7,z8,z9,z10,z11, p0,x1)
 "                                            \n\t"
 ZERO4VEC_D(z12,z13,z14,z15)                          // c columns 0-1
 ZERO4VEC_D(z16,z17,z18,z19)                          // c columns 2-3
@@ -250,16 +250,16 @@ ENDBLOCK_2VX10_Z12_Z31(z10,z11,z4,z5,z6,z7,z8,z9,z10,z11,  z2,z3)
 LOAD2VEC_D(z0,z1,p0,x0)
 " incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
 "                                            \n\t"
-LOADVEC_DIST_OFF_D(z2,  p0, x1,  0)
-LOADVEC_DIST_OFF_D(z3,  p0, x1,  8)
-LOADVEC_DIST_OFF_D(z4,  p0, x1, 16)
-LOADVEC_DIST_OFF_D(z5,  p0, x1, 24)
-LOADVEC_DIST_OFF_D(z6,  p0, x1, 32)
-LOADVEC_DIST_OFF_D(z7,  p0, x1, 40)
-LOADVEC_DIST_OFF_D(z8,  p0, x1, 48)
-LOADVEC_DIST_OFF_D(z9,  p0, x1, 56)
-LOADVEC_DIST_OFF_D(z10, p0, x1, 64)
-LOADVEC_DIST_OFF_D(z11, p0, x1, 72)
+LOAD1VEC_DIST_OFF_D(z2,  p0, x1,  0)
+LOAD1VEC_DIST_OFF_D(z3,  p0, x1,  8)
+LOAD1VEC_DIST_OFF_D(z4,  p0, x1, 16)
+LOAD1VEC_DIST_OFF_D(z5,  p0, x1, 24)
+LOAD1VEC_DIST_OFF_D(z6,  p0, x1, 32)
+LOAD1VEC_DIST_OFF_D(z7,  p0, x1, 40)
+LOAD1VEC_DIST_OFF_D(z8,  p0, x1, 48)
+LOAD1VEC_DIST_OFF_D(z9,  p0, x1, 56)
+LOAD1VEC_DIST_OFF_D(z10, p0, x1, 64)
+LOAD1VEC_DIST_OFF_D(z11, p0, x1, 72)
 " add x1, x1, #80                            \n\t" // advance b pointer by 10 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"

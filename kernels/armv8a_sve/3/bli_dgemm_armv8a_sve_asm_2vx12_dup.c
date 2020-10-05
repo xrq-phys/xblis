@@ -144,8 +144,8 @@ ZERO4VEC_D(z27,z28,z29,z30)                          // c columns 10-11
 "                                            \n\t" 
 "                                            \n\t"
 " .D2VX12LOOP:                               \n\t" // Body
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
 MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
@@ -167,8 +167,8 @@ MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end first 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
 MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
@@ -188,8 +188,8 @@ MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
 MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"                              // end second 2vx12 block
 " incb x0, ALL, MUL #4                       \n\t" // Next 4 A vectors
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // third 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // third 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
 MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
@@ -211,8 +211,8 @@ MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end third 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // fourth 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // fourth 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
 MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
@@ -239,8 +239,8 @@ MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " bne .D2VX12LOOP                             \n\t"
 " .D2VX12LASTITER:                            \n\t" // Body
 
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,0)    // first 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,1)
 " dup z5.q, z4.q[2] \n\t"
 MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
@@ -262,8 +262,8 @@ MLA2ROW_I_D(z29,z30, z0,z1, z6, 1, p0)
 LOAD1VEC_D(z4,p0,x1)
 " add x1, x1, #64 \n\t"                                // end first 2vx12 block
 "                                            \n\t"
-MLA2ROW_I_LA(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
-MLA2ROW_I_LA(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
+MLA2ROW_I_LA_D(z7,z8,  z2,z3, z5, 0, p0, z0, x0,2)    // second 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z2,z3, z5, 1, p0, z1, x0,3)
 " dup z5.q, z4.q[0] \n\t"
 MLA2ROW_I_D(z11,z12, z2,z3, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z2,z3, z6, 1, p0)
@@ -283,8 +283,8 @@ MLA2ROW_I_D(z27,z28, z2,z3, z6, 0, p0)
 MLA2ROW_I_D(z29,z30, z2,z3, z6, 1, p0)
 " dup z6.q, z4.q[1] \n\t"                              // end second 2vx12 block
 "                                                \n\t"
-MLA2ROW_I_LA(z7,z8,  z0,z1, z5, 0, p0, z2, x0,4)    // third 2vx12 block
-MLA2ROW_I_LA(z9,z10, z0,z1, z5, 1, p0, z3, x0,5)
+MLA2ROW_I_LA_D(z7,z8,  z0,z1, z5, 0, p0, z2, x0,4)    // third 2vx12 block
+MLA2ROW_I_LA_D(z9,z10, z0,z1, z5, 1, p0, z3, x0,5)
 " dup z5.q, z4.q[2] \n\t"
 MLA2ROW_I_D(z11,z12, z0,z1, z6, 0, p0)
 MLA2ROW_I_D(z13,z14, z0,z1, z6, 1, p0)
@@ -342,7 +342,7 @@ LOAD1VEC_D(z4,p0,x1)
 " dup z5.q, z4.q[0]                          \n\t"
 " dup z6.q, z4.q[1]                          \n\t"
 " add x1, x1, #64                            \n\t" // advance b pointer by 8 doubles
-LOAD2VEC_QDIST(z2,z3,p0,x1)
+LOAD2VEC_QDIST_D(z2,z3,p0,x1)
 " add x1, x1, #32                            \n\t" // advance b pointer by 8 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"

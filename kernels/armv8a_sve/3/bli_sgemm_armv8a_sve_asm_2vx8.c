@@ -272,8 +272,8 @@ MLA2ROW_S(z24,z25,z0,z1,z9,p0)
 //FINC_2COL(2VX8,CONT,z4,z5,z6,z7,     x21,x22, no,no, 29, 30, z14,z15,z16,z17,2)
 //FINC_2COL(2VX8,CONT,z8,z9,z10,z11,   x23,x24, no,no, 29, 30, z18,z19,z20,z21,3)
 //FINC_2COL(2VX8,CONT,z12,z13,z14,z15, x25,x26, no,no, 29, 30, z22,z23,z24,z25,4)
-FINC_4COL_S(2VX8,CONT_D, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-FINC_4COL_S(2VX8,CONT_D, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
+FINC_4COL(2VX8,CONT_S, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, no,no, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+FINC_4COL(2VX8,CONT_S, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
 "                                            \n\t"
 " b .S2VX8END                                \n\t"
 "                                            \n\t"
@@ -287,8 +287,8 @@ FINC_4COL_S(2VX8,CONT_D, z8,z9,z10,z11,z12,z13,z14,z15, x23,x24,x25,x26, no,no, 
 //FINC_2COL(2VX8,GENI,z4,z5,z6,z7,     x21,x22, z8,z9, 29, 30, z14,z15,z16,z17,2)
 //FINC_2COL(2VX8,GENI,z10,z11,z12,z13, x23,x24, z8,z9, 29, 30, z18,z19,z20,z21,3)
 //FINC_2COL(2VX8,GENI,z14,z15,z16,z17, x25,x26, z8,z9, 29, 30, z22,z23,z24,z25,4)
-FINC_4COL_S(2VX8,GENI_S, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, z8,z9, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
-FINC_4COL_S(2VX8,GENI_S, z10,z11,z12,z13,z14,z15,z16,z17, x23,x24,x25,x26, z8,z9, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
+FINC_4COL(2VX8,GENI_S, z0,z1,z2,z3,z4,z5,z6,z7, x2,x20,x21,x22, z8,z9, 29,30, z10,z11,z12,z13,z14,z15,z16,z17, 1)
+FINC_4COL(2VX8,GENI_S, z10,z11,z12,z13,z14,z15,z16,z17, x23,x24,x25,x26, z8,z9, 29,30, z18,z19,z20,z21,z22,z23,z24,z25, 2)
 "                                            \n\t"
 " .S2VX8END:                                 \n\t" // Done!
 "                                            \n\t"

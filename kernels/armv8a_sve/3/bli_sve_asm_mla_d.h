@@ -43,123 +43,139 @@
 #include "bli_sve_asm_loadstore_d.h"
 
 
-#define ZEROVEC(vec1)\
+#define ZEROVEC_D(vec1)\
     " dup " #vec1 ".d, #0\n\t"
 
-#define ZERO2VEC(vec1,vec2)\
-    ZEROVEC(vec1)\
-    ZEROVEC(vec2)
+#define ZERO2VEC_D(vec1,vec2)\
+    ZEROVEC_D(vec1)\
+    ZEROVEC_D(vec2)
 
-#define ZERO4VEC(vec1,vec2,vec3,vec4)\
-    ZERO2VEC(vec1,vec2)\
-    ZERO2VEC(vec3,vec4)
+#define ZERO4VEC_D(vec1,vec2,vec3,vec4)\
+    ZERO2VEC_D(vec1,vec2)\
+    ZERO2VEC_D(vec3,vec4)
 
-#define ZERO8VEC(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)\
-    ZERO4VEC(vec1,vec2,vec3,vec4)\
-    ZERO4VEC(vec5,vec6,vec7,vec8)
+#define ZERO8VEC_D(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)\
+    ZERO4VEC_D(vec1,vec2,vec3,vec4)\
+    ZERO4VEC_D(vec5,vec6,vec7,vec8)
 
-#define MLA1ROW(cvec, avec, bvec, preg)\
+#define MLA1COL_D(cvec, avec, bvec, preg)\
     " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d\n\t"
 
-#define MLA2ROW(c1, c2 , a1, a2, bvec, preg)\
-    MLA1ROW(c1,a1,bvec,preg)\
-    MLA1ROW(c2,a2,bvec,preg)
+#define MLA2COL_D(cvec1,cvec2, avec, bvec1,bvec2, preg)\
+    MLA1COL_D(cvec1, avec, bvec1, preg)\
+    MLA1COL_D(cvec2, avec, bvec2, preg)
 
-#define MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
-    MLA2ROW(c1,c2,a1,a2,bvec,preg)\
-    MLA2ROW(c3,c4,a3,a4,bvec,preg)
+#define MLA4COL_D(cvec1,cvec2,cvec3,cvec4, avec, bvec1,bvec2,bvec3,bvec4, preg)\
+    MLA2COL_D(cvec1,cvec2, avec, bvec1,bvec2, preg)\
+    MLA2COL_D(cvec3,cvec4, avec, bvec3,bvec4, preg)
 
-#define MLA1ROW_I(cvec, avec, bvec, ind, preg)\
+#define MLA5COL_D(cvec1,cvec2,cvec3,cvec4,cvec5, avec, bvec1,bvec2,bvec3,bvec4,bvec5, preg)\
+    MLA4COL_D(cvec1,cvec2,cvec3,cvec4, avec, bvec1,bvec2,bvec3,bvec4, preg)\
+    MLA1COL_D(cvec5, avec, bvec5, preg)
+
+
+#define MLA1ROW_D(cvec, avec, bvec, preg)\
+    " fmla " #cvec ".d, " #preg "/m, " #avec ".d, " #bvec ".d\n\t"
+
+#define MLA2ROW_D(c1, c2 , a1, a2, bvec, preg)\
+    MLA1ROW_D(c1,a1,bvec,preg)\
+    MLA1ROW_D(c2,a2,bvec,preg)
+
+#define MLA4ROW_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
+    MLA2ROW_D(c1,c2,a1,a2,bvec,preg)\
+    MLA2ROW_D(c3,c4,a3,a4,bvec,preg)
+
+#define MLA1ROW_I_D(cvec, avec, bvec, ind, preg)\
     " fmla " #cvec ".d, " #avec ".d, " #bvec ".d[" #ind "]\n\t"
 
-#define MLA2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
-    MLA1ROW_I(c1,a1,bvec,ind,preg)\
-    MLA1ROW_I(c2,a2,bvec,ind,preg)
+#define MLA2ROW_I_D(c1, c2 , a1, a2, bvec, ind, preg)\
+    MLA1ROW_I_D(c1,a1,bvec,ind,preg)\
+    MLA1ROW_I_D(c2,a2,bvec,ind,preg)
 
-#define MLA4ROW_I(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
-    MLA2ROW_I(c1,c2, a1,a2, bvec,ind,preg)\
-    MLA2ROW_I(c3,c4, a3,a4, bvec,ind,preg)
+#define MLA4ROW_I_D(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
+    MLA2ROW_I_D(c1,c2, a1,a2, bvec,ind,preg)\
+    MLA2ROW_I_D(c3,c4, a3,a4, bvec,ind,preg)
 
 
-#define MUL1ROW(c1, a1, bvec, preg)\
+#define MUL1ROW_D(c1, a1, bvec, preg)\
     " fmul " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec ".d\n\t"
 
-#define MUL2ROW(c1, c2 , a1, a2, bvec, preg)\
-    MUL1ROW(c1,a1,bvec,preg)\
-    MUL1ROW(c2,a2,bvec,preg)
+#define MUL2ROW_D(c1, c2 , a1, a2, bvec, preg)\
+    MUL1ROW_D(c1,a1,bvec,preg)\
+    MUL1ROW_D(c2,a2,bvec,preg)
 
-#define MUL4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
-    MUL2ROW(c1,c2,a1,a2,bvec,preg)\
-    MUL2ROW(c3,c4,a3,a4,bvec,preg)
+#define MUL4ROW_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
+    MUL2ROW_D(c1,c2,a1,a2,bvec,preg)\
+    MUL2ROW_D(c3,c4,a3,a4,bvec,preg)
 
-#define MUL1ROW_I(c1, a1, bvec, ind, preg)\
+#define MUL1ROW_I_D(c1, a1, bvec, ind, preg)\
     " fmul " #c1 ".d, " #a1 ".d, " #bvec ".d["#ind"]\n\t"
 
-#define MUL2ROW_I(c1, c2 , a1, a2, bvec, ind, preg)\
-    MUL1ROW_I(c1,a1,bvec,ind,preg)\
-    MUL1ROW_I(c2,a2,bvec,ind,preg)
+#define MUL2ROW_I_D(c1, c2 , a1, a2, bvec, ind, preg)\
+    MUL1ROW_I_D(c1,a1,bvec,ind,preg)\
+    MUL1ROW_I_D(c2,a2,bvec,ind,preg)
 
-#define MUL4ROW_I(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
-    MUL2ROW_I(c1,c2, a1,a2, bvec,ind,preg)\
-    MUL2ROW_I(c3,c4, a3,a4, bvec,ind,preg)
+#define MUL4ROW_I_D(c1,c2,c3,c4, a1,a2,a3,a4, bvec, ind, preg)\
+    MUL2ROW_I_D(c1,c2, a1,a2, bvec,ind,preg)\
+    MUL2ROW_I_D(c3,c4, a3,a4, bvec,ind,preg)
 
-#define MLA2X2ROW(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg)\
-    MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
-    MLA2ROW(c21, c22, a1, a2, bvec2, preg)
+#define MLA2X2ROW_D(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg)\
+    MLA2ROW_D(c11, c12, a1, a2, bvec1, preg)\
+    MLA2ROW_D(c21, c22, a1, a2, bvec2, preg)
 
-#define MLA2ROW_I_LA(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff)\
-    MLA2ROW_I(c1, c2, a1, a2, bvec, ind, preg)\
+#define MLA2ROW_I_LA_D(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff)\
+    MLA2ROW_I_D(c1, c2, a1, a2, bvec, ind, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"
 
-#define MLA2ROW_I_LA_LB(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff, bareg, bboff)\
-    MLA2ROW_I(c1, c2, a1, a2, bvec, ind, preg)\
+#define MLA2ROW_I_LA_LB_D(c1, c2 , a1, a2, bvec, ind, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA2ROW_I_D(c1, c2, a1, a2, bvec, ind, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    LOADVEC_QDIST(bvec,preg,bareg)
+    LOADVEC_QDIST_D(bvec,preg,bareg)
 
-#define MLA1ROW_LA_LB(cvec, avec, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
-    MLA1ROW(cvec, avec, bvec, preg)\
-    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
-    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
-
-#define MLA2ROW_LA_LB(c1, c2 , a1, a2, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
-    MLA2ROW(c1, c2, a1, a2, bvec, preg)\
+#define MLA1ROW_LA_LB_D(cvec, avec, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA1ROW_D(cvec, avec, bvec, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
+#define MLA2ROW_LA_LB_D(c1, c2 , a1, a2, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA2ROW_D(c1, c2, a1, a2, bvec, preg)\
+    " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
+    " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
-#define MLA2X2ROW_LA_LB(c11,c12,c21,c22, a1, a2, bvec1,bvec2, preg, nextavec, aareg, avoff, bareg, bboff1,bboff2)\
-    MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
-    MLA2ROW(c21, c22, a1, a2, bvec2, preg)\
+
+#define MLA2X2ROW_LA_LB_D(c11,c12,c21,c22, a1, a2, bvec1,bvec2, preg, nextavec, aareg, avoff, bareg, bboff1,bboff2)\
+    MLA2ROW_D(c11, c12, a1, a2, bvec1, preg)\
+    MLA2ROW_D(c21, c22, a1, a2, bvec2, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
     " ld1rd  " #bvec1 ".d, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
     " ld1rd  " #bvec2 ".d, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
 
-#define MLA4ROW_LA_LB(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
-    MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
+#define MLA4ROW_LA_LB_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg, nextavec, aareg, avoff, bareg, bboff)\
+    MLA4ROW_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     " ld1d   " #nextavec ".d, " #preg "/z, [" #aareg ", #" #avoff", MUL VL]\n\t"\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 
-#define MLA2X2ROW_LB(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg, bareg, bboff1,bboff2)\
-    MLA2ROW(c11, c12, a1, a2, bvec1, preg)\
-    MLA2ROW(c21, c22, a1, a2, bvec2, preg)\
+#define MLA2X2ROW_LB_D(c11, c12, c21, c22, a1, a2, bvec1,bvec2, preg, bareg, bboff1,bboff2)\
+    MLA2ROW_D(c11, c12, a1, a2, bvec1, preg)\
+    MLA2ROW_D(c21, c22, a1, a2, bvec2, preg)\
     " ld1rd  " #bvec1 ".d, "#preg"/z, [" #bareg",#" #bboff1 "]\n\t"\
     " ld1rd  " #bvec2 ".d, "#preg"/z, [" #bareg",#" #bboff2 "]\n\t"
 
-#define MLA1ROW_LB(cvec, avec, bvec, preg,  bareg, bboff)\
-    MLA1ROW(cvec, avec, bvec, preg)\
+#define MLA1ROW_LB_D(cvec, avec, bvec, preg,  bareg, bboff)\
+    MLA1ROW_D(cvec, avec, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
-#define MLA2ROW_LB(c1, c2 , a1, a2, bvec, preg,  bareg, bboff)\
-    MLA2ROW(c1, c2, a1, a2, bvec, preg)\
+#define MLA2ROW_LB_D(c1, c2 , a1, a2, bvec, preg,  bareg, bboff)\
+    MLA2ROW_D(c1, c2, a1, a2, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
-#define MLA4ROW_LB(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg,  bareg, bboff)\
-    MLA4ROW(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
+#define MLA4ROW_LB_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg,  bareg, bboff)\
+    MLA4ROW_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
 #if defined(USE_SVE_CMLA_INSTRUCTION)
-    #define CMLA1ROW_ILV(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define CMLA1ROW_ILV_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
         " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #0\n\t"\
         ilv1\
         " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #0\n\t"\
@@ -170,7 +186,7 @@
         ilv4\
         "\n\t"
 #else
-    #define CMLA1ROW_ILV(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define CMLA1ROW_ILV_D(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
         " fmla " #cvec_r ".d, " #preg "/m, " #avec_r ".d, " #bvec_r ".d\n\t"\
         ilv1\
         " fmla " #cvec_i ".d, " #preg "/m, " #avec_r ".d, " #bvec_i ".d\n\t"\
@@ -182,27 +198,27 @@
         "\n\t"
 #endif
 
-#define CMLA1ROW(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-        CMLA1ROW_ILV(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
+#define CMLA1ROW_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+        CMLA1ROW_ILV_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
 
-#define CMLA1ROW_ILV_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
-    LOADC2VEC_VOFF(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
-    LOADC2VEC_DIST_OFF(bvec1, bvec2, preg, bareg, bboff1,bboff2)
+#define CMLA1ROW_ILV_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
+    LOADC2VEC_VOFF_D(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
+    LOADC2VEC_DIST_OFF_D(bvec1, bvec2, preg, bareg, bboff1,bboff2)
 
-#define CMLA1ROW_ILV_LB(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
-    LOADC2VEC_DIST_OFF(bvec1, bvec2, preg, bareg, bboff1, bboff2)
+#define CMLA1ROW_ILV_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    LOADC2VEC_DIST_OFF_D(bvec1, bvec2, preg, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LA_LB(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
+#define CMLA1ROW_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LB(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LB(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
+#define CMLA1ROW_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+    CMLA1ROW_ILV_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
 
-#define CMLA2ROW(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
-    CMLA1ROW(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-    CMLA1ROW(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
+#define CMLA2ROW_D(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
+    CMLA1ROW_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+    CMLA1ROW_D(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
 
 #define PFL1(areg,preg,offset) " prfd pldl1keep, "#preg", [" #areg ", #" #offset ", MUL VL]\n\t"
 

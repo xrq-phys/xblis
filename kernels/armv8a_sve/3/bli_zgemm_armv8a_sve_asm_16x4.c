@@ -379,7 +379,7 @@ LDR_BVEC_D(z10, z11, p0, x1, 0, 8)                   // Load beta
 " dup z26.d, #0                              \n\t" 
 " dup z27.d, #0                              \n\t" 
 "                                            \n\t"
-CMPCZB(z10, z11, ".C256BETAZEROCOLSTOREDS1")
+CMPCZB_D(z10, z11, ".C256BETAZEROCOLSTOREDS1")
 "                                            \n\t"
 LD_AVEC_D(z0, z1, p0, x2)  // Load column 0 of C
 LD_AVEC_D(z2, z3, p0, x20) // Load column 1 of C
@@ -409,7 +409,7 @@ ST_AVEC_D(z26, z27, p0, x22) // Store column 3 of C
 "                                            \n\t"
 " .C256GENSTORED:                            \n\t" // C is general-stride stored.
 "                                            \n\t"
-MKINDC_2VEC(z28, z29, x13, x11, x3)
+MKINDC_2VEC_D(z28, z29, x13, x11, x3)
 " dup z0.d, #0                               \n\t" // for loading C
 " dup z1.d, #0                               \n\t" 
 " dup z2.d, #0                               \n\t" 
