@@ -65,11 +65,7 @@ void* get_sve_dgemm_bli_kernel(int m_r, int n_r)
         return kptr;
     }
 
-    if(sve_bit_size == m_r*64)
-    {
-        kptr = (void*) bli_dgemm_armv8a_sve_asm_1vx8;
-    }
-    else if(4*sve_bit_size == m_r*64)
+    if(4*sve_bit_size == m_r*64)
     {
         kptr = (void*) bli_dgemm_armv8a_sve_asm_4vx5;
     }
@@ -176,7 +172,11 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     int C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_d*m_c_d*S_Data)/(c_l3*n_l3));
     int n_c_d = C_Bc * (n_l3 * c_l3)/(k_c_d*S_Data);
     n_c_d -= (n_c_d%n_r_d);
-    
+   
+    // check overrides
+    k_c_d   = bli_env_get_var("BLIS_SVE_KC_D",k_c_d);
+    m_c_d   = bli_env_get_var("BLIS_SVE_MC_D",m_c_d);
+    n_c_d   = bli_env_get_var("BLIS_SVE_NC_D",n_c_d);
 
     // float
     S_Data   = 4;

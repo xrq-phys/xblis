@@ -60,22 +60,22 @@
 //#define SVE_VECSIZE SVE_VECSIZE_VLA
 
 // Number of cache lines in a set
-#define N_L1 256
+#define N_L1 64
 // L1 associativity
 #define W_L1 4
 // Cacheline size
-#define C_L1 64
+#define C_L1 256
 // FMA latency (chained)
 #define L_VFMA 9
 // Number of SVE engines
 #define N_VFMA 2   
 
-#define N_L2 8192
+#define N_L2 2048
 #define W_L2 16
-#define C_L2 64
+#define C_L2 256
 
-#define N_L3 32768
+#define N_L3 8192
 #define W_L3 16
-#define C_L3 64
+#define C_L3 256
 
 #endif
