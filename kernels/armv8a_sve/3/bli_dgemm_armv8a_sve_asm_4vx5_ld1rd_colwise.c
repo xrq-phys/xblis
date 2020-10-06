@@ -48,15 +48,15 @@ MLA5COL_D(z14,z18,z22,z26,z30, avec2, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cu
 LOAD1VEC_VOFF_D(avec2, p0, x0, aoff2)\
 /*MLA4COL_D(z15,z19,z23,z27,z31, avec3, cur_bvec0,cur_bvec1,cur_bvec2,cur_bvec3,cur_bvec4, p0)\*/\
 MLA1COL_D(z15, avec3, cur_bvec0, p0)\
-LOAD1VEC_DIST_OFF_D(next_bvec0, p0, x0, 0)\
+LOAD1VEC_DIST_OFF_D(next_bvec0, p0, x1, 0)\
 MLA1COL_D(z19, avec3, cur_bvec1, p0)\
-LOAD1VEC_DIST_OFF_D(next_bvec1, p0, x0, 8)\
+LOAD1VEC_DIST_OFF_D(next_bvec1, p0, x1, 8)\
 MLA1COL_D(z23, avec3, cur_bvec2, p0)\
-LOAD1VEC_DIST_OFF_D(next_bvec2, p0, x0, 16)\
+LOAD1VEC_DIST_OFF_D(next_bvec2, p0, x1, 16)\
 MLA1COL_D(z27, avec3, cur_bvec3, p0)\
-LOAD1VEC_DIST_OFF_D(next_bvec3, p0, x0, 24)\
+LOAD1VEC_DIST_OFF_D(next_bvec3, p0, x1, 24)\
 MLA1COL_D(z31, avec3, cur_bvec4, p0)\
-LOAD1VEC_DIST_OFF_D(next_bvec4, p0, x0, 32)\
+LOAD1VEC_DIST_OFF_D(next_bvec4, p0, x1, 32)\
 LOAD1VEC_VOFF_D(avec3, p0, x0, aoff3)\
 " add x1, x1, #40 \n\t"
 
@@ -170,20 +170,19 @@ ZERO4VEC_D(z16,z17,z18,z19)                          // c columns 1
 ZERO4VEC_D(z20,z21,z22,z23)                          // c columns 2
 ZERO4VEC_D(z24,z25,z26,z27)                          // c columns 3
 ZERO4VEC_D(z28,z29,z30,z31)                          // c columns 4
-
 "                                            \n\t"
 "                                            \n\t"
 " cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
-" beq .D4VX5CONSIDERKLEFT                   \n\t"
+" beq .D4VX5CONSIDERKLEFT                    \n\t"
 "                                            \n\t"
-" incb x0, ALL, MUL #2                       \n\t" // A = A+vecsize*2
-" add x1, x1, #64                            \n\t" // B = B+8*sizeof(double)
+" incb x0, ALL, MUL #4                       \n\t" // A = A+vecsize*4
+" add x1, x1, #40                            \n\t" // B = B+5*sizeof(double)
 "                                            \n\t"
 " cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
-" beq .D4VX5LASTITER                        \n\t" // (as loop is do-while-like).
+" beq .D4VX5LASTITER                         \n\t" // (as loop is do-while-like).
 "                                            \n\t" 
 "                                            \n\t"
-" .D4VX5LOOP:                               \n\t" // Body
+" .D4VX5LOOP:                                \n\t" // Body
 BLOCK_4VX5_Z12_Z31(z4,z5,z6,z7,z8,   z0,z1,z2,z3, z9,z10,z11,z4,z5, 0,1,2,3)
 "                                            \n\t"
 BLOCK_4VX5_Z12_Z31(z9,z10,z11,z4,z5, z0,z1,z2,z3, z6,z7,z8,z9,z10,  4,5,6,7)
@@ -230,7 +229,7 @@ ENDBLOCK_4VX5_Z12_Z31(z7,z8,z9,z10,z11, z0,z1,z2,z3)
 ".D4VX5LOOPKLEFT:                            \n\t"
 "                                            \n\t"
 LOAD4VEC_D(z0,z1,z2,z3,p0,x0)
-" incb x0, ALL, MUL #2                       \n\t" // Advance a pointer by 2 vectors
+" incb x0, ALL, MUL #4                       \n\t" // Advance a pointer by 4 vectors
 "                                            \n\t"
 LOAD5VEC_DIST_D(z4,z5,z6,z7,z8,  p0, x1)
 " add x1, x1, #40                            \n\t" // advance b pointer by 10 doubles
@@ -260,7 +259,7 @@ ENDBLOCK_4VX5_Z12_Z31(z4,z5,z6,z7,z8, z0,z1,z2,z3)
 "                                            \n\t"
 
 // Accumulated results are stored in z12-z31
-// alpha in z0, beta in z1 - put alpha is in z0.d[0], beta in z1.d[1]
+// alpha in z0, beta in z1 - put alpha is in z0.d, beta in z1.d
 // z2-z11 are free
 "                                        \n\t"
 
@@ -294,7 +293,7 @@ STOR4VEC_D(z24,z25,z26,z27, p0,x22)              // Store Column 3
 STOR4VEC_D(z28,z29,z30,z31, p0,x23)              // Store Column 4
 
 " b .D4VX5END                              \n\t"       // Duplicate code for stores required due to lack of registers
-"                                           \n\t"
+"                                          \n\t"
 " .D4VX5BETAZEROCONTCOLSTOREDS:            \n\t"
 // No need to zero anything as we are storing the scaled accumulated A*B values
 MUL4ROW_D(z12,z13,z14,z15, z12,z13,z14,z15, z0, p0)
@@ -309,23 +308,23 @@ STOR4VEC_D(z20,z21,z22,z23, p0,x21)              // Store Column 2
 STOR4VEC_D(z24,z25,z26,z27, p0,x22)              // Store Column 3
 STOR4VEC_D(z28,z29,z30,z31, p0,x23)              // Store Column 4
 
-"                                           \n\t"
+"                                          \n\t"
 " b .D4VX5END                              \n\t"
-"                                           \n\t"
+"                                          \n\t"
 " .D4VX5GENSTORED:                         \n\t" // C is general-stride stored.
 
-"                                           \n\t" // Creating index for stride load&store access
-" index z2.d, xzr, x13                       \n\t" // 0, stride*double, 2*stride*double, ...
-" mul x3, x13, x11                           \n\t" // x3 <- stride*double*vecsize
-" index z3.d, x3, x13                        \n\t" // stride*double*vecsize, (vecsize+1)*stride*double, (vecsize+2)*stride*double, ...
-" lsl x4, x3, #1                             \n\t" // x4 <- 2*stride*double*vecsize
-" index z4.d, x4, x13                        \n\t" // stride*double*(2*vecsize), (2*vecsize+1)*stride*double, (2*vecsize+2)*stride*double, ...
-" add x5, x4, x3                             \n\t" // x5 <- 3*stride*double*vecsize
-" index z5.d, x5, x13                       \n\t" // stride*double*(3*vecsize), (3*vecsize+1)*stride*double, (3*vecsize+2)*stride*double, ...
-"                                           \n\t"
-" fcmp d1,#0.0                              \n\t"
+"                                          \n\t" // Creating index for stride load&store access
+" index z2.d, xzr, x13                     \n\t" // 0, stride*double, 2*stride*double, ...
+" mul x3, x13, x11                         \n\t" // x3 <- stride*double*vecsize
+" index z3.d, x3, x13                      \n\t" // stride*double*vecsize, (vecsize+1)*stride*double, (vecsize+2)*stride*double, ...
+" lsl x4, x3, #1                           \n\t" // x4 <- 2*stride*double*vecsize
+" index z4.d, x4, x13                      \n\t" // stride*double*(2*vecsize), (2*vecsize+1)*stride*double, (2*vecsize+2)*stride*double, ...
+" add x5, x4, x3                           \n\t" // x5 <- 3*stride*double*vecsize
+" index z5.d, x5, x13                      \n\t" // stride*double*(3*vecsize), (3*vecsize+1)*stride*double, (3*vecsize+2)*stride*double, ...
+"                                          \n\t"
+" fcmp d1,#0.0                             \n\t"
 " beq .D4VX5BETAZEROGENSTOREDS             \n\t" // multiply with beta if beta isn't zero
-"                                        \n\t"
+"                                          \n\t"
 LOAD4VEC_GENI_D(z6,z7,z8,z9, p0,x2, z2,z3,z4,z5)
 MUL4ROW_D(z12,z13,z14,z15,  z12,z13,z14,z15,  z0, p0)
 MLA4ROW_D(z12,z13,z14,z15,  z6,z7,z8,z9,     z1, p0)
@@ -363,10 +362,10 @@ STOR4VEC_GENI_D(z16,z17,z18,z19, p0,x20, z2,z3,z4,z5)
 STOR4VEC_GENI_D(z20,z21,z22,z23, p0,x21, z2,z3,z4,z5)
 STOR4VEC_GENI_D(z24,z25,z26,z27, p0,x22, z2,z3,z4,z5)
 STOR4VEC_GENI_D(z28,z29,z30,z31, p0,x23, z2,z3,z4,z5)
-"                                           \n\t"
-"                                           \n\t"
 "                                            \n\t"
-" .D4VX5END:                                \n\t"     // Done!
+"                                            \n\t"
+"                                            \n\t"
+" .D4VX5END:                                 \n\t"     // Done!
 "                                            \n\t"
 :// output operands (none)
 :// input operands

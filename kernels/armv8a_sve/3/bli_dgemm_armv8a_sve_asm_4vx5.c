@@ -112,8 +112,7 @@ __asm__ volatile
 "                                            \n\t"
 LOAD4VEC_D(z0,z1,z2,z3, p0,x0)
 "                                            \n\t"
-LOAD4VEC_DIST_D(z4,z5,z6,z7,p0,x1)
-LDR_NOADDR_D(z8,p0)OA_D(x1,32)"\n\t"
+LOAD5VEC_DIST_D(z4,z5,z6,z7,z8,p0,x1)
 "                                            \n\t"
 "                                            \n\t"
 ZERO4VEC_D(z9,z10,z11,z12)                          // c column 0
@@ -144,7 +143,7 @@ ZERO4VEC_D(z25,z26,z27,z28)                          // c column 4
 " cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 " beq .D4VX5CONSIDERKLEFT                    \n\t"
 "                                            \n\t"
-" incb x0, ALL, MUL #4                       \n\t" // A = A+vecsize*2
+" incb x0, ALL, MUL #4                       \n\t" // A = A+vecsize*4
 " add x1, x1, #40                            \n\t" // B = B+5*sizeof(double)
 "                                            \n\t"
 " cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
@@ -314,8 +313,7 @@ MLA4ROW_D(z25,z26,z27,z28, z29,z30,z31,z3, z8, p0)
 LOAD4VEC_D(z0,z1,z2,z3,p0,x0)
 " incb x0, ALL, MUL #4                       \n\t" // Advance a pointer by 4 vectors
 "                                            \n\t"
-LOAD4VEC_DIST_D(z4,z5,z6,z7,p0,x1)
-LDR_NOADDR_D(z8,p0)OA_D(x1,32)"\n\t"
+LOAD5VEC_DIST_D(z4,z5,z6,z7,z8, p0,x1)
 " add x1, x1, #40                            \n\t" // advance b pointer by 5 doubles
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
