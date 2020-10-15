@@ -166,6 +166,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 
 INSERT_GENTFUNC_BASIC( hemm, BLIS_HERMITIAN )
 INSERT_GENTFUNC_BASIC( symm, BLIS_SYMMETRIC )
+INSERT_GENTFUNC_BASIC( skmm, BLIS_SKEWSYMMETRIC )
 
 
 #undef  GENTFUNCR
@@ -347,7 +348,7 @@ INSERT_GENTFUNC_BASIC0( syrk )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
+#define GENTFUNC( ctype, ch, opname, strucc ) \
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
@@ -393,7 +394,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_obj_set_conjtrans( transa, &ao ); \
 	bli_obj_set_conjtrans( transb, &bo ); \
 \
-	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
+	bli_obj_set_struc( strucc, &co ); \
 \
 	PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
 	( \
@@ -407,8 +408,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( syr2k )
-INSERT_GENTFUNC_BASIC0( skr2k )
+INSERT_GENTFUNC_BASIC( syr2k, BLIS_SYMMETRIC )
+INSERT_GENTFUNC_BASIC( skr2k, BLIS_SKEWSYMMETRIC )
 
 
 #undef  GENTFUNC

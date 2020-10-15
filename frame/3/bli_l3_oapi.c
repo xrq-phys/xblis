@@ -260,6 +260,7 @@ void PASTEMAC(opname,EX_SUF) \
 
 GENFRONT( hemm )
 GENFRONT( symm )
+GENFRONT( skmm )
 GENFRONT( trmm3 )
 
 

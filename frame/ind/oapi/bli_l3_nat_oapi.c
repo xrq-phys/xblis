@@ -123,6 +123,7 @@ void PASTEMAC(opname,imeth) \
 
 GENFRONT( hemm, gemm, nat )
 GENFRONT( symm, gemm, nat )
+GENFRONT( skmm, gemm, nat )
 GENFRONT( trmm3, gemm, nat )
 
 

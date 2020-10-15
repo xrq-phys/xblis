@@ -83,6 +83,7 @@ typedef void (*PASTECH(opname,_oft)) \
 
 GENTDEF( hemm )
 GENTDEF( symm )
+GENTDEF( skmm )
 GENTDEF( trmm3 )
 
 

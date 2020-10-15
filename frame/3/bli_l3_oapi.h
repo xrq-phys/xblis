@@ -74,6 +74,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
 
 GENPROT( hemm )
 GENPROT( symm )
+GENPROT( skmm )
 GENPROT( trmm3 )
 
 
