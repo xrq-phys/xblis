@@ -1,3 +1,5 @@
+Please see [README_SVE](README_SVE.md) for SVE-related information
+
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
 [![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
