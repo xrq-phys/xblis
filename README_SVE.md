@@ -39,7 +39,7 @@ The available kernels along with their index are listed in config/arm64_sve/sve_
 
 Here's the enum at the time of this writing (2020-10-19):
 
-```
+```c
 enum kernel_indices
 {
     ukr_2vx8                =  1,
@@ -50,7 +50,7 @@ enum kernel_indices
     ukr_2vx10_ld1rd_colwise =  6,
     ukr_2vx10_ld1rqd        =  7,
     ukr_2vx12               =  8,
-    ukr_2vx12_dup           =  9,
+    ukr_2vx12_dup           =  9, // not true VLA, only works with 512 bit SVE vector size
     ukr_2vx12_ld1rqd        = 10,
     ukr_4vx5                = 11,
     ukr_4vx5_ld1rd_colwise  = 12
