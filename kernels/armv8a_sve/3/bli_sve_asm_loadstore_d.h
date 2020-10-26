@@ -355,21 +355,21 @@
 
 #if defined(PREFETCH64)
     #define PREF64(type,areg,off)\
-" prfm " #type "," #areg ",[" #off "]\n\t"
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
 #else
     #define PREF64(type,areg,off)
 #endif
 
 #if defined(PREFETCH256)
     #define PREF256(type,areg,off)\
-" prfm " #type "," #areg ",[" #off "]\n\t"
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
 #else
     #define PREF256(type,areg,off)
 #endif
 
 #if defined(PREFETCH64) || defined(PREFETCH256)
     #define PREFANY(type,areg,off)\
-" prfm " #type "," #areg ",[" #off "]\n\t"
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
 #else
     #define PREFANY(type,areg,off)
 #endif
