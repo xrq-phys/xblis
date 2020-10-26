@@ -343,3 +343,76 @@
 #define ST_AVEC_D(vec1, vec2, preg, reg)\
     " st2d {" #vec1 ".d," #vec2 ".d}, " #preg ", [" #reg "]\n\t"
 #endif
+
+
+
+
+/****************************************************************
+ * ============================================================ *
+ *                         prefetches                           *
+ * ============================================================ *
+ ****************************************************************/
+
+#if defined(PREFETCH64)
+    #define PREF64(type,areg,off)\
+" prfm " #type "," #areg ",[" #off "]\n\t"
+#else
+    #define PREF64(type,areg,off)
+#endif
+
+#if defined(PREFETCH256)
+    #define PREF256(type,areg,off)\
+" prfm " #type "," #areg ",[" #off "]\n\t"
+#else
+    #define PREF256(type,areg,off)
+#endif
+
+#if defined(PREFETCH64) || defined(PREFETCH256)
+    #define PREFANY(type,areg,off)\
+" prfm " #type "," #areg ",[" #off "]\n\t"
+#else
+    #define PREFANY(type,areg,off)
+#endif
+
+
+// One cache line is one vector
+#if defined(PREFETCHSVE1)
+    #define PREFSVE1(type,preg,areg,voff)\
+" prfd " #type "," #preg ", [" #areg ", #" #voff ", MUL VL]        \n\t"
+#else
+    #define PREFSVE1(type,preg,areg,voff)
+#endif
+
+
+// One cache line is two vectors
+#if defined(PREFETCHSVE2)
+    #define PREFSVE2(type,preg,areg,voff)\
+" prfd " #type "," #preg ", [" #areg ", #" #voff ", MUL VL]        \n\t"
+#else
+    #define PREFSVE2(type,preg,areg,voff)
+#endif
+
+
+// One cache line is four vectors
+#if defined(PREFETCHSVE4)
+    #define PREFSVE4(type,preg,areg,voff)\
+" prfd " #type "," #preg ", [" #areg ", #" #voff ", MUL VL]        \n\t"
+#else
+    #define PREFSVE4(type,preg,areg,voff)
+#endif
+
+// One cache line is 2 or 1 vector
+#if defined(PREFETCHSVE1) || defined(PREFETCHSVE2)
+    #define PREFSVE21(type,preg,areg,voff)\
+" prfd " #type "," #preg ", [" #areg ", #" #voff ", MUL VL]        \n\t"
+#else
+    #define PREFSVE21(type,preg,areg,voff)
+#endif
+
+// One cache line is four, two or one vector
+#if defined(PREFETCHSVE1) || defined(PREFETCHSVE2) || defined(PREFETCHSVE4)
+    #define PREFSVE421(type,preg,areg,voff)\
+" prfd " #type "," #preg ", [" #areg ", #" #voff ", MUL VL]        \n\t"
+#else
+    #define PREFSVE421(type,preg,areg,voff)
+#endif
