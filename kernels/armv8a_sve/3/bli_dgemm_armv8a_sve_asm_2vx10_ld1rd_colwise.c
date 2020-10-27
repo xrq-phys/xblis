@@ -195,6 +195,7 @@ __asm__ volatile
 " prfd pldl1keep,p0, [x0, #6, MUL VL]        \n\t" // 7/8 | 8/8
 " prfd pldl1keep,p0, [x0, #7, MUL VL]        \n\t" // 8/8 | 8/8
 #endif
+PREFANY(pldl1keep,x1,0)
 "                                            \n\t"
 " ptrue p0.d                                 \n\t" // Creating all true predicate
 "                                            \n\t"
@@ -283,24 +284,24 @@ LOAD1VEC_DIST_OFF_D(z11, p0, x1, 72)
 " sub x6,x6,1                                \n\t"
 "                                            \n\t"
 MLA1ROW_D(z12, z0, z2, p0)
-MLA1ROW_D(z14, z0, z3, p0)
-MLA1ROW_D(z16, z0, z4, p0)
-MLA1ROW_D(z18, z0, z5, p0)
-MLA1ROW_D(z20, z0, z6, p0)
 MLA1ROW_D(z13, z1, z2, p0)
+MLA1ROW_D(z14, z0, z3, p0)
 MLA1ROW_D(z15, z1, z3, p0)
+MLA1ROW_D(z16, z0, z4, p0)
 MLA1ROW_D(z17, z1, z4, p0)
+MLA1ROW_D(z18, z0, z5, p0)
 MLA1ROW_D(z19, z1, z5, p0)
+MLA1ROW_D(z20, z0, z6, p0)
 MLA1ROW_D(z21, z1, z6, p0)
 MLA1ROW_D(z22, z0, z7, p0)
-MLA1ROW_D(z24, z0, z8, p0)
-MLA1ROW_D(z26, z0, z9, p0)
-MLA1ROW_D(z28, z0, z10, p0)
-MLA1ROW_D(z30, z0, z11, p0)
-MLA1ROW_D(z25, z1, z8, p0)
 MLA1ROW_D(z23, z1, z7, p0)
+MLA1ROW_D(z24, z0, z8, p0)
+MLA1ROW_D(z25, z1, z8, p0)
+MLA1ROW_D(z26, z0, z9, p0)
 MLA1ROW_D(z27, z1, z9, p0)
+MLA1ROW_D(z28, z0, z10, p0)
 MLA1ROW_D(z29, z1, z10, p0)
+MLA1ROW_D(z30, z0, z11, p0)
 MLA1ROW_D(z31, z1, z11, p0)
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
