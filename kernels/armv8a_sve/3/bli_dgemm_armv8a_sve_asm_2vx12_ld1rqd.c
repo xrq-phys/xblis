@@ -42,6 +42,8 @@
 #define EBLOCK_2VX12_Z8_Z31(bvec0,bvec1,bvec2,bvec3, cur_avec0,cur_avec1, next_avec0,next_avec1, aoff0,aoff1)\
 MLA2ROW_I_LA_D(z8,z9,  cur_avec0,cur_avec1, bvec0, 0, p0, next_avec0, x0,aoff0)\
 MLA2ROW_I_LA_D(z10,z11, cur_avec0,cur_avec1, bvec0, 1, p0, next_avec1, x0,aoff1)\
+PREFSVE421(pldl1keep,p0,x0,8)\
+PREFSVE1(pldl1keep,p0,x0,9)\
 LOADVEC_QDIST_OFF_D(bvec0, p0, x1, 0)\
 MLA2ROW_I_D(z12,z13, cur_avec0,cur_avec1, bvec1, 0, p0)\
 MLA2ROW_I_D(z14,z15, cur_avec0,cur_avec1, bvec1, 1, p0)\
@@ -52,6 +54,7 @@ LOADVEC_QDIST_OFF_D(bvec2, p0, x1, 32)\
 MLA2ROW_I_D(z20,z21, cur_avec0,cur_avec1, bvec3, 0, p0)\
 MLA2ROW_I_D(z22,z23, cur_avec0,cur_avec1, bvec3, 1, p0)\
 LOADVEC_QDIST_OFF_D(bvec3, p0, x1, 48)\
+PREFANY(pldl1keep,x1,192)\
 " add x1, x1, #64 \n\t"\
 MLA2ROW_I_D(z24,z25, cur_avec0,cur_avec1, bvec0, 0, p0)\
 MLA2ROW_I_D(z26,z27, cur_avec0,cur_avec1, bvec0, 1, p0)\
@@ -63,10 +66,13 @@ LOADVEC_QDIST_OFF_D(bvec1, p0, x1, 16)
 #define OBLOCK_2VX12_Z8_Z31(bvec0,bvec1,bvec2,bvec3, cur_avec0,cur_avec1, next_avec0,next_avec1, aoff0,aoff1)\
 MLA2ROW_I_LA_D(z8,z9,  cur_avec0,cur_avec1, bvec2, 0, p0, next_avec0, x0,aoff0)\
 MLA2ROW_I_LA_D(z10,z11, cur_avec0,cur_avec1, bvec2, 1, p0, next_avec1, x0,aoff1)\
+PREFSVE21(pldl1keep,p0,x0,10)\
+PREFSVE1(pldl1keep,p0,x0,11)\
 LOADVEC_QDIST_OFF_D(bvec2, p0, x1, 32)\
 MLA2ROW_I_D(z12,z13, cur_avec0,cur_avec1, bvec3, 0, p0)\
 MLA2ROW_I_D(z14,z15, cur_avec0,cur_avec1, bvec3, 1, p0)\
 LOADVEC_QDIST_OFF_D(bvec3, p0, x1, 48)\
+PREF64(pldl1keep,x1,192)\
 " add x1, x1, #64 \n\t"\
 MLA2ROW_I_D(z16,z17, cur_avec0,cur_avec1, bvec0, 0, p0)\
 MLA2ROW_I_D(z18,z19, cur_avec0,cur_avec1, bvec0, 1, p0)\
@@ -80,6 +86,7 @@ LOADVEC_QDIST_OFF_D(bvec2, p0, x1, 32)\
 MLA2ROW_I_D(z28,z29, cur_avec0,cur_avec1, bvec3, 0, p0)\
 MLA2ROW_I_D(z30,z31, cur_avec0,cur_avec1, bvec3, 1, p0)\
 LOADVEC_QDIST_OFF_D(bvec3, p0, x1, 48)\
+PREF64(pldl1keep,x1,192)\
 " add x1, x1, #64 \n\t"
 
 #define ENDBLOCK_2VX12_Z8_Z31(bvec0,bvec1,bvec2,bvec3, cur_avec0,cur_avec1)\
@@ -187,22 +194,19 @@ __asm__ volatile
 //" prfm pstl1keep,[x25]                       \n\t" // Prefetch c.
 //" prfm pstl1keep,[x26]                       \n\t" // Prefetch c.
 #endif
-#if defined(PREFETCHSVE1) || defined(PREFETCHSVE2)
-" prfd pldl1keep,p0, [x0, #0, MUL VL]        \n\t" // 1/8 | 4/8
-#endif
-#if defined(PREFETCHSVE1)
-" prfd pldl1keep,p0, [x0, #1, MUL VL]        \n\t" // 2/8 | 4/8
-" prfd pldl1keep,p0, [x0, #2, MUL VL]        \n\t" // 3/8 | 4/8
-" prfd pldl1keep,p0, [x0, #3, MUL VL]        \n\t" // 4/8 | 4/8
-#endif
-#if defined(PREFETCHSVE1) || defined(PREFETCHSVE2)
-" prfd pldl1keep,p0, [x0, #4, MUL VL]        \n\t" // 5/8 | 8/8
-#endif
-#if defined(PREFETCHSVE1)
-" prfd pldl1keep,p0, [x0, #5, MUL VL]        \n\t" // 6/8 | 8/8
-" prfd pldl1keep,p0, [x0, #6, MUL VL]        \n\t" // 7/8 | 8/8
-" prfd pldl1keep,p0, [x0, #7, MUL VL]        \n\t" // 8/8 | 8/8
-#endif
+PREFSVE421(pldl1keep,p0,x0,0)  // 1/8
+PREFSVE1  (pldl1keep,p0,x0,1)  // 2/8
+PREFSVE21 (pldl1keep,p0,x0,2)  // 3/8
+PREFSVE1  (pldl1keep,p0,x0,3)  // 4/8
+PREFSVE421(pldl1keep,p0,x0,4)  // 5/8
+PREFSVE1  (pldl1keep,p0,x0,5)  // 6/8
+PREFSVE21 (pldl1keep,p0,x0,6)  // 7/8
+PREFSVE1  (pldl1keep,p0,x0,7)  // 8/8
+
+PREFANY(pldl1keep,x1,0)
+PREF64(pldl1keep,x1,64)
+PREF64(pldl1keep,x1,128)
+PREF64(pldl1keep,x1,192)
 "                                            \n\t"
 " ptrue p0.d                                 \n\t" // Creating all true predicate
 "                                            \n\t"
