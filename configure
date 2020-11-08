@@ -319,6 +319,16 @@ print_usage()
 	echo " "
 	echo "                 Enable the use of the FCMLA instruction in the complex"
 	echo "                 SVE kernels"
+	echo " Unsafe/experimental/non-production options:"
+	echo " "
+	echo "   --unsafe-disable-pthread"
+	echo " "
+	echo "                 Completely disable dependence on pthread. The intended "
+	echo "                 usecase is tuning an implementation with a simulator like "
+	echo "                 gem5 (in systemless mode) or vendor-specific RTL-based "
+	echo "                 simulators. Serial execution should be guaranteed, therefore "
+	echo "                 thread-safety is not a concern. This is NOT intended for "
+	echo "                 'normal' systems that do not provide the pthread library "
 	echo " "
 	echo " Environment Variables:"
 	echo " "
@@ -1062,7 +1072,7 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	if [[ $is_win == no || "$cc_vendor" != "clang" ]]; then
+	if [[ $is_win == no || "$cc_vendor" != "clang" ]] && [ "x${unsafe_disable_pthread}" != "" ]; then
 		ldflags="${LIBPTHREAD--lpthread}"
 	fi
 
@@ -2010,6 +2020,11 @@ main()
 	sve_use_fcmla='no'
 	sve_use_fcmla_flag=0
 
+	# -- unsafe/debug ----------------------------------
+
+	unsafe_disable_pthread='no'
+	unsafe_disable_pthread_flag=0
+
 	# -- Command line option/argument parsing ----------------------------------
 
 	found=true
@@ -2174,6 +2189,10 @@ main()
 						sve-use-fcmla)
 							sve_use_fcmla='yes'
 							sve_use_fcmla_flag=1
+							;;
+						unsafe-disable-pthread)
+							unsafe_disable_pthread='yes'
+							unsafe_disable_pthread_flag=1
 							;;
 						*)
 							print_usage
@@ -2734,6 +2753,14 @@ main()
 			echo "${script_name}: *** Please do not use these option for non-SVE targets."
 			exit 1
 	fi
+    if [ "x${unsafe_disable_pthread}" == 'xyes' ]; then
+        arch_extra_flags+=" -DBLIS_UNSAFE_DISABLE_PTHREAD"
+			echo "${script_name}: WARNING: disabling pthread is unsafe and will produce a buggy"
+			echo "${script_name}:          library. Only intended for producing system-independent"
+			echo "${script_name}:          binaries for hardware-simulators"
+			echo "${script_name}: *** Please do not use these option for systems that do not"
+            echo "${script_name}: *** provide pthread by default!"
+    fi
 
 	# -- Prepare variables for subsitution into template files -----------------
 
@@ -2895,6 +2922,12 @@ main()
 		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
 	fi
+
+    if [ "x${unsafe_disable_pthread}" == 'xyes' ]; then
+        enable_pthreads='no'
+        enable_pthreads_01=0
+        threading_model="off"
+    fi
 
 	# Check the method of assigning micropanels to threads in the JR and IR
 	# loops.
@@ -3082,7 +3115,7 @@ main()
 	# For Windows builds, clear the libpthread_esc variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
-	if [[ $is_win == yes && "$cc_vendor" == "clang" ]]; then
+	if [[ $is_win == yes && "$cc_vendor" == "clang" ]] || [ "x${unsafe_disable_pthread}" == "" ]; then
 		libpthread_esc=
 	fi
 
@@ -3190,6 +3223,7 @@ main()
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@enable_pthreads@/${enable_pthreads}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		> "${config_mk_out_path}"

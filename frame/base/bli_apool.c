@@ -39,12 +39,14 @@ void bli_apool_init
        apool_t* restrict apool
      )
 {
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Query the mutex from the apool_t.
 	bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
 
 	// Initialize the mutex.
 	//*mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 	bli_pthread_mutex_init( mutex, NULL );
+#endif
 
 	// We choose to start with:
 	// - an empty pool
@@ -212,11 +214,13 @@ void bli_apool_finalize
        apool_t* restrict apool
      )
 {
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Query the mutex from the apool_t.
 	bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
 
 	// Destroy the mutex.
 	bli_pthread_mutex_destroy( mutex );
+#endif
 
 	// Query the underlying pool_t and mutex from the apool_t.
 	pool_t* restrict pool = bli_apool_pool( apool );

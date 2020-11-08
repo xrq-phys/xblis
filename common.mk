@@ -493,7 +493,12 @@ LIBMEMKIND := -lmemkind
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner.
-LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD)
+LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) 
+
+# allow disabling explicitly
+ifeq ($(MK_ENABLE_PTHREAD),yes)
+LDFLAGS    += $(LIBPTHREAD)
+endif
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(MK_ENABLE_MEMKIND),yes)

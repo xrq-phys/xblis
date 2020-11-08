@@ -181,6 +181,8 @@ MK_ENABLE_MEMKIND := @enable_memkind@
 # enabled.
 SANDBOX           := @sandbox@
 
+# Pthread is generally required unconditionally, disabling is possible with an unsafe option for special cases
+MK_ENABLE_PTHREAD := @enable_pthread@
 # The name of the pthreads library.
 LIBPTHREAD        := @libpthread@
 

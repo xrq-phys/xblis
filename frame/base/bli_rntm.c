@@ -38,8 +38,10 @@
 // along with a few other key parameters.
 rntm_t global_rntm;
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to global_rntm.
 bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -48,13 +50,17 @@ void bli_rntm_init_from_global( rntm_t* rntm )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
+#endif
 
 	*rntm = global_rntm;
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+#endif
 }
 
 // -----------------------------------------------------------------------------

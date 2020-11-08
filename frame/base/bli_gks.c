@@ -453,9 +453,12 @@ cntx_t* bli_gks_query_cntx_noinit( void )
 
 // -----------------------------------------------------------------------------
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to the gks when it needs to be updated
 // with a new entry corresponding to a context for an ind_t value.
 static bli_pthread_mutex_t gks_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+
+#endif
 
 cntx_t* bli_gks_query_ind_cntx
      (
@@ -508,8 +511,10 @@ cntx_t* bli_gks_query_ind_cntx
 	// gks[ id ] is non-NULL and gks[ id ][ BLIS_NAT ] is also non-NULL
 	// and refers to a context initialized with valid data).
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting the gks.
 	bli_pthread_mutex_lock( &gks_mutex );
+#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -546,8 +551,10 @@ cntx_t* bli_gks_query_ind_cntx
 	}
 	// END CRITICAL SECTION
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting the gks.
 	bli_pthread_mutex_unlock( &gks_mutex );
+#endif
 
 	// Return the address of the newly-allocated/initialized context.
 	return gks_id_ind;

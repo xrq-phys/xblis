@@ -130,12 +130,16 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_t* pthread = bli_malloc_user( sizeof( bli_pthread_t ) * nt );
+#endif
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt );
+#endif
 
 	// Allocate a mutex for the threads to share.
 	//bli_pthread_mutex_t* mutex   = bli_malloc_user( sizeof( bli_pthread_mutex_t ) );
@@ -145,14 +149,19 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_barrier_t* barrier = bli_malloc_user( sizeof( bli_pthread_barrier_t ) );
+#endif
 
 	// Initialize the mutex.
 	//bli_pthread_mutex_init( mutex, NULL );
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Initialize the barrier for nt threads.
 	bli_pthread_barrier_init( barrier, NULL, nt );
+#endif
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
 	// can spawn all other threads before proceeding with its own computation.
 	// ALSO: Since we need to let the counter go negative, id must be a signed
@@ -173,36 +182,47 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 		else
 			libblis_test_thread_entry( ( void* )(&tdata[0]) );
 	}
+#endif
 
 	// Thread 0 waits for additional threads to finish.
 	for ( unsigned int id = 1; id < nt; id++ )
 	{
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 		bli_pthread_join( pthread[id], NULL );
+#endif
 	}
 
 	// Destroy the mutex.
 	//bli_pthread_mutex_destroy( mutex );
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Destroy the barrier.
 	bli_pthread_barrier_destroy( barrier );
+#endif
 
 	// Free the pthread-related memory.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_free_user( pthread );
+#endif
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_free_user( tdata );
+#endif
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	//bli_free_user( mutex );
 	bli_free_user( barrier );
+#endif
 }
 
 
@@ -2336,8 +2356,10 @@ void libblis_test_op_driver
 				}
 			}
 
+#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 			// Wait for all other threads so that the output stays organized.
 			bli_pthread_barrier_wait( tdata->barrier );
+#endif
 
 			// These statements should only be executed by one thread.
 			if ( tdata->id == 0 )
