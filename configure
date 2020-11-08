@@ -2238,6 +2238,7 @@ main()
 						unsafe-disable-pthread)
 							unsafe_disable_pthread='yes'
 							unsafe_disable_pthread_flag=1
+                            ;;
 						complex-return=*)
 							complex_return=${OPTARG#*=}
 							;;
