@@ -300,6 +300,15 @@ print_usage()
 	echo "                 a sanity check to make sure these lists are constituted"
 	echo "                 as expected."
 	echo " "
+	echo "   --complex-return=gnu|intel"
+	echo " "
+	echo "                 Specify the way in which complex numbers are returned"
+	echo "                 from Fortran functions, either \"gnu\" (return in"
+	echo "                 registers) or \"intel\" (return via hidden argument)."
+	echo "                 If not specified and the environment variable FC is set,"
+	echo "                 attempt to determine the return type from the compiler."
+	echo "                 Otherwise, the default is \"gnu\"."
+	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
@@ -334,6 +343,7 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
+	echo "   FC            Specifies the Fortran compiler to use (only to determine --complex-return)."
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
@@ -1015,7 +1025,7 @@ select_tool()
 
 auto_detect()
 {
-	local cc cflags config_defines detected_config rval
+	local cc cflags config_defines detected_config rval cmd
 
 	# Use the same compiler that was found earlier.
 	cc="${found_cc}"
@@ -1032,40 +1042,57 @@ auto_detect()
 		cflags=
 	fi
 
-	# Locate our source files.
-	bli_arch_c="bli_arch.c"
-	bli_cpuid_c="bli_cpuid.c"
-	main_c="config_detect.c"
+	# Accumulate a list of source files we'll need to compile along with
+	# the top-level (root) directory in which they are located.
+	c_src_pairs=""
+	c_src_pairs="${c_src_pairs} frame:bli_arch.c"
+	c_src_pairs="${c_src_pairs} frame:bli_cpuid.c"
+	c_src_pairs="${c_src_pairs} frame:bli_env.c"
+	c_src_pairs="${c_src_pairs} build:config_detect.c"
 
-	bli_arch_c_filepath=$(find ${dist_path}/frame -name "${bli_arch_c}")
-	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_c}")
-	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+	# Accumulate a list of full filepaths to the source files listed above.
+	c_src_filepaths=""
+	for pair in ${c_src_pairs}; do
 
-	# Locate headers needed directly by the above files.
-	bli_arch_h="bli_arch.h"
-	bli_cpuid_h="bli_cpuid.h"
-	bli_typed_h="bli_type_defs.h"
+		filename=${pair#*:}
+		rootdir=${pair%:*}
 
-	bli_arch_h_filepath=$(find ${dist_path}/frame -name "${bli_arch_h}")
-	bli_cpuid_h_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_h}")
-	bli_typed_h_filepath=$(find ${dist_path}/frame -name "${bli_typed_h}")
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		c_src_filepaths="${c_src_filepaths} ${filepath}"
+	done
 
-	bli_arch_h_path=${bli_arch_h_filepath%/${bli_arch_h}}
-	bli_cpuid_h_path=${bli_cpuid_h_filepath%/${bli_cpuid_h}}
-	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
+	# Accumulate a list of header files we'll need to locate along with
+	# the top-level (root) directory in which they are located.
+	c_hdr_pairs=""
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_system.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_type_defs.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_arch.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_cpuid.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_env.h"
+	# NOTE: These headers are needed by bli_type_defs.h.
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_malloc.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_pthread.h"
 
-	# Locate other headers needed by bli_type_defs.h.
-	bli_pthread_h="bli_pthread.h"
-	bli_pthread_h_filepath=$(find ${dist_path}/frame -name "${bli_pthread_h}")
-	bli_pthread_h_path=${bli_pthread_h_filepath%/${bli_pthread_h}}
-	bli_malloc_h="bli_malloc.h"
-	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
-	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
+	# Accumulate a list of full paths to the header files listed above.
+	# While we are at it, we include the "-I" compiler option to indicate
+	# adding the path to the list of directories to search when encountering
+	# #include directives.
+	c_hdr_paths=""
+	for pair in ${c_hdr_pairs}; do
+
+		filename=${pair#*:}
+		rootdir=${pair%:*}
+
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		path=${filepath%/*}
+		c_hdr_paths="${c_hdr_paths} -I${path}"
+	done
 
 	# Define the executable name.
 	autodetect_x="auto-detect.x"
 
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
+	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
 	                 | sed -e 's/#ifdef /-D/g')
 
@@ -1080,20 +1107,29 @@ auto_detect()
 	# framework.
 	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
 	# pthreads (i.e., barriers).
-	${cc} ${config_defines} \
+
+	cmd="${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
-	      -I${bli_cpuid_h_path} \
-	      -I${bli_arch_h_path} \
-	      -I${bli_typed_h_path} \
-	      -I${bli_pthread_h_path} \
-	      -I${bli_malloc_h_path} \
+	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags} \
-	      ${bli_arch_c_filepath} \
-	      ${bli_cpuid_c_filepath} \
+	      ${c_src_filepaths} \
 	      ${ldflags} \
-	      ${main_c_filepath} \
-	   -o ${autodetect_x}
+	      -o ${autodetect_x}"
+
+	if [ "${debug_auto_detect}" == "no" ]; then
+
+		# Execute the compilation command.
+		eval ${cmd}
+
+	else
+
+		# Debugging stuff. Instead of executing ${cmd}, join the lines together
+		# with tr and trim excess whitespace via awk.
+		cmd=$(echo "${cmd}" | tr '\n' ' ' | awk '{$1=$1;print}')
+		echo "${cmd}"
+		return
+	fi
 
 	# Run the auto-detect program.
 	detected_config=$(./${autodetect_x})
@@ -1982,6 +2018,7 @@ main()
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
+	complex_return='default'
 
 	# The sandbox flag and name.
 	sandbox_flag=''
@@ -2024,6 +2061,14 @@ main()
 
 	unsafe_disable_pthread='no'
 	unsafe_disable_pthread_flag=0
+
+	# -- Debugging --
+
+	# A global flag to help debug the compilation command for the executable
+	# that configure builds on-the-fly to perform hardware auto-detection.
+	debug_auto_detect="no"
+
+
 
 	# -- Command line option/argument parsing ----------------------------------
 
@@ -2193,6 +2238,8 @@ main()
 						unsafe-disable-pthread)
 							unsafe_disable_pthread='yes'
 							unsafe_disable_pthread_flag=1
+						complex-return=*)
+							complex_return=${OPTARG#*=}
 							;;
 						*)
 							print_usage
@@ -2479,7 +2526,15 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
-		#config_name="generic"
+
+		# Debugging stuff. When confirming the behavior of auto_detect(),
+		# it is useful to output ${config_name}, which in theory could be
+		# set temoprarily to something other than the config_name, such as
+		# the compilation command.
+		if [ "${debug_auto_detect}" = "yes" ]; then
+			echo "auto-detect program compilation command: ${config_name}"
+			exit 1
+		fi
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
 
@@ -3087,7 +3142,49 @@ main()
 
 		enable_sandbox_01=0
 	fi
+	
+	# Check the method used for returning complex numbers
+	if [ "x${complex_return}" = "xdefault" ]; then
+		if [ -n "${FC}" ]; then
+			# Determine the complex return type from the given Fortran compiler
 
+			# Query the full vendor version string output. This includes the
+			# version number along with (potentially) a bunch of other textual
+			# clutter.
+			# NOTE: This maybe should use merged stdout/stderr rather than only
+			# stdout. But it works for now.
+			vendor_string="$(${FC} --version 2>/dev/null)"
+
+			# Query the compiler "vendor" (ie: the compiler's simple name) and
+			# isolate the version number.
+			# The last part ({ read first rest ; echo $first ; }) is a workaround
+			# to OS X's egrep only returning the first match.
+			fc_vendor=$(echo "${vendor_string}" | egrep -o 'ifort|GNU' | { read first rest ; echo $first ; })
+
+			if [ "x${fc_vendor}" = "xifort" ]; then
+				complex_return='intel'
+			elif [ "x${fc_vendor}" = "xGNU" ]; then
+				complex_return='gnu'
+			else
+				echo "${script_name}: unable to determine Fortran compiler vendor!"
+				complex_return='gnu'
+			fi
+		else
+			complex_return='gnu'
+		fi
+	fi
+	
+	if [ "x${complex_return}" = "xgnu"  ]; then
+		complex_return_intel01='0'
+	elif [ "x${complex_return}" = "xintel" ]; then
+		complex_return_intel01='1'
+	else
+		echo "${script_name}: unknown complex return type \"${complex_return}\"! Cannot continue."
+		echo "${script_name}: *** Acceptable values are \"gnu\" and \"intel\"."
+		exit 1
+	fi
+
+	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
 	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
@@ -3257,6 +3354,7 @@ main()
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
+		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
 		> "${bli_config_h_out_path}"
 
 
