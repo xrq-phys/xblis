@@ -280,7 +280,11 @@
 -1 -1 -1 #   dimensions: m n k
 ??       #   parameters: transa transb
 
-0        # hemm
+1        # gemmt
+-1 -1    #   dimensions: m k
+???      #   parameters: uploc transa transb
+
+1        # hemm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
