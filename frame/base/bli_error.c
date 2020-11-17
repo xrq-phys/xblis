@@ -133,10 +133,8 @@ void bli_abort( void )
 
 // -----------------------------------------------------------------------------
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to bli_err_chk_level.
 static bli_pthread_mutex_t err_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 // Current error checking level.
 static errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
@@ -153,10 +151,8 @@ void bli_error_checking_level_set( errlev_t new_level )
 	e_val = bli_check_valid_error_level( new_level );
 	bli_check_error_code( e_val );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting bli_err_chk_level.
 	bli_pthread_mutex_lock( &err_mutex );
-#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -164,10 +160,8 @@ void bli_error_checking_level_set( errlev_t new_level )
 	}
 	// END CRITICAL SECTION
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting bli_err_chk_level.
 	bli_pthread_mutex_unlock( &err_mutex );
-#endif
 }
 
 bool bli_error_checking_is_enabled( void )

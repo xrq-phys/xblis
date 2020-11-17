@@ -38,11 +38,9 @@
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to global_rntm. (The definition
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -84,17 +82,13 @@ void bli_pack_set_pack_a( bool pack_a )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
-#endif
 
 	bli_rntm_set_pack_a( pack_a, &global_rntm );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -104,17 +98,13 @@ void bli_pack_set_pack_b( bool pack_b )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
-#endif
 
 	bli_rntm_set_pack_a( pack_b, &global_rntm );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
-#endif
 }
 
 // ----------------------------------------------------------------------------

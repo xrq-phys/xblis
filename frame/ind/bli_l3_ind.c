@@ -214,10 +214,8 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status )
 
 // -----------------------------------------------------------------------------
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
 static bli_pthread_mutex_t oper_st_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status )
 {
@@ -231,10 +229,8 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool statu
 
 	idt = bli_ind_map_cdt_to_index( dt );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting bli_l3_ind_oper_st.
 	bli_pthread_mutex_lock( &oper_st_mutex );
-#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -242,10 +238,8 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool statu
 	}
 	// END CRITICAL SECTION
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting bli_l3_ind_oper_st.
 	bli_pthread_mutex_unlock( &oper_st_mutex );
-#endif
 }
 
 bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )

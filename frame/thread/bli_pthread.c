@@ -34,8 +34,6 @@
 
 */
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
-
 #include "blis.h"
 
 #include <errno.h>
@@ -417,5 +415,3 @@ int bli_pthread_barrier_wait
 }
 
 #endif // defined(__APPLE__) || defined(_MSC_VER)
-
-#endif // !defined(BLIS_UNSAFE_DISABLE_PTHREAD)

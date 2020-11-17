@@ -62,20 +62,14 @@ arch_t bli_arch_query_id( void )
 
 // -----------------------------------------------------------------------------
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A pthread structure used in pthread_once(). pthread_once() is guaranteed to
 // execute exactly once among all threads that pass in this control object.
 static bli_pthread_once_t once_id = BLIS_PTHREAD_ONCE_INIT;
-#endif
 
 void bli_arch_set_id_once( void )
 {
-#if defined(BLIS_UNSAFE_DISABLE_PTHREAD)
-    bli_arch_set_id();
-#else
 #ifndef BLIS_CONFIGURETIME_CPUID
 	bli_pthread_once( &once_id, bli_arch_set_id );
-#endif
 #endif
 }
 

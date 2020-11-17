@@ -77,11 +77,7 @@ typedef struct thrinfo_s thrinfo_t;
 
 BLIS_INLINE dim_t bli_thread_num_threads( thrinfo_t* t )
 {
-#if defined(BLIS_UNSAFE_DISABLE_PTHREAD)
-    return 1;
-#else
 	return (t->ocomm)->n_threads;
-#endif
 }
 
 BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
@@ -91,11 +87,7 @@ BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
 
 BLIS_INLINE dim_t bli_thread_n_way( thrinfo_t* t )
 {
-#if defined(BLIS_UNSAFE_DISABLE_PTHREAD)
-    return 1;
-#else
 	return t->n_way;
-#endif
 }
 
 BLIS_INLINE dim_t bli_thread_work_id( thrinfo_t* t )
@@ -120,11 +112,7 @@ BLIS_INLINE dim_t bli_thread_bszid( thrinfo_t* t )
 
 BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
 {
-#if defined(BLIS_UNSAFE_DISABLE_PTHREAD)
-    return NULL;
-#else
 	return t->sub_node;
-#endif
 }
 
 BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )

@@ -41,16 +41,12 @@
 
 BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
 {
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_mutex_init( &(membrk->mutex), NULL );
-#endif
 }
 
 BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
 {
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_mutex_destroy( &(membrk->mutex) );
-#endif
 }
 
 // membrk query
@@ -96,16 +92,12 @@ BLIS_INLINE void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 
 BLIS_INLINE void bli_membrk_lock( membrk_t* membrk )
 {
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_mutex_lock( &(membrk->mutex) );
-#endif
 }
 
 BLIS_INLINE void bli_membrk_unlock( membrk_t* membrk )
 {
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	bli_pthread_mutex_unlock( &(membrk->mutex) );
-#endif
 }
 
 // -----------------------------------------------------------------------------

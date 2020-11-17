@@ -42,11 +42,9 @@ thrcomm_t BLIS_SINGLE_COMM           = {};
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 // A mutex to allow synchronous access to global_rntm. (The definition
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -1264,17 +1262,13 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
-#endif
 
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
-#endif
 }
 
 void bli_thread_set_num_threads( dim_t n_threads )
@@ -1282,17 +1276,13 @@ void bli_thread_set_num_threads( dim_t n_threads )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
-#endif
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
 
-#if !defined(BLIS_UNSAFE_DISABLE_PTHREAD)
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
-#endif
 }
 
 // ----------------------------------------------------------------------------
