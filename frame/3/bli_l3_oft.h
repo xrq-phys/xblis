@@ -59,6 +59,7 @@ typedef void (*PASTECH(opname,_oft)) \
 GENTDEF( gemm )
 GENTDEF( her2k )
 GENTDEF( syr2k )
+GENTDEF( skr2k )
 
 
 // hemm, symm, trmm3
@@ -80,6 +81,7 @@ typedef void (*PASTECH(opname,_oft)) \
 
 GENTDEF( hemm )
 GENTDEF( symm )
+GENTDEF( skmm )
 GENTDEF( trmm3 )
 
 

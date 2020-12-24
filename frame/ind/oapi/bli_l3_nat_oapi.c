@@ -82,6 +82,7 @@ GENFRONT( gemm, gemm, nat )
 #endif
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
+GENFRONT( skr2k, gemm, nat )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
@@ -121,6 +122,7 @@ void PASTEMAC(opname,imeth) \
 
 GENFRONT( hemm, gemm, nat )
 GENFRONT( symm, gemm, nat )
+GENFRONT( skmm, gemm, nat )
 GENFRONT( trmm3, gemm, nat )
 
 
