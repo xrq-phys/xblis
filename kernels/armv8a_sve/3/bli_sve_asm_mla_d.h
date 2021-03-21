@@ -174,8 +174,20 @@
     MLA4ROW_D(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     " ld1rd  " #bvec ".d, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
+
+
+#define ZEROVEC_Z(vec1) ZEROVEC_D(vec1)
+
+#define ZERO2VEC_Z(vec1,vec2) ZERO2VEC_D(vec1,vec2)
+
+#define ZERO4VEC_Z(vec1,vec2,vec3,vec4) ZERO4VEC_D(vec1,vec2,vec3,vec4)
+
+#define ZERO8VEC_Z(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)\
+    ZERO8VEC_D(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)
+
+
 #if defined(USE_SVE_CMLA_INSTRUCTION)
-    #define CMLA1ROW_ILV_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define MLA1ROW_ILV_Z(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
         " fcmla " #cvec1 ".d, " #preg "/m, " #avec1 ".d, " #bvec1 ".d, #0\n\t"\
         ilv1\
         " fcmla " #cvec2 ".d, " #preg "/m, " #avec2 ".d, " #bvec1 ".d, #0\n\t"\
@@ -186,7 +198,7 @@
         ilv4\
         "\n\t"
 #else
-    #define CMLA1ROW_ILV_D(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define MLA1ROW_ILV_Z(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
         " fmla " #cvec_r ".d, " #preg "/m, " #avec_r ".d, " #bvec_r ".d\n\t"\
         ilv1\
         " fmla " #cvec_i ".d, " #preg "/m, " #avec_r ".d, " #bvec_i ".d\n\t"\
@@ -198,28 +210,53 @@
         "\n\t"
 #endif
 
-#define CMLA1ROW_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-        CMLA1ROW_ILV_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
+#define MLA1ROW_Z(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+        MLA1ROW_ILV_Z(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
 
-#define CMLA1ROW_ILV_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
-    LOADC2VEC_VOFF_D(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
-    LOADC2VEC_DIST_OFF_D(bvec1, bvec2, preg, bareg, bboff1,bboff2)
+#define MLA1ROW_ILV_LA_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_Z(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
+    LOAD2VEC_VOFF_Z(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
+    LOAD2VEC_DIST_OFF_Z(bvec1, bvec2, preg, bareg, bboff1,bboff2)
 
-#define CMLA1ROW_ILV_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_D(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
-    LOADC2VEC_DIST_OFF_D(bvec1, bvec2, preg, bareg, bboff1, bboff2)
+#define MLA1ROW_ILV_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_Z(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    LOAD2VEC_DIST_OFF_Z(bvec1, bvec2, preg, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LA_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
+#define MLA1ROW_LA_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_LA_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LB_D(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
+//#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define MLA1ROW_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
+// not faster
+//#else
+//#define MLA1ROW_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+//        " fmla " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec1 ".d\n\t"\
+//        " fmla " #c2 ".d, " #preg "/m, " #a2 ".d, " #bvec1 ".d\n\t"\
+//        LDR_NOADDR_D(bvec1,preg)OA_D(bareg,bboff1)"\n\t"\
+//        " fmls " #c1 ".d, " #preg "/m, " #a2 ".d, " #bvec2 ".d\n\t"\
+//        " fmla " #c2 ".d, " #preg "/m, " #a1 ".d, " #bvec2 ".d\n\t"\
+//        LDR_NOADDR_D(bvec2,preg)OA_D(bareg,bboff2)"\n\t"
+//#endif
 
-#define CMLA2ROW_D(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
-    CMLA1ROW_D(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-    CMLA1ROW_D(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
+#define MLA2ROW_Z(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
+    MLA1ROW_Z(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+    MLA1ROW_Z(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
 
 #define PFL1(areg,preg,offset) " prfd pldl1keep, "#preg", [" #areg ", #" #offset ", MUL VL]\n\t"
 
 
+// Check if a complex number is 0
+// TODO: Only first complex number needs to be checked, 
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define CMPCZB_D(vec1,vec2,label)\
+" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
+" nots p1.b, p0/z, p1.b\n\t"\
+" b.none " label "\n\t"
+#else
+#define CMPCZB_D(vec1,vec2,label)\
+" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
+" fcmeq p2.d, p0/z, " #vec2 ".d, #0.0\n\t"\
+" ands p1.b, p0/z, p1.b, p2.b\n\t"\
+" b.any " label "\n\t"
+#endif

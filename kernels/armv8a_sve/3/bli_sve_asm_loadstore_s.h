@@ -37,6 +37,9 @@
 #define LOAD1VEC_S(vec,preg,areg)\
     " ld1w  " #vec ".s, " #preg "/z, [" #areg "]           \n\t"
 
+#define LOAD1VEC_VOFF_S(vec, preg, areg, off)\
+    " ld1w   " #vec ".s, " #preg "/z, [" #areg ", #" #off", MUL VL]\n\t"
+
 #define LOAD1VEC_CONT_S(vec,preg,areg,avec) LOAD1VEC_S(vec,preg,areg)
 
 #define LOAD1VEC_GENI_S(vec,preg,areg,avec)\
@@ -56,6 +59,9 @@
     " ld1rw  " #vec1 ".s, " #preg "/z"
 #define OA_S(areg,offset)\
     ",[" #areg ", #" #offset"]"
+
+#define LOAD1VEC_DIST_OFF_S(vec1,preg,areg,off)\
+    LDR_NOADDR_S(vec1,preg)OA_S(areg,off)"\n\t"
 
 #define LOADVEC_DIST_S(vec1,preg,areg)\
     LDR_NOADDR_S(vec1,preg)OA_S(areg,0)"\n\t"
@@ -86,30 +92,30 @@
 // load {real, imag} into every 128 bit part of the vector
 
 // Load 2 vectors worth of complex numbers
-#define LOADC2VEC_S(vec1, vec2, preg, areg) LOAD2VEC_S(vec1, vec2, preg, areg)
+#define LOAD2VEC_C(vec1, vec2, preg, areg) LOAD2VEC_S(vec1, vec2, preg, areg)
 
-#define LOADC2VEC_VOFF_S(vec1, vec2, preg, areg, off1, off2)\
+#define LOAD2VEC_VOFF_C(vec1, vec2, preg, areg, off1, off2)\
     " ld1w  " #vec1 ".s, " #preg "/z, [" #areg ",#"#off1",   MUL VL]           \n\t"\
     " ld1w  " #vec2 ".s, " #preg "/z, [" #areg ",#"#off2", MUL VL]\n\t"
 
 #define LDC2_DIST_NOADDR_S(vec1, vec2, preg)\
     " ld1rd {" #vec1 ".d}, " #preg "/z"
-#define LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
+#define LOAD2VEC_DIST_OFF_C(vec1, vec2, preg, areg, off1, off2)\
     LDC2_DIST_NOADDR_S(vec1, vec2, preg)OA_S(areg,off1)"\n\t"
 
 // Load 2 vectors and distribute the first complex number to all 128 parts
-#define LOADC2VEC_DIST_S(vec1, vec2, preg, areg) LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, 0)
+#define LOAD2VEC_DIST_C(vec1, vec2, preg, areg) LOAD2VEC_DIST_OFF_C(vec1, vec2, preg, areg, 0)
 
-#define LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, off1, off2, off3, off4)\
-    LOADC2VEC_DIST_OFF_S(vec1, vec2, preg, areg, off1, off2)\
-    LOADC2VEC_DIST_OFF_S(vec3, vec4, preg, areg, off3, off4)
+#define LOAD4VEC_DIST_OFF_C(vec1, vec2, vec3, vec4, preg, areg, off1, off2, off3, off4)\
+    LOAD2VEC_DIST_OFF_C(vec1, vec2, preg, areg, off1, off2)\
+    LOAD2VEC_DIST_OFF_C(vec3, vec4, preg, areg, off3, off4)
 
-#define LOADC4VEC_DIST_S(vec1, vec2, vec3, vec4, preg, areg)\
-    LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)
+#define LOAD4VEC_DIST_C(vec1, vec2, vec3, vec4, preg, areg)\
+    LOAD4VEC_DIST_OFF_C(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)
 
-#define LOADC8VEC_DIST_S(vec1, vec2, vec3, vec4, vec5, vec6, vec7, vec8, preg, areg)\
-    LOADC4VEC_DIST_OFF_S(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)\
-    LOADC4VEC_DIST_OFF_S(vec5, vec6, vec7, vec8, preg, areg, 16, 20, 24, 28)
+#define LOAD8VEC_DIST_C(vec1, vec2, vec3, vec4, vec5, vec6, vec7, vec8, preg, areg)\
+    LOAD4VEC_DIST_OFF_C(vec1, vec2, vec3, vec4, preg, areg, 0, 4, 8, 12)\
+    LOAD4VEC_DIST_OFF_C(vec5, vec6, vec7, vec8, preg, areg, 16, 20, 24, 28)
 
 // Make an index for gather-load/scatter-store
 // Here it has to be
@@ -118,8 +124,8 @@
 // ivec2 = {nelem*stride, nelem*stride+8, (nelem+1)*stride, (nelem+1)*stride+8, ... }
 #define MKINDC_2VEC_S(ivec1, ivec2, stridereg, nelemreg, sparereg)\
     " lsl " #sparereg", "#stridereg", #1\n\t"\
-    " index "#ivec1".s,xzr," #sparereg "\n\t"\
-    " mov "  #ivec2".s," #ivec1".s\n\t"\
+    " index "#ivec1".s,wzr," #sparereg "\n\t"\
+    " mov "  #ivec2".d," #ivec1".d\n\t"\
     " add "  #ivec2".s," #ivec2".s,#1\n\t"\
     " zip1 " #ivec1".s," #ivec1".s," #ivec2".s\n\t"\
     " mul "  #sparereg", "#sparereg", "#nelemreg"\n\t"\
@@ -128,26 +134,26 @@
     " add "  #ivec2".s," #ivec2 ".s," #ivec1".s\n\t"
 
 // Load 2 vectors worth of complex numbers
-#define STORC2VEC_S(vec1, vec2, preg, areg) STOR2VEC_S(vec1, vec2, preg, areg)
+#define STOR2VEC_C(vec1, vec2, preg, areg) STOR2VEC_S(vec1, vec2, preg, areg)
 
 #else
 // Otherwise
 // load {real} {imag} into separate vectors
 
-#define LOADC2VEC_S(vec1, vec2, preg, areg)\
+#define LOAD2VEC_C(vec1, vec2, preg, areg)\
     " ld2w {" #vec1 ".s," #vec2 ".s}, " #preg "/z, [" #areg "]\n\t"
 
-#define LOADC2VEC_VOFF_S(vec1, vec2, preg, areg, off1, off2)\
+#define LOAD2VEC_VOFF_C(vec1, vec2, preg, areg, off1, off2)\
     " ld2w {" #vec1 ".s," #vec2 ".s}, " #preg "/z, [" #areg ",#"#off1", MUL VL]\n\t"
 
-#define LOADC2VEC_DIST_OFF_S(vec_r, vec_i, preg,areg,off1,off2)\
+#define LOAD2VEC_DIST_OFF_C(vec_r, vec_i, preg,areg,off1,off2)\
     LDR_NOADDR_S(vec_r,preg)OA_S(areg,off1)"\n\t"\
     LDR_NOADDR_S(vec_i,preg)OA_S(areg,off2)"\n\t"
 
-#define LOADC2VEC_DIST_S(vec_r, vec_i, preg, areg) LOAD2VEC_DIST_S(vec_r, vec_i, preg, areg)
-#define LOADC4VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)\
+#define LOAD2VEC_DIST_C(vec_r, vec_i, preg, areg) LOAD2VEC_DIST_S(vec_r, vec_i, preg, areg)
+#define LOAD4VEC_DIST_C(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)\
     LOAD4VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, preg, areg)
-#define LOADC8VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)\
+#define LOAD8VEC_DIST_C(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)\
     LOAD8VEC_DIST_S(vec1_r, vec1_i, vec2_r, vec2_i, vec3_r, vec3_i, vec4_r, vec4_i, preg, areg)
 
 // Make an index for gather-load/scatter-store
@@ -157,18 +163,18 @@
 // ivec2 = {8,stride+8,2*stride+8,  ... }
 #define MKINDC_2VEC_S(ivec1, ivec2, stridereg, nelemreg, sparereg)\
     " lsl " #sparereg", "#stridereg", #1\n\t"\
-    " index "#ivec1".s,xzr," #sparereg "\n\t"\
-    " mov "#ivec2".s, "#ivec1".s\n\t"\
+    " index "#ivec1".s,wzr," #sparereg "\n\t"\
+    " mov "#ivec2".d, "#ivec1".d\n\t"\
     " add "#ivec2".s, "#ivec2".s,#1\n\t"
 
-#define STORC2VEC_S(vec1, vec2, preg, areg)\
+#define STOR2VEC_C(vec1, vec2, preg, areg)\
     " st2w {" #vec1 ".s," #vec2 ".s}, " #preg ", [" #areg "]\n\t"
 
 #endif
 
-#define LOADC2VEC_CONT_S(vec1,vec2,preg,areg,avec1,avec2) LOADC2VEC_S(vec1,vec2,preg,areg)
+#define LOAD2VEC_CONT_C(vec1,vec2,preg,areg,avec1,avec2) LOAD2VEC_C(vec1,vec2,preg,areg)
 
-#define LOADC2VEC_GENI_S(vec1,vec2,preg,areg,avec1,avec2)\
+#define LOAD2VEC_GENI_C(vec1,vec2,preg,areg,avec1,avec2)\
     " ld1w  " #vec1 ".s, " #preg "/z, [" #areg "," #avec1 ".s, UXTW #2]\n\t"\
     " ld1w  " #vec2 ".s, " #preg "/z, [" #areg "," #avec2 ".s, UXTW #2]\n\t"
 
@@ -194,10 +200,10 @@
     " st1w  {" #vec1 ".s}, " #preg ", [" #areg "," #avec1 ".s, UXTW #2]\n\t"\
     " st1w  {" #vec2 ".s}, " #preg ", [" #areg "," #avec2 ".s, UXTW #2]\n\t"
 
-#define STORC2VEC_CONT_S(vec1,vec2,preg,areg,avec1,avec2) STORC2VEC_S(vec1,vec2,preg,areg)
+#define STOR2VEC_CONT_C(vec1,vec2,preg,areg,avec1,avec2) STORC2VEC_S(vec1,vec2,preg,areg)
 
 // Store 2 vectors with generic indexing (scatter-store)
-#define STORC2VEC_GENI_S(vec1,vec2,preg,areg,avec1,avec2)\
+#define STOR2VEC_GENI_C(vec1,vec2,preg,areg,avec1,avec2)\
     " st1w  {" #vec1 ".s}, " #preg ", [" #areg "," #avec1 ".s, UXTW #2]\n\t"\
     " st1w  {" #vec2 ".s}, " #preg ", [" #areg "," #avec2 ".s, UXTW #2]\n\t"
 
@@ -229,4 +235,26 @@
 #else
 #define ST_AVEC_S(vec1, vec2, preg, reg)\
     " st2w {" #vec1 ".s," #vec2 ".s}, " #preg ", [" #reg "]\n\t"
+#endif
+
+
+#if defined(PREFETCH64)
+    #define PREF64(type,areg,off)\
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
+#else
+    #define PREF64(type,areg,off)
+#endif
+
+#if defined(PREFETCH256)
+    #define PREF256(type,areg,off)\
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
+#else
+    #define PREF256(type,areg,off)
+#endif
+
+#if defined(PREFETCH64) || defined(PREFETCH256)
+    #define PREFANY(type,areg,off)\
+" prfm " #type ",[" #areg ",#" #off "]\n\t"
+#else
+    #define PREFANY(type,areg,off)
 #endif

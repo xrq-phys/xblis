@@ -127,8 +127,17 @@
     MLA4ROW_S(c1, c2, c3, c4, a1, a2, a3, a4, bvec, preg)\
     " ld1rw  " #bvec ".s, "#preg"/z, [" #bareg",#" #bboff "]\n\t"
 
+#define ZEROVEC_C(vec1) ZEROVEC_S(vec1)
+
+#define ZERO2VEC_C(vec1,vec2) ZERO2VEC_S(vec1,vec2)
+
+#define ZERO4VEC_C(vec1,vec2,vec3,vec4) ZERO4VEC_S(vec1,vec2,vec3,vec4)
+
+#define ZERO8VEC_C(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)\
+    ZERO8VEC_S(vec1,vec2,vec3,vec4,vec5,vec6,vec7,vec8)
+
 #if defined(USE_SVE_CMLA_INSTRUCTION)
-    #define CMLA1ROW_ILV_S(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define MLA1ROW_ILV_C(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
         " fcmla " #cvec1 ".s, " #preg "/m, " #avec1 ".s, " #bvec1 ".s, #0\n\t"\
         ilv1\
         " fcmla " #cvec2 ".s, " #preg "/m, " #avec2 ".s, " #bvec1 ".s, #0\n\t"\
@@ -139,7 +148,7 @@
         ilv4\
         "\n\t"
 #else
-    #define CMLA1ROW_ILV_S(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
+    #define MLA1ROW_ILV_C(cvec_r, cvec_i, avec_r, avec_i, bvec_r, bvec_i, preg, ilv1, ilv2, ilv3, ilv4)\
         " fmla " #cvec_r ".s, " #preg "/m, " #avec_r ".s, " #bvec_r ".s\n\t"\
         ilv1\
         " fmla " #cvec_i ".s, " #preg "/m, " #avec_r ".s, " #bvec_i ".s\n\t"\
@@ -151,28 +160,42 @@
         "\n\t"
 #endif
 
-#define CMLA1ROW_S(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-        CMLA1ROW_ILV_S(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
+#define MLA1ROW_C(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+        MLA1ROW_ILV_C(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg,"","","","")
 
-#define CMLA1ROW_ILV_LA_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_S(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
-    LOADC2VEC_VOFF_S(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
-    LOADC2VEC_DIST_OFF_S(bvec1, bvec2, preg, bareg, bboff1,bboff2)
+#define MLA1ROW_ILV_LA_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_C(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4 )\
+    LOAD2VEC_VOFF_C(nextavec1, nextavec2, preg, aareg, avoff1, avoff2)\
+    LOAD2VEC_DIST_OFF_C(bvec1, bvec2, preg, bareg, bboff1,bboff2)
 
-#define CMLA1ROW_ILV_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_S(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
-    LOADC2VEC_DIST_OFF_S(bvec1, bvec2, preg, bareg, bboff1, bboff2)
+#define MLA1ROW_ILV_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_C(c1, c2, a1, a2, bvec1, bvec2, preg, ilv1, ilv2, ilv3, ilv4)\
+    LOAD2VEC_DIST_OFF_C(bvec1, bvec2, preg, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LA_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LA_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
+#define MLA1ROW_LA_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_LA_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", nextavec1, nextavec2, aareg, avoff1, avoff2, bareg, bboff1, bboff2)
 
-#define CMLA1ROW_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
-    CMLA1ROW_ILV_LB_S(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
+#define MLA1ROW_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+    MLA1ROW_ILV_LB_C(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
 
-#define CMLA2ROW_S(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
-    CMLA1ROW_S(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
-    CMLA1ROW_S(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
+#define MLA2ROW_C(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
+    MLA1ROW_C(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\
+    MLA1ROW_C(cvec3, cvec4, avec3, avec4, bvec1, bvec2, preg)
 
 #define PFL1(areg,preg,offset) " prfd pldl1keep, "#preg", [" #areg ", #" #offset ", MUL VL]\n\t"
 
 
+// Check if a complex number is 0
+// TODO: Only first complex number needs to be checked, 
+#if defined(USE_SVE_CMLA_INSTRUCTION)
+#define CMPCZB_S(vec1,vec2,label)\
+" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
+" nots p1.b, p0/z, p1.b\n\t"\
+" b.none " label "\n\t"
+#else
+#define CMPCZB_S(vec1,vec2,label)\
+" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
+" fcmeq p2.s, p0/z, " #vec2 ".s, #0.0\n\t"\
+" ands p1.b, p0/z, p1.b, p2.b\n\t"\
+" b.any " label "\n\t"
+#endif

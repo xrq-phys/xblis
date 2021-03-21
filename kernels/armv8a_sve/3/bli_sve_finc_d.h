@@ -86,20 +86,6 @@ COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c4,c5,p0,ca2,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 
-// Check if a complex number is 0
-// TODO: Only first complex number needs to be checked, 
-#if defined(USE_SVE_CMLA_INSTRUCTION)
-#define CMPCZB_D(vec1,vec2,label)\
-" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
-" nots p1.b, p0/z, p1.b\n\t"\
-" b.none " label "\n\t"
-#else
-#define CMPCZB_D(vec1,vec2,label)\
-" fcmeq p1.d, p0/z, " #vec1 ".d, #0.0\n\t"\
-" fcmeq p2.d, p0/z, " #vec2 ".d, #0.0\n\t"\
-" ands p1.b, p0/z, p1.b, p2.b\n\t"\
-" b.any " label "\n\t"
-#endif
 
 // complex variant, 1row = 2 vectors worth of double complex
 // Zero 4 columns of C,
@@ -115,20 +101,20 @@ ZERO8VEC_D(c0,c1,c2,c3,c4,c5,c6,c7)\
 "                                            \n\t"\
 CMPCZB_D(z ##beta1, z ##beta2, ".Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr)\
 "                                            \n\t"\
-COMBINE2(LOADC2VEC,addressing) (cs0,cs1,p0,ca0,avec1,avec2)\
-COMBINE2(LOADC2VEC,addressing) (cs2,cs3,p0,ca1,avec1,avec2)\
-COMBINE2(LOADC2VEC,addressing) (cs4,cs5,p0,ca2,avec1,avec2)\
-COMBINE2(LOADC2VEC,addressing) (cs6,cs7,p0,ca3,avec1,avec2)\
+COMBINE2(LOAD2VEC,addressing) (cs0,cs1,p0,ca0,avec1,avec2)\
+COMBINE2(LOAD2VEC,addressing) (cs2,cs3,p0,ca1,avec1,avec2)\
+COMBINE2(LOAD2VEC,addressing) (cs4,cs5,p0,ca2,avec1,avec2)\
+COMBINE2(LOAD2VEC,addressing) (cs6,cs7,p0,ca3,avec1,avec2)\
 "                                            \n\t"\
-CMLA2ROW_D(c0,c1,c2,c3,cs0,cs1,cs2,cs3,z ##beta1,z ##beta2,p0)\
-CMLA2ROW_D(c4,c5,c6,c7,cs4,cs5,cs6,cs7,z ##beta1,z ##beta2,p0)\
+MLA2ROW_Z(c0,c1,c2,c3,cs0,cs1,cs2,cs3,z ##beta1,z ##beta2,p0)\
+MLA2ROW_Z(c4,c5,c6,c7,cs4,cs5,cs6,cs7,z ##beta1,z ##beta2,p0)\
 "                                            \n\t"\
 " .Z" #fsuf "BETAZERO" #addressing "COLSTOREDS" #labelnr ":          \n\t"\
 "                                            \n\t"\
-CMLA2ROW_D(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha1 , z ##alpha2 ,p0)\
-CMLA2ROW_D(c4,c5,c6,c7,acc4,acc5,acc6,acc7,z ##alpha1 , z ##alpha2 ,p0)\
+MLA2ROW_Z(c0,c1,c2,c3,acc0,acc1,acc2,acc3,z ##alpha1 , z ##alpha2 ,p0)\
+MLA2ROW_Z(c4,c5,c6,c7,acc4,acc5,acc6,acc7,z ##alpha1 , z ##alpha2 ,p0)\
 "                                            \n\t"\
-COMBINE2(STORC2VEC,addressing) (c0,c1,p0,ca0,avec1,avec2)\
-COMBINE2(STORC2VEC,addressing) (c2,c3,p0,ca1,avec1,avec2)\
-COMBINE2(STORC2VEC,addressing) (c4,c5,p0,ca2,avec1,avec2)\
-COMBINE2(STORC2VEC,addressing) (c6,c7,p0,ca3,avec1,avec2)
+COMBINE2(STOR2VEC,addressing) (c0,c1,p0,ca0,avec1,avec2)\
+COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec1,avec2)\
+COMBINE2(STOR2VEC,addressing) (c4,c5,p0,ca2,avec1,avec2)\
+COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec1,avec2)

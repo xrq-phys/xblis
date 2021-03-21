@@ -86,21 +86,6 @@ COMBINE2(STOR2VEC,addressing) (c2,c3,p0,ca1,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c4,c5,p0,ca2,avec0,avec1)\
 COMBINE2(STOR2VEC,addressing) (c6,c7,p0,ca3,avec0,avec1)
 
-// Check if a complex number is 0
-// TODO: Only first complex number needs to be checked, 
-#if defined(USE_SVE_CMLA_INSTRUCTION)
-#define CMPCZB_S(vec1,vec2,label)\
-" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
-" nots p1.b, p0/z, p1.b\n\t"\
-" b.none " label "\n\t"
-#else
-#define CMPCZB_S(vec1,vec2,label)\
-" fcmeq p1.s, p0/z, " #vec1 ".s, #0.0\n\t"\
-" fcmeq p2.s, p0/z, " #vec2 ".s, #0.0\n\t"\
-" ands p1.b, p0/z, p1.b, p2.b\n\t"\
-" b.any " label "\n\t"
-#endif
-
 // complex variant, 1row = 2 vectors worth of double complex
 // Zero 4 columns of C,
 // Load 4 columns of C and multiply by beta if beta !=0
