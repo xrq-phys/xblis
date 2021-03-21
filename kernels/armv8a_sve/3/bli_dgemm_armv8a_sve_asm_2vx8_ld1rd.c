@@ -61,7 +61,7 @@ MLA2ROW_D(z24,z25, cur_avec0,cur_avec1, bvec6, p0)\
 MLA2ROW_D(z26,z27, cur_avec0,cur_avec1, bvec7, p0)
 
 
-/* 2 vectors in m_r, n_r = 12
+/* 2 vectors in m_r, n_r = 8
 */
 void bli_dgemm_armv8a_sve_asm_2vx8_ld1rd
      (
