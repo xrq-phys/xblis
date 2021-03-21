@@ -43,7 +43,7 @@ void* get_sve_sgemm_bli_kernel(int m_r, int n_r)
 {
     void* kptr = NULL;
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    kptr = (void*) bli_sgemm_armv8a_sve_asm_2vx8;
+    kptr = (void*) bli_sgemm_armv8a_sve_asm_2vx10;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     kptr = (void*) bli_sgemm_armv8a_sve_asm_16x8;
 #else
@@ -126,7 +126,13 @@ void* get_sve_zgemm_bli_kernel(int m_r, int n_r)
     void* kptr = NULL;
 
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
-    kptr = (void*) bli_zgemm_armv8a_sve_asm_2vx4;
+    gint_t kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_Z",0);
+    if(0 != kernel_override_idx)
+    {
+        kptr = sve_get_override_kernel_z(kernel_override_idx);
+        return kptr;
+    }
+    kptr = (void*) bli_zgemm_armv8a_sve_asm_2vx12;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     kptr = (void*) bli_zgemm_armv8a_sve_asm_4x4;
 #elif SVE_VECSIZE == SVE_VECSIZE_512
@@ -135,6 +141,20 @@ void* get_sve_zgemm_bli_kernel(int m_r, int n_r)
     kptr = (void*) bli_zgemm_armv8a_sve_asm_16x4;
 #else
 #endif
+
+    return kptr;
+}
+void* get_sve_cgemm_bli_kernel(int m_r, int n_r)
+{
+    void* kptr = NULL;
+
+    gint_t kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_C",0);
+    if(0 != kernel_override_idx)
+    {
+        kptr = sve_get_override_kernel_c(kernel_override_idx);
+        return kptr;
+    }
+    kptr = (void*) bli_cgemm_armv8a_sve_asm_2vx10;
 
     return kptr;
 }
@@ -197,6 +217,11 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     int n_c_s = C_Bc * (n_l3 * c_l3)/(k_c_s*S_Data);
     n_c_s -= (n_c_s%n_r_s);
 
+    // check overrides
+    k_c_s   = bli_env_get_var("BLIS_SVE_KC_S",k_c_s);
+    m_c_s   = bli_env_get_var("BLIS_SVE_MC_S",m_c_s);
+    n_c_s   = bli_env_get_var("BLIS_SVE_NC_S",n_c_s);
+
     // if kernel not implemented, set everything to -1 -> back to default
     if (m_r_s == -1 || n_r_s == -1)
         k_c_s = m_c_s = n_c_s = -1;
@@ -220,6 +245,35 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     int n_c_z = C_Bc * (n_l3 * c_l3)/(k_c_z*S_Data);
     n_c_z -= (n_c_z%n_r_z);
 
+    // check overrides
+    k_c_z   = bli_env_get_var("BLIS_SVE_KC_Z",k_c_z);
+    m_c_z   = bli_env_get_var("BLIS_SVE_MC_Z",m_c_z);
+    n_c_z   = bli_env_get_var("BLIS_SVE_NC_Z",n_c_z);
+
+    // single complex
+    S_Data   = 8;
+    simd_size = get_sve_byte_size()/S_Data;
+
+    int m_r_c = (int) ceil(sqrt((double)simd_size*l_vfma*n_vfma)/simd_size)*simd_size;
+    int n_r_c = (int) ceil(((double)simd_size*l_vfma*n_vfma)/m_r_c);
+
+    adjust_sve_mr_nr_c(&m_r_c,&n_r_c);
+
+    int k_c_c = (int) (floor(((double)w_l1-1.0)/(1.0+((double)n_r_c)/m_r_c)) * n_l1*c_l1)/(n_r_c*S_Data);
+
+    C_Ac = w_l2 - 1 - ceil((2.0*(double)k_c_c*n_r_c*S_Data)/(c_l2*n_l2));
+    int m_c_c = C_Ac * (n_l2 * c_l2)/(k_c_c*S_Data);
+    m_c_c -= (m_c_c%m_r_c);
+
+    C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_c*m_c_c*S_Data)/(c_l3*n_l3));
+    int n_c_c = C_Bc * (n_l3 * c_l3)/(k_c_c*S_Data);
+    n_c_c -= (n_c_c%n_r_c);
+
+    // check overrides
+    k_c_c   = bli_env_get_var("BLIS_SVE_KC_C",k_c_c);
+    m_c_c   = bli_env_get_var("BLIS_SVE_MC_C",m_c_c);
+    n_c_c   = bli_env_get_var("BLIS_SVE_NC_C",n_c_c);
+
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
@@ -231,16 +285,12 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-#if SVE_VECSIZE == SVE_VECSIZE_VLA
-	  3,
+#if (SVE_VECSIZE == SVE_VECSIZE_VLA) || (SVE_VECSIZE == SVE_VECSIZE_256)
+	  4,
       BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s, n_r_s), FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
       BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
-#elif SVE_VECSIZE == SVE_VECSIZE_256
-	  3,
-      BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s, n_r_s), FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
-      BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
+      BLIS_GEMM_UKR, BLIS_COMPLEX,  get_sve_cgemm_bli_kernel(m_r_c, n_r_c), FALSE,
 #else
 	  2,
       //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
@@ -250,19 +300,14 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	  cntx
 	);
 
-    // TODO: clean this up
-//#if SVE_VECSIZE != SVE_VECSIZE_VLA
- //   m_r_z = n_r_z = m_c_z = k_c_z = n_c_z = -1;
-//#endif
-
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                                  s        d      c       z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],        m_r_s,   m_r_d,    -1,  m_r_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],        n_r_s,   n_r_d,    -1,  n_r_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],        m_c_s,   m_c_d,    -1,  m_c_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],        k_c_s,   k_c_d,    -1,  k_c_z);
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],        n_c_s,   n_c_d,    -1,  n_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],        m_r_s,   m_r_d, m_r_c,  m_r_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],        n_r_s,   n_r_d, n_r_c,  n_r_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],        m_c_s,   m_c_d, m_c_c,  m_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],        k_c_s,   k_c_d, k_c_c,  k_c_z);
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],        n_c_s,   n_c_d, n_c_c,  n_c_z);
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
@@ -276,6 +321,7 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 	  cntx
 	);
+
 
 }
 

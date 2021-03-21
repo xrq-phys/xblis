@@ -108,7 +108,7 @@ void  adjust_sve_mr_nr_s(int* m_r, int* n_r)
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
     int onevec = (get_sve_byte_size())/4;
     *m_r = 2*onevec;
-    *n_r = 8;
+    *n_r = 10;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 16;
     *n_r = 8;
@@ -124,8 +124,16 @@ void  adjust_sve_mr_nr_s(int* m_r, int* n_r)
 void  adjust_sve_mr_nr_z(int* m_r, int* n_r)
 {
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
+    int onevec = (get_sve_byte_size())/16;
+
+    int kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_Z",0);
+    if(0 != kernel_override_idx)
+    {
+        sve_override_mr_nr_z(kernel_override_idx, onevec, m_r, n_r);
+        return;
+    }
     *m_r = (2*get_sve_byte_size())/16;
-    *n_r = 4;
+    *n_r = 12;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     *m_r = 4;
     *n_r = 4;
@@ -136,4 +144,18 @@ void  adjust_sve_mr_nr_z(int* m_r, int* n_r)
     *m_r = 16;
     *n_r = 4;
 #endif
+}
+
+void  adjust_sve_mr_nr_c(int* m_r, int* n_r)
+{
+    int onevec = (get_sve_byte_size())/8;
+
+    int kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_C",0);
+    if(0 != kernel_override_idx)
+    {
+        sve_override_mr_nr_c(kernel_override_idx, onevec, m_r, n_r);
+        return;
+    }
+    *m_r = (2*get_sve_byte_size())/8;
+    *n_r = 10;
 }
