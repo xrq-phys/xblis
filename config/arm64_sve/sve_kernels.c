@@ -103,7 +103,7 @@ void sve_override_mr_nr_z(int kernel_idx, int vec_size, int* m_r, int* n_r)
 void* sve_get_override_kernel_c(int kernel_idx)
 {
 #define UKRCASE(suffix)\
-    case zukr_ ## suffix :\
+    case cukr_ ## suffix :\
         {\
             return bli_cgemm_armv8a_sve_asm_ ## suffix ;\
         }
