@@ -169,12 +169,93 @@ void bli_pthread_once
 	init();
 }
 
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
+     (
+       void
+     )
+{
+	return 0;
+}
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	// We don't bother comparing t1 and t2 since we must, by definition, be
+	// executing the same thread if there is not threading mechanism on the
+	// system.
+	return 1;
+}
+#endif
+
 #elif defined(_MSC_VER) // !defined(BLIS_DISABLE_SYSTEM)
 
 #include <errno.h>
 
 // This branch defines a pthread-like API, bli_pthread_*(), and implements it
 // in terms of Windows API calls.
+
+// -- pthread_create(), pthread_join() --
+
+typedef struct
+{
+	void* (*start_routine)( void* );
+	void*   param;
+	void**  retval;
+
+} bli_thread_param;
+
+static DWORD bli_thread_func
+     (
+       void* param_
+     )
+{
+	bli_thread_param* param = param_;
+	*param->retval = param->start_routine( param->param );
+	return 0;
+}
+
+int bli_pthread_create
+     (
+       bli_pthread_t*            thread,
+       const bli_pthread_attr_t* attr,
+       void*                   (*start_routine)(void*),
+       void*                     arg
+     )
+{
+	if ( attr ) return EINVAL;
+	bli_thread_param param = { start_routine, arg, &thread->retval };
+	thread->handle = CreateThread( NULL, 0, bli_thread_func, &param, 0, NULL );
+	if ( !thread->handle ) return EAGAIN;
+	return 0;
+}
+
+int bli_pthread_join
+     (
+       bli_pthread_t thread,
+       void**        retval
+     )
+{
+	if ( !WaitForSingleObject( thread.handle, INFINITE ) ) return EAGAIN;
+	if ( retval ) *retval = thread.retval;
+	return 0;
+}
+
+// -- pthread_mutex_*() --
 
 int bli_pthread_mutex_init
      (
@@ -221,28 +302,7 @@ int bli_pthread_mutex_unlock
 	return 0;
 }
 
-static BOOL bli_init_once_wrapper
-     (
-       bli_pthread_once_t* once,
-       void*               param,
-       void**              context
-     )
-{
-	( void )once;
-	( void )context;
-	typedef void (*callback)( void );
-	((callback)param)();
-	return TRUE;
-}
-
-void bli_pthread_once
-     (
-       bli_pthread_once_t* once,
-       void              (*init)(void)
-     )
-{
-	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
-}
+// -- pthread_cond_*() --
 
 int bli_pthread_cond_init
      (
@@ -283,49 +343,68 @@ int bli_pthread_cond_broadcast
 	return 0;
 }
 
-typedef struct
-{
-	void* (*start_routine)( void* );
-	void*   param;
-	void**  retval;
+// -- pthread_once() --
 
-} bli_thread_param;
-
-static DWORD bli_thread_func
+static BOOL bli_init_once_wrapper
      (
-       void* param_
+       bli_pthread_once_t* once,
+       void*               param,
+       void**              context
      )
 {
-	bli_thread_param* param = param_;
-	*param->retval = param->start_routine( param->param );
-	return 0;
+	( void )once;
+	( void )context;
+	typedef void (*callback)( void );
+	((callback)param)();
+	return TRUE;
 }
 
-int bli_pthread_create
+void bli_pthread_once
      (
-       bli_pthread_t*            thread,
-       const bli_pthread_attr_t* attr,
-       void*                   (*start_routine)(void*),
-       void*                     arg
+       bli_pthread_once_t* once,
+       void              (*init)(void)
      )
 {
-	if ( attr ) return EINVAL;
-	bli_thread_param param = { start_routine, arg, &thread->retval };
-	thread->handle = CreateThread( NULL, 0, bli_thread_func, &param, 0, NULL );
-	if ( !thread->handle ) return EAGAIN;
-	return 0;
+	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
 }
 
-int bli_pthread_join
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
      (
-       bli_pthread_t thread,
-       void**        retval
+       void
      )
 {
-	if ( !WaitForSingleObject( thread.handle, INFINITE ) ) return EAGAIN;
-	if ( retval ) *retval = thread.retval;
-	return 0;
+	bli_pthread_t t;
+
+	// Note: BLIS will only ever use bli_pthread_self() in conjunction with
+	// bli_pthread_equal(), and thus setting the .retval field is unnecessary.
+	// Despite this, we set it to NULL anyway.
+	t.handle = GetCurrentThread();
+	t.retval = NULL;
+
+	return t;
 }
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	return ( int )CompareObjectHandles( t1.handle, t2.handle );
+}
+#endif
 
 #else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
@@ -447,7 +526,37 @@ void bli_pthread_once
 	pthread_once( once, init );
 }
 
-#endif // _MSC_VER
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
+     (
+       void
+     )
+{
+	return pthread_self();
+}
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	return pthread_equal( t1, t2 );
+}
+#endif
+
+#endif // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
 
 

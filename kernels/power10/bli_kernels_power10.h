@@ -35,3 +35,4 @@
 // gemm
 GEMM_UKR_PROT( double,   d, gemm_power10_mma_8x8  )
 GEMM_UKR_PROT( float,    s, gemm_power10_mma_8x16 )
+

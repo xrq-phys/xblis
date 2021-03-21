@@ -554,7 +554,7 @@ Contributing
 ------------
 
 For information on how to contribute to our project, including preferred
-[coding conventions](docs/CodingConventions), please refer to the
+[coding conventions](docs/CodingConventions.md), please refer to the
 [CONTRIBUTING](CONTRIBUTING.md) file at the top-level of the BLIS source
 distribution.
 
@@ -642,7 +642,7 @@ for determining blocksize parameters in BLIS
 
 A fifth paper, submitted to ACM TOMS, begins the study of so-called
 [induced methods for complex matrix multiplication]( https://dl.acm.org/doi/10.1145/3086466?cid=81314495332)
-([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf)):
 
 ```
 @article{BLIS5,
@@ -662,7 +662,7 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
 article and derives a
 [superior induced method](https://epubs.siam.org/doi/10.1137/19M1282040)
-([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev3.pdf):
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev3.pdf)):
 
 ```
 @article{BLIS6,
@@ -681,7 +681,7 @@ article and derives a
 
 A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` for
 [mixed-domain and/or mixed-precision](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands
-([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf):
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf)):
 
 ```
 @article{BLIS7,
