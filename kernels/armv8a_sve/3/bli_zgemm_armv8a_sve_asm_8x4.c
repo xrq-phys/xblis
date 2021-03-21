@@ -149,16 +149,16 @@ LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 "                                            \n\t"
 " D256LOOP:                                  \n\t" // Body
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
 "                                            \n\t"
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
 "                                            \n\t"
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
 "                                            \n\t"
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " prfm PLDL1KEEP, [x1, #256]                  \n\t"
 " add x1, x1, #64                            \n\t" //update address of B
@@ -170,16 +170,16 @@ LD_AVEC_D(z0, z1, p0, x0)
 " add x0, x0, #128                            \n\t" //update address of A
 "                                            \n\t"	//End it 1.
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
 "                                            \n\t"
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
 "                                            \n\t"
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
 "                                            \n\t"
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " prfm PLDL1KEEP, [x1, #256]                  \n\t"
 " add x1, x1, #64                            \n\t" //update address of B
@@ -192,16 +192,16 @@ LD_AVEC_D(z0, z1, p0, x0)
 "                                            \n\t"	//End it 2.
 "                                            \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
 "                                            \n\t"
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
 "                                            \n\t"
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
 "                                            \n\t"
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " prfm PLDL1KEEP, [x1, #256]                  \n\t"
 " add x1, x1, #64                            \n\t" //update address of B
@@ -213,16 +213,16 @@ LD_AVEC_D(z0, z1, p0, x0)
 " add x0, x0, #128                            \n\t" //update address of A
 "                                            \n\t"	//End it 3.
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
 "                                            \n\t"
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
 "                                            \n\t"
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
 "                                            \n\t"
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " prfm PLDL1KEEP, [x1, #256]                  \n\t"
 " add x1, x1, #64                            \n\t" //update address of B
@@ -243,13 +243,13 @@ LD_AVEC_D(z0, z1, p0, x0)
 " .C256LASTITER:                             \n\t"
 "                                            \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " prfm PLDL1KEEP, [x1, #256]                  \n\t"
 " add x1, x1, #64                            \n\t" //update address of B
@@ -261,13 +261,13 @@ LD_AVEC_D(z0, z1, p0, x0)
 "                                            \n\t"	//End it 1.
 "                                            \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " add x1, x1, #64                            \n\t" //update address of B
 "                                            \n\t"
@@ -276,13 +276,13 @@ LD_AVEC_D(z0, z1, p0, x0)
 "                                            \n\t"	//End it 2.
 "                                            \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
 LDR_BVEC_D(z2, z3, p0, x1, 0, 8)
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
 LDR_BVEC_D(z4, z5, p0, x1, 16, 24)
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
 LDR_BVEC_D(z6, z7, p0, x1, 32, 40)
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 " add x1, x1, #64                            \n\t" //update address of B
 "                                            \n\t"
@@ -290,10 +290,10 @@ LD_AVEC_D(z0, z1, p0, x0)
 " add x0, x0, #128                            \n\t" // incremenenting by 64  
 "                                            \n\t"	//End it 3.
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 "                                            \n\t"
 "                                            \n\t"	//End it 4.
 "                                            \n\t"
@@ -318,10 +318,10 @@ LDR_BVEC_D(z8, z9, p0, x1, 48, 56)
 "                                            \n\t"
 " sub x6,x6,1                                \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z12, z13, z0, z1, z2, z3, p0)
-CMLA1ROW_D(z14, z15, z0, z1, z4, z5, p0)
-CMLA1ROW_D(z16, z17, z0, z1, z6, z7, p0)
-CMLA1ROW_D(z18, z19, z0, z1, z8, z9, p0)
+MLA1ROW_Z(z12, z13, z0, z1, z2, z3, p0)
+MLA1ROW_Z(z14, z15, z0, z1, z4, z5, p0)
+MLA1ROW_Z(z16, z17, z0, z1, z6, z7, p0)
+MLA1ROW_Z(z18, z19, z0, z1, z8, z9, p0)
 "                                            \n\t"
 "                                            \n\t"
 " cmp x6,0                                   \n\t" // Iterate again.
@@ -366,17 +366,17 @@ LD_AVEC_D(z4, z5, p0, x21) // Load column 2 of C
 LD_AVEC_D(z6, z7, p0, x22) // Load column 3 of C
 "                                            \n\t"
 "                                            \n\t" // Scale by beta
-CMLA1ROW_D(z20, z21, z0, z1, z10, z11, p0)
-CMLA1ROW_D(z22, z23, z2, z3, z10, z11, p0)
-CMLA1ROW_D(z24, z25, z4, z5, z10, z11, p0)
-CMLA1ROW_D(z26, z27, z6, z7, z10, z11, p0)
+MLA1ROW_Z(z20, z21, z0, z1, z10, z11, p0)
+MLA1ROW_Z(z22, z23, z2, z3, z10, z11, p0)
+MLA1ROW_Z(z24, z25, z4, z5, z10, z11, p0)
+MLA1ROW_Z(z26, z27, z6, z7, z10, z11, p0)
 "                                            \n\t"
 " .C256BETAZEROCOLSTOREDS1:                  \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z20, z21, z12, z13, z8, z9, p0)
-CMLA1ROW_D(z22, z23, z14, z15, z8, z9, p0)
-CMLA1ROW_D(z24, z25, z16, z17, z8, z9, p0)
-CMLA1ROW_D(z26, z27, z18, z19, z8, z9, p0)
+MLA1ROW_Z(z20, z21, z12, z13, z8, z9, p0)
+MLA1ROW_Z(z22, z23, z14, z15, z8, z9, p0)
+MLA1ROW_Z(z24, z25, z16, z17, z8, z9, p0)
+MLA1ROW_Z(z26, z27, z18, z19, z8, z9, p0)
 "                                            \n\t"
 ST_AVEC_D(z20, z21, p0, x2)  // Store column 0 of C
 ST_AVEC_D(z22, z23, p0, x20) // Store column 1 of C
@@ -421,17 +421,17 @@ CMPCZB_D(z10, z11, ".C256BETAZEROGENSTOREDS1")
 " ld1d {z6.d}, p0/z, [x22, z28.d, LSL #3]    \n\t" // Load column 3 of C
 " ld1d {z7.d}, p0/z, [x22, z29.d, LSL #3]    \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z20, z21, z0, z1, z10, z11, p0)
-CMLA1ROW_D(z22, z23, z2, z3, z10, z11, p0)
-CMLA1ROW_D(z24, z25, z4, z5, z10, z11, p0)
-CMLA1ROW_D(z26, z27, z6, z7, z10, z11, p0)
+MLA1ROW_Z(z20, z21, z0, z1, z10, z11, p0)
+MLA1ROW_Z(z22, z23, z2, z3, z10, z11, p0)
+MLA1ROW_Z(z24, z25, z4, z5, z10, z11, p0)
+MLA1ROW_Z(z26, z27, z6, z7, z10, z11, p0)
 "                                            \n\t"
 " .C256BETAZEROGENSTOREDS1:                  \n\t"
 "                                            \n\t"
-CMLA1ROW_D(z20, z21, z12, z13, z8, z9, p0)
-CMLA1ROW_D(z22, z23, z14, z15, z8, z9, p0)
-CMLA1ROW_D(z24, z25, z16, z17, z8, z9, p0)
-CMLA1ROW_D(z26, z27, z18, z19, z8, z9, p0)
+MLA1ROW_Z(z20, z21, z12, z13, z8, z9, p0)
+MLA1ROW_Z(z22, z23, z14, z15, z8, z9, p0)
+MLA1ROW_Z(z24, z25, z16, z17, z8, z9, p0)
+MLA1ROW_Z(z26, z27, z18, z19, z8, z9, p0)
 "                                            \n\t"
 " st1d {z20.d}, p0, [x2, z28.d, LSL #3]      \n\t" // Store column 0 of C
 " st1d {z21.d}, p0, [x2, z29.d, LSL #3]      \n\t"
