@@ -300,6 +300,18 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	  cntx
 	);
 
+	if (8 == (get_sve_byte_size()/8))
+    {
+	  bli_cntx_set_packm_kers
+	  (
+		3,
+		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
+		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
+		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+		cntx
+	  );
+    }
+
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                                  s        d      c       z

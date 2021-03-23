@@ -79,4 +79,9 @@ GEMM_UKR_PROT(dcomplex, z, gemm_armv8a_sve_asm_2vx12)
 
 GEMM_UKR_PROT(scomplex, c, gemm_armv8a_sve_asm_2vx10)
 
+
+PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
+PACKM_KER_PROT( double,   d, packm_armsve512_asm_12xk )
+PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
+
 void* get_sve_dgemm_bli_kernel(int m_r, int n_r);
