@@ -8,6 +8,11 @@ void* sve_get_override_kernel_d(int kernel_idx)
         {\
             return bli_dgemm_armv8a_sve_asm_ ## suffix ;\
         }
+#define UKRCASE_ALT(suffix)\
+    case dukr_ ## suffix :\
+        {\
+            return bli_dgemm_armsve_asm_ ## suffix ;\
+        }
     switch(kernel_idx)
     {
         UKRCASE(2vx8)
@@ -23,9 +28,11 @@ void* sve_get_override_kernel_d(int kernel_idx)
         UKRCASE(2vx12_ld1rqd)
         UKRCASE(4vx5)
         UKRCASE(4vx5_ld1rd_colwise)
+        UKRCASE_ALT(2vx10_unindexed)
         default: return NULL;
     }
 #undef UKRCASE
+#undef UKRCASE_ALT
     return NULL;
 }
 
@@ -56,6 +63,7 @@ void sve_override_mr_nr_d(int kernel_idx, int vec_size, int* m_r, int* n_r)
         UKRCASEEX(2v,12,_ld1rqd)
         UKRCASEEX(4v,5,)
         UKRCASEEX(4v,5,_ld1rd_colwise)
+        UKRCASEEX(2v,10,_unindexed)
     }
 }
 

@@ -16,7 +16,8 @@ enum kernel_indices_d
     dukr_2vx12_ld1rd         = 10,
     dukr_2vx12_ld1rqd        = 11,
     dukr_4vx5                = 12,
-    dukr_4vx5_ld1rd_colwise  = 13
+    dukr_4vx5_ld1rd_colwise  = 13,
+    dukr_2vx10_unindexed     = 14
 };
 
 void* sve_get_override_kernel_d(int kernel_idx);
