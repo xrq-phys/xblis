@@ -140,10 +140,10 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
 " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
 #ifdef _A64FX
-" mov             x16, 0x1                        \n\t" // Tag C address.
+" mov             x16, 0x3                        \n\t" // Tag C address.
 " lsl             x16, x16, #56                   \n\t"
 " orr             x5, x5, x16                     \n\t"
-" mov             x16, 0x2                        \n\t" // Tag A address.
+" mov             x16, 0x1                        \n\t" // Tag A address.
 " lsl             x16, x16, #56                   \n\t"
 " orr             x0, x0, x16                     \n\t"
 #endif
@@ -183,7 +183,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
 " ldr             x12, %[k_mker]                  \n\t"
 " ldr             x13, %[k_left]                  \n\t"
 #ifdef _A64FX
-" mov             x16, 0x3                        \n\t" // Tag B address.
+" mov             x16, 0x2                        \n\t" // Tag B address.
 " lsl             x16, x16, #56                   \n\t"
 " orr             x11, x11, x16                   \n\t"
 #endif
