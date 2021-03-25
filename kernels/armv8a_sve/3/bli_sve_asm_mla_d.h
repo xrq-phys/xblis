@@ -229,15 +229,15 @@
 #define MLA1ROW_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
     MLA1ROW_ILV_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, "", "", "", "", bareg, bboff1, bboff2)
 // not faster
-//#else
-//#define MLA1ROW_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
-//        " fmla " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec1 ".d\n\t"\
-//        " fmla " #c2 ".d, " #preg "/m, " #a2 ".d, " #bvec1 ".d\n\t"\
-//        LDR_NOADDR_D(bvec1,preg)OA_D(bareg,bboff1)"\n\t"\
-//        " fmls " #c1 ".d, " #preg "/m, " #a2 ".d, " #bvec2 ".d\n\t"\
-//        " fmla " #c2 ".d, " #preg "/m, " #a1 ".d, " #bvec2 ".d\n\t"\
-//        LDR_NOADDR_D(bvec2,preg)OA_D(bareg,bboff2)"\n\t"
-//#endif
+/*#else
+#define MLA1ROW_LB_Z(c1, c2, a1, a2, bvec1, bvec2, preg, bareg, bboff1, bboff2)\
+        " fmla " #c1 ".d, " #preg "/m, " #a1 ".d, " #bvec1 ".d\n\t"\
+        " fmla " #c2 ".d, " #preg "/m, " #a2 ".d, " #bvec1 ".d\n\t"\
+        LDR_NOADDR_D(bvec1,preg)OA_D(bareg,bboff1)"\n\t"\
+        " fmls " #c1 ".d, " #preg "/m, " #a2 ".d, " #bvec2 ".d\n\t"\
+        " fmla " #c2 ".d, " #preg "/m, " #a1 ".d, " #bvec2 ".d\n\t"\
+        LDR_NOADDR_D(bvec2,preg)OA_D(bareg,bboff2)"\n\t"
+#endif*/
 
 #define MLA2ROW_Z(cvec1, cvec2, cvec3, cvec4, avec1, avec2, avec3, avec4, bvec1, bvec2, preg)\
     MLA1ROW_Z(cvec1, cvec2, avec1, avec2, bvec1, bvec2, preg)\

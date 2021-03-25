@@ -38,8 +38,6 @@
 #include "blis.h"
 #include "bli_sve_asm_mla_d.h"
 
-#include "bli_a64fx_sector_cache.h"
-
 //#define inblock_pref(off) \
 PREFSVE421(pldl1keep,p0,x0,off)
 

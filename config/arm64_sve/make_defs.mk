@@ -45,7 +45,7 @@ THIS_CONFIG    := arm64_sve
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -D_GNU_SOURCE
-CMISCFLAGS     := -march=armv8.4-a+sve 
+CMISCFLAGS     := -march=armv8.2-a+sve 
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -59,14 +59,14 @@ else
 COPTFLAGS      := -O3 -ftree-vectorize
 endif
 
+SUPPORTED_COMPILERS := gcc armclang clang fcc
+
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv8.4-a+sve
-else ifeq ($(CC_VENDOR),armclang)
-CKVECFLAGS     := -march=armv8.4-a+sve
+ifneq ($(filter $(CC_VENDOR),$(SUPPORTED_COMPILERS)),)
+CKVECFLAGS     := -march=armv8.2-a+sve
 else
-$(error gcc or armclang is required for this configuration. You are using $(CC_VENDOR) )
+$(error supported configuration. You are using $(CC_VENDOR) )
 endif
 
 # Flags specific to reference kernels.

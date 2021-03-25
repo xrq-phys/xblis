@@ -35,7 +35,7 @@ void* sve_get_override_kernel_d(int kernel_idx)
 void sve_override_mr_nr_d(int kernel_idx, int vec_size, int* m_r, int* n_r)
 {
 #define UKRCASEEX(mr,nr,suffix)\
-    case dukr_ ## mr ## x ## nr ## suffix :\ 
+    case dukr_ ## mr ## x ## nr ## suffix :\
         {\
             *m_r = mr_ ## mr;\
             *n_r = nr;\

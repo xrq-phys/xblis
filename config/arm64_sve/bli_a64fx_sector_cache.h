@@ -1,3 +1,6 @@
+#ifndef BLIS_A64FX_SECTOR_CACHE_H
+#define BLIS_A64FX_SECTOR_CACHE_H
+
 #if defined(_A64FX)
     // A64FX: set up cache sizes
     //
@@ -50,6 +53,17 @@
             );\
 }
 
+#define A64FX_SETUP_SECTOR_CACHE_SIZES_L2(config_bitfield)\
+{\
+    uint64_t sector_cache_config = config_bitfield;\
+    __asm__ volatile(\
+            "msr s3_3_c15_c8_2,%[sector_cache_config]"\
+            :\
+            : [sector_cache_config] "r" (sector_cache_config)\
+            :\
+            );\
+}
+
 
 #define A64FX_SET_CACHE_SECTOR(areg, tag, sparereg)\
 " mov "#sparereg", "#tag"      \n\t"\
@@ -63,19 +77,21 @@ __asm__ volatile(\
         : \
         :\
         );
+
+#define A64FX_SCC(sec0,sec1,sec2,sec3)\
+    (uint64_t)((sec0 & 0x7LU) | ((sec1 & 0x7LU) << 4) | ((sec2 & 0x7LU) << 8) | ((sec3 & 0x7LU) << 12))
+
+#define A64FX_SCC_L2(sec02,sec13)\
+    (uint64_t)((sec02 & 0x1FLU) | ((sec13 & 0x1FLU) << 8))
 #else
 #define A64FX_SETUP_SECTOR_CACHE_SIZES(config_bitfield) 
+#define A64FX_SETUP_SECTOR_CACHE_SIZES_L2(config_bitfield) 
 #define A64FX_READ_SECTOR_CACHE_SIZES(output_uint64) 
 #define A64FX_SET_CACHE_SECTOR(areg,tag,sparereg) 
+#define A64FX_SCC(sec0,sec1,sec2,sec3)
+#define A64FX_SCC_L2(sec0,sec1,sec2,sec3)
 #endif
 
+void a64fx_print_sc_configuration(uint64_t bitfield);
 
-inline void print_sector_cache_configuration(uint64_t bitfield)
-{
-    for(uint64_t sector = 0; sector < 4; sector++)
-    {
-        uint64_t count = bitfield & 0x7;
-        bitfield >>= 4;
-        printf("cache sector %zu has %zu sectors\n", sector, count+1LU);
-    }
-}
+#endif // BLIS_A64FX_SECTOR_CACHE_H

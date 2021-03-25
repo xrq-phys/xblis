@@ -35,9 +35,12 @@
 
 #include "blis.h"
 
+#include "bli_a64fx_sector_cache.h"
+
 #include "sve_architecture.h"
 #include "sve_kernels.h"
 #include "sve_helpers.h"
+
 
 void* get_sve_sgemm_bli_kernel(int m_r, int n_r)
 {
@@ -192,7 +195,7 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     int C_Bc = w_l3 - 1 - ceil((2.0*(double)k_c_d*m_c_d*S_Data)/(c_l3*n_l3));
     int n_c_d = C_Bc * (n_l3 * c_l3)/(k_c_d*S_Data);
     n_c_d -= (n_c_d%n_r_d);
-   
+
     // check overrides
     k_c_d   = bli_env_get_var("BLIS_SVE_KC_D",k_c_d);
     m_c_d   = bli_env_get_var("BLIS_SVE_MC_D",m_c_d);
@@ -333,6 +336,16 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 	  cntx
 	);
+
+
+#if defined(_A64FX)
+    // Set A64FX cache sector sizes for each PE/CMG
+    #pragma omp parallel
+    {
+        A64FX_SETUP_SECTOR_CACHE_SIZES(A64FX_SCC(0,1,3,0))
+        A64FX_SETUP_SECTOR_CACHE_SIZES_L2(A64FX_SCC_L2(9,28))
+    }
+#endif
 
 
 }

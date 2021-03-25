@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include "sve_helpers.h"
+#include "bli_a64fx_sector_cache.h"
 
 
 //#endif

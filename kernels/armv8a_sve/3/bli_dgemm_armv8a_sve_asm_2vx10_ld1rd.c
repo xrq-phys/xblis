@@ -38,8 +38,6 @@
 #include "blis.h"
 #include "bli_sve_asm_mla_d.h"
 
-#include "bli_a64fx_sector_cache.h"
-
 //#define inblock_pref(off) \
 PREFSVE421(pldl1keep,p0,x0,off)
 
@@ -51,7 +49,7 @@ PREFANY(pldl1keep,x0,256*off)
 
 #define BLOCK_2VX10_Z12_Z31(bvec0,bvec1,bvec2,bvec3,bvec4,bvec5,bvec6,bvec7,bvec8,bvec9, cur_avec0,cur_avec1, next_avec0,next_avec1, aoff0,aoff1, prefmode)\
 LOAD1VEC_VOFF_D(next_avec0, p0, x0, aoff0)\
-inblock_ ##prefmode(16)\
+inblock_ ##prefmode(10)\
 MLA2ROW_D(z12,z13, cur_avec0,cur_avec1, bvec0, p0)\
 LOAD1VEC_VOFF_D(next_avec1, p0, x0, aoff1)\
 LOAD1VEC_DIST_OFF_D(bvec0, p0, x1, 0)\
@@ -79,11 +77,11 @@ LOAD1VEC_DIST_OFF_D(bvec9, p0, x1, 72)\
 MLA2ROW_D(z12,z13, cur_avec0,cur_avec1, bvec0, p0)\
 MLA2ROW_D(z14,z15, cur_avec0,cur_avec1, bvec1, p0)\
 LOAD1VEC_DIST_OFF_D(bvec0, p0, x1, 0)\
-LOAD1VEC_DIST_OFF_D(bvec1, p0, x1, 8)\
-" add x1, x1, #16 \n\t"\
 MLA2ROW_D(z16,z17, cur_avec0,cur_avec1, bvec2, p0)\
 MLA2ROW_D(z18,z19, cur_avec0,cur_avec1, bvec3, p0)\
 MLA2ROW_D(z20,z21, cur_avec0,cur_avec1, bvec4, p0)\
+LOAD1VEC_DIST_OFF_D(bvec1, p0, x1, 8)\
+" add x1, x1, #16 \n\t"\
 MLA2ROW_D(z22,z23, cur_avec0,cur_avec1, bvec5, p0)\
 MLA2ROW_D(z24,z25, cur_avec0,cur_avec1, bvec6, p0)\
 MLA2ROW_D(z26,z27, cur_avec0,cur_avec1, bvec7, p0)\
@@ -119,9 +117,12 @@ void bli_dgemm_armv8a_sve_asm_2vx10_ld1rd
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
+    uint64_t byte_size = get_sve_byte_size();
+
     // see macro definition for documentation
     //A64FX_SETUP_SECTOR_CACHE_SIZES(0b0000000101110000)
-    A64FX_SETUP_SECTOR_CACHE_SIZES(0b0001011101110000)
+    //A64FX_SETUP_SECTOR_CACHE_SIZES(A64FX_SCC(0,1,3,0))
+    //A64FX_SETUP_SECTOR_CACHE_SIZES_L2(A64FX_SCC_L2(1,31))
     //A64FX_SETUP_SECTOR_CACHE_SIZES(0b0001010100010001)
     
     //uint64_t sector_config = 0;
@@ -212,12 +213,12 @@ PREF256(pldl1keep, x0, 256*6)
 PREF256(pldl1keep, x0, 256*7)
 PREF256(pldl1keep, x0, 256*8)
 PREF256(pldl1keep, x0, 256*9)
-PREF256(pldl1keep, x0, 256*10)
-PREF256(pldl1keep, x0, 256*11)
-PREF256(pldl1keep, x0, 256*12)
-PREF256(pldl1keep, x0, 256*13)
-PREF256(pldl1keep, x0, 256*14)
-PREF256(pldl1keep, x0, 256*15)
+//PREF256(pldl1keep, x0, 256*10)
+//PREF256(pldl1keep, x0, 256*11)
+//PREF256(pldl1keep, x0, 256*12)
+//PREF256(pldl1keep, x0, 256*13)
+//PREF256(pldl1keep, x0, 256*14)
+//PREF256(pldl1keep, x0, 256*15)
 // Prefetching a bit more than 4kiB seems to give better performance
 PREF256(pldl1keep, x1, 256*0)
 PREF256(pldl1keep, x1, 256*1)
@@ -338,40 +339,42 @@ MLA2ROW_D(z30,z31,  z0,z1, z11, p0)
 "                                            \n\t" // x6 is free from here
 " .D2VX10POSTACCUM:                          \n\t"
 
-#if defined(PREFETCH64) || defined(PREFETCH256)
-" mov x6, 0x1      \n\t" // A64FX: Use cache sector 1 for A
-" lsl x6, x6, 56  \n\t"
-" orr x3, x3, x6   \n\t"
-" prfm PLDL2KEEP, [x3,256*0]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*1]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*2]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*3]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*4]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*5]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*6]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*7]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*8]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*9]                       \n\t"
-" prfm PLDL2KEEP, [x3,256*10]                      \n\t"
-" prfm PLDL2KEEP, [x3,256*11]                      \n\t"
-" prfm PLDL2KEEP, [x3,256*12]                      \n\t"
-" prfm PLDL2KEEP, [x3,256*13]                      \n\t"
-" prfm PLDL2KEEP, [x3,256*14]                      \n\t"
-" prfm PLDL2KEEP, [x3,256*15]                      \n\t"
-" mov x6, 0x2      \n\t" // A64FX: Use cache sector 2 for B
-" lsl x6, x6, 56  \n\t"
-" orr x4, x4, x6   \n\t"
-" prfm PLDL2KEEP, [x4,256*0]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*1]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*2]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*3]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*4]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*5]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*6]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*7]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*8]                       \n\t"
-" prfm PLDL2KEEP, [x4,256*9]                       \n\t"
-#endif
+A64FX_SET_CACHE_SECTOR(x3,0x1,x6)
+PREF256(pldl2keep,x3,256*0)
+//PREF256(pldl2keep,x3,256*1)
+//PREF256(pldl2keep,x3,256*2)
+//PREF256(pldl2keep,x3,256*3)
+//PREF256(pldl2keep,x3,256*4)
+//PREF256(pldl2keep,x3,256*5)
+//PREF256(pldl2keep,x3,256*6)
+//PREF256(pldl2keep,x3,256*7)
+//PREF256(pldl2keep,x3,256*8)
+//PREF256(pldl2keep,x3,256*9)
+//PREF256(pldl2keep,x3,256*10)
+//PREF256(pldl2keep,x3,256*11)
+//PREF256(pldl2keep,x3,256*12)
+//PREF256(pldl2keep,x3,256*13)
+//PREF256(pldl2keep,x3,256*14)
+//PREF256(pldl2keep,x3,256*15)
+A64FX_SET_CACHE_SECTOR(x4,0x2,x6)
+PREF256(pldl2keep,x4,256*0)
+//PREF256(pldl2keep,x4,256*1)
+//PREF256(pldl2keep,x4,256*2)
+//PREF256(pldl2keep,x4,256*3)
+//PREF256(pldl2keep,x4,256*4)
+//PREF256(pldl2keep,x4,256*5)
+//PREF256(pldl2keep,x4,256*6)
+//PREF256(pldl2keep,x4,256*7)
+//PREF256(pldl2keep,x4,256*8)
+//PREF256(pldl2keep,x4,256*9)
+//PREF256(pldl2keep,x4,256*10)
+//PREF256(pldl2keep,x4,256*11)
+//PREF256(pldl2keep,x4,256*12)
+//PREF256(pldl2keep,x4,256*13)
+//PREF256(pldl2keep,x4,256*14)
+//PREF256(pldl2keep,x4,256*15)
+//PREF256(pldl2keep,x4,256*16)
+//PREF256(pldl2keep,x4,256*17)
 "                                            \n\t"
 " ld1rd  z0.d, p0/z, [x7]                    \n\t" // Load alpha
 " ld1rd  z1.d, p0/z, [x8]                   \n\t" // Load beta
@@ -391,6 +394,80 @@ MLA2ROW_D(z30,z31,  z0,z1, z11, p0)
 " fcmp d1,#0.0                           \n\t"
 " beq .D2VX10BETAZEROCONTCOLSTOREDS      \n\t" // multiply with beta if beta isn't zero
 "                                        \n\t"
+// interleaved saving
+
+MUL2ROW_D(z12,z13, z12,z13, z0, p0)
+LOAD2VEC_D(z2,z3,p0,x2)                         // Load Column 0
+MUL2ROW_D(z14,z15, z14,z15, z0, p0)
+LOAD2VEC_D(z4,z5,p0,x20)                        // Load Column 1
+MUL2ROW_D(z16,z17, z16,z17, z0, p0)
+LOAD2VEC_D(z6,z7,p0,x21)                        // Load Column 2
+MUL2ROW_D(z18,z19, z18,z19, z0, p0)
+LOAD2VEC_D(z8,z9,p0,x22)                        // Load Column 3
+"                                            \n\t"
+
+//  0   1   2   3   4   5   6   7   8   9
+//  ^   ^   ^   ^   ^   ^
+// x2 x20 x21 x22 x23 x24
+
+MUL2ROW_D(z20,z21, z20,z21, z0, p0)
+LOAD2VEC_D(z10,z11, p0, x23)                           // Load Column 4
+MLA2ROW_D(z12,z13, z2,z3,     z1, p0)
+STOR2VEC_D(z12,z13,  p0,  x2)                          // Store Column 0
+" add x2,x24,x10                            \n\t"      // Load address Column 6 of C
+MUL2ROW_D(z22,z23, z22,z23, z0, p0)
+LOAD2VEC_D(z12,z13, p0, x24)                           // Load Column 5
+MLA2ROW_D(z14,z15, z4,z5,     z1, p0)
+STOR2VEC_D(z14,z15,  p0, x20)                          // Store Column 1
+" add x20,x2,x10                            \n\t"      // Load address Column 7 of C
+
+//  0   1   2   3   4   5   6   7   8   9
+//          ^   ^   ^   ^   ^   ^
+//        x21 x22 x23 x24  x2 x20
+
+MUL2ROW_D(z24,z25, z24,z25, z0, p0)
+LOAD2VEC_D(z14,z15, p0,x2)                             // Load Column 6
+MLA2ROW_D(z16,z17, z6,z7,     z1, p0)
+STOR2VEC_D(z16,z17, p0, x21)                           // Store Column 2
+" add x21,x20,x10                           \n\t"      // Load address Column 8 of C
+MUL2ROW_D(z26,z27, z26,z27, z0, p0)
+LOAD2VEC_D(z16,z17, p0,x20)                            // Load Column 7
+MLA2ROW_D(z18,z19, z8,z9,     z1, p0)
+STOR2VEC_D(z18,z19, p0, x22)                           // Store Column 3
+" add x22,x21,x10                           \n\t"      // Load address Column 9 of C
+
+//  0   1   2   3   4   5   6   7   8   9
+//                  ^   ^   ^   ^   ^   ^
+//                x23 x24  x2 x20 x21 x22
+MUL2ROW_D(z28,z29, z28,z29, z0, p0)
+LOAD2VEC_D(z18,z19,p0,x21)                              // Load Column 8
+MLA2ROW_D(z20,z21, z10,z11, z1, p0)
+STOR2VEC_D(z20,z21, p0, x23)                            // Store Column 4
+
+MUL2ROW_D(z30,z31, z30,z31, z0, p0)
+LOAD2VEC_D(z20,z21,p0,x22)                              // Load Column 9
+MLA2ROW_D(z22,z23, z12,z13, z1, p0)
+STOR2VEC_D(z22,z23, p0, x24)                            // Store Column 5
+
+//  0   1   2   3   4   5   6   7   8   9
+//                  ^   ^   ^   ^   ^   ^
+//                x23 x24  x2 x20 x21 x22
+MLA2ROW_D(z24,z25, z14,z15, z1, p0)
+STOR2VEC_D(z24,z25, p0, x2)                             // Store Column 6
+MLA2ROW_D(z26,z27, z16,z17, z1, p0)
+STOR2VEC_D(z26,z27, p0, x20)                            // Store Column 7
+MLA2ROW_D(z28,z29, z18,z19, z1, p0)
+STOR2VEC_D(z28,z29, p0, x21)                            // Store Column 8
+MLA2ROW_D(z30,z31, z20,z21, z1, p0)
+STOR2VEC_D(z30,z31, p0, x22)                            // Store Column 9
+
+
+
+
+
+
+// blocked saving
+/*
 LOAD2VEC_D(z2,z3,p0,x2)                         // Load Column 0
 LOAD2VEC_D(z4,z5,p0,x20)                        // Load Column 1
 LOAD2VEC_D(z6,z7,p0,x21)                        // Load Column 2
@@ -444,6 +521,7 @@ STOR2VEC_D(z24,z25, p0, x2)                             // Store Column 6
 STOR2VEC_D(z26,z27, p0, x20)                            // Store Column 7
 STOR2VEC_D(z28,z29, p0, x21)                            // Store Column 8
 STOR2VEC_D(z30,z31, p0, x22)                            // Store Column 9
+*/
 
 " b .D2VX10END                              \n\t"       // Duplicate code for stores required due to lack of registers
 "                                           \n\t"
