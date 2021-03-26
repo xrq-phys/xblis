@@ -92,6 +92,17 @@ void bli_dpackm_armsve512_asm_10xk
     svfloat64_t      z_a32;
     svuint64_t       z_index;
 
+#ifdef _A64FX
+    if ( bli_cntx_schema_a_block(cntx) != bli_cntx_schema_b_panel(cntx) )
+    {
+        // A twisted way to infer whether A or B is being packed.
+        if ( schema == bli_cntx_schema_a_block(cntx) )
+            pi1 = ( (uint64_t)0x1 << 56 ) | (uint64_t)p;
+        if ( schema == bli_cntx_schema_b_panel(cntx) )
+            pi1 = ( (uint64_t)0x2 << 56 ) | (uint64_t)p;
+    }
+#endif
+
     // creating index for gather/scatter
     //   with each element as: 0, 1*inca, 2*inca, 3*inca
     z_index = svindex_u64( 0, inca * sizeof( double ) );
