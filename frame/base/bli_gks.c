@@ -155,6 +155,13 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa9_ind );
 #endif
 
+		// VecLib Bridge
+#ifdef BLIS_CONFIG_VECLIB
+		bli_gks_register_cntx( BLIS_ARCH_VECLIB,      bli_cntx_init_veclib,
+		                                              bli_cntx_init_veclib_ref,
+		                                              bli_cntx_init_veclib_ind );
+#endif
+
 		// IBM architectures
 #ifdef BLIS_CONFIG_POWER10
 		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,

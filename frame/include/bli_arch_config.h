@@ -99,6 +99,11 @@ CNTX_INIT_PROTS( cortexa15 )
 CNTX_INIT_PROTS( cortexa9 )
 #endif
 
+// -- VecLib Bridge
+#ifdef BLIS_CONFIG_VECLIB
+CNTX_INIT_PROTS( veclib )
+#endif
+
 // -- IBM Power --
 
 #ifdef BLIS_CONFIG_POWER10
@@ -199,6 +204,11 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_cortexa9.h"
 #endif
 
+// -- VecLib Bridge --
+#ifdef BLIS_FAMILY_VECLIB
+#include "bli_family_veclib.h"
+#endif
+
 // -- IBM Power --
 
 #ifdef BLIS_FAMILY_POWER10
@@ -279,6 +289,12 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_KERNELS_ARMV7A
 #include "bli_kernels_armv7a.h"
+#endif
+
+// -- Use BLIS as wrapper for Accelerate --
+
+#ifdef BLIS_KERNELS_VECLIB
+#include "bli_kernels_veclib.h"
 #endif
 
 // -- IBM Power --

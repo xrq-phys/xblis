@@ -85,8 +85,8 @@ int main( int argc, char** argv )
 	p_max   = P_MAX;
 	p_inc   = P_INC;
 
-	m_input = -1;
-	n_input = -1;
+	m_input = 160;
+	n_input = 16;
 	k_input = -1;
 #else
 	p_begin = 40;

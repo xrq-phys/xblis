@@ -189,6 +189,11 @@ void bli_arch_set_id( void )
 		id = BLIS_ARCH_CORTEXA9;
 		#endif
 
+		// VecLib Bridge
+		#ifdef BLIS_FAMILY_VECLIB
+		id = BLIS_ARCH_VECLIB;
+		#endif
+
 		// IBM microarchitectures.
 		#ifdef BLIS_FAMILY_POWER10
 		id = BLIS_ARCH_POWER10;
@@ -244,6 +249,8 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa53",
     "cortexa15",
     "cortexa9",
+
+    "veclib",
 
     "power10",
     "power9",

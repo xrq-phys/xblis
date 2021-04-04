@@ -38,6 +38,9 @@ cortexa53:   cortexa53/armv8a
 cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
+# VecLib bridge.
+veclib:      veclib
+
 # IBM architectures.
 power10:     power10
 power9:      power9
