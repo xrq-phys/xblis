@@ -1,6 +1,18 @@
 #include "blis.h"
 #include "sve_kernels.h"
 
+void* sve_get_override_kernel_s(int kernel_idx)
+{
+    // TODO: Merge style.
+    switch(kernel_idx)
+    {
+        case 1: return bli_sgemm_armv8a_sve_asm_2vx10;
+        case 2: return bli_sgemm_armsve_asm_2vx10_unindexed;
+        default: return NULL;
+    }
+    return NULL;
+}
+
 void* sve_get_override_kernel_d(int kernel_idx)
 {
 #define UKRCASE(suffix)\

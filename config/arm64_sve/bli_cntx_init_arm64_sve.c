@@ -46,6 +46,12 @@ void* get_sve_sgemm_bli_kernel(int m_r, int n_r)
 {
     void* kptr = NULL;
 #if SVE_VECSIZE == SVE_VECSIZE_VLA
+    gint_t kernel_override_idx = bli_env_get_var("BLIS_SVE_KERNEL_IDX_S",0);
+    if(0 != kernel_override_idx)
+    {
+        kptr = sve_get_override_kernel_s(kernel_override_idx);
+        return kptr;
+    }
     kptr = (void*) bli_sgemm_armv8a_sve_asm_2vx10;
 #elif SVE_VECSIZE == SVE_VECSIZE_256
     kptr = (void*) bli_sgemm_armv8a_sve_asm_16x8;
@@ -289,16 +295,22 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 #if (SVE_VECSIZE == SVE_VECSIZE_VLA) || (SVE_VECSIZE == SVE_VECSIZE_256)
+#if defined(SVE_NO_NAT_COMPLEX_KERNELS)
+	  2,
+#else
 	  4,
-      BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s, n_r_s), FALSE,
+#endif
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s, n_r_s), FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
-      BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
-      BLIS_GEMM_UKR, BLIS_COMPLEX,  get_sve_cgemm_bli_kernel(m_r_c, n_r_c), FALSE,
+#if !defined(SVE_NO_NAT_COMPLEX_KERNELS)
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
+	  BLIS_GEMM_UKR, BLIS_COMPLEX,  get_sve_cgemm_bli_kernel(m_r_c, n_r_c), FALSE,
+#endif
 #else
 	  2,
-      //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
+	  //BLIS_GEMM_UKR, BLIS_FLOAT,    get_sve_sgemm_bli_kernel(m_r_s,n_r_s), FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   get_sve_dgemm_bli_kernel(m_r_d, n_r_d), FALSE,
-      BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, get_sve_zgemm_bli_kernel(m_r_z, n_r_z), FALSE,
 #endif
 	  cntx
 	);
@@ -316,6 +328,13 @@ void bli_cntx_init_arm64_sve( cntx_t* cntx )
     }
 
 
+#if defined(SVE_NO_NAT_COMPLEX_KERNELS)
+	m_r_c = -1;  m_r_z = -1;
+	n_r_c = -1;  n_r_z = -1;
+	m_c_c = -1;  m_c_z = -1;
+	k_c_c = -1;  k_c_z = -1;
+	n_c_c = -1;  n_c_z = -1;
+#endif
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                                  s        d      c       z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],        m_r_s,   m_r_d, m_r_c,  m_r_z);
