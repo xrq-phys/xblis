@@ -1,4 +1,4 @@
-#include "bli_a64fx_sector_cache.h"
+#include "blis.h"
 
 void a64fx_print_sc_configuration(uint64_t bitfield)
 {
