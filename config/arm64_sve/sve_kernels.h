@@ -1,5 +1,6 @@
 // include after blis.h so that the kernels are known
 
+void* sve_get_override_kernel_s(int kernel_idx);
 
 // Write down the index directly so it's easier to look up
 enum kernel_indices_d
