@@ -88,11 +88,11 @@
 
 # --- Section overrides ----------------------------------------------------
 
-0        # Utility
-0        # Level-1v kernels
-0        # Level-1m
-0        # Level-1f kernels
-0        # Level-2
+1        # Utility
+1        # Level-1v kernels
+1        # Level-1m
+1        # Level-1f kernels
+1        # Level-2
 1        # Level-3 micro-kernels
 1        # Level-3
 
@@ -266,10 +266,10 @@
 1        # gemm
 -1       #   dimensions: k
 
-0        # trsm
+1        # trsm
 ?        #   parameters: uploa
 
-0        # gemmtrsm
+1        # gemmtrsm
 -1       #   dimensions: k
 ?        #   parameters: uploa
 
@@ -288,35 +288,35 @@
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
-0        # herk
+1        # herk
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc transa
 
-0        # her2k
+1        # her2k
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
-0        # symm
+1        # symm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
-0        # syrk
+1        # syrk
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc transa
 
-0        # syr2k
+1        # syr2k
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
-0        # trmm
+1        # trmm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa transa diaga
 
-0        # trmm3
+1        # trmm3
 -1 -1    #   dimensions: m n
 ????n    #   parameters: side uploa transa diaga transb
 
-0        # trsm
+1        # trsm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa transa diaga
 
