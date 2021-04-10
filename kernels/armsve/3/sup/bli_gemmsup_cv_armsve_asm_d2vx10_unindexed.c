@@ -181,25 +181,17 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve_2vx10_unindex
 "                                                 \n\t"
 " ldr             x8, %[n_mker]                   \n\t" // Number of N-loops.
 "                                                 \n\t"
-" ldr             x20, %[ai]                      \n\t" // Parameters to be reloaded
-" ldr             x21, %[k_mker]                  \n\t" //  within each millikernel loop.
-" ldr             x22, %[k_left]                  \n\t"
-" ldr             x23, %[alpha]                   \n\t"
-" ldr             x24, %[beta]                    \n\t"
-" ldr             x25, %[a_next]                  \n\t"
-" ldr             x26, %[b_next]                  \n\t"
-" ldr             x23, [x23]                      \n\t" // Directly load alpha and beta.
-" ldr             x24, [x24]                      \n\t"
+" ldr             x17, %[alpha]                   \n\t"
+" ldr             x18, %[beta]                    \n\t"
+" ldr             x17, [x17]                      \n\t" // Directly load alpha and beta.
+" ldr             x18, [x18]                      \n\t"
 "                                                 \n\t"
 " MILLIKER_MLOOP:                                 \n\t"
 "                                                 \n\t"
 " mov             x11, x0                         \n\t" // B's address.
-// " ldr             x10, %[ai]                      \n\t" // A's address.
-" mov             x10, x20                        \n\t"
-// " ldr             x12, %[k_mker]                  \n\t"
-" mov             x12, x21                        \n\t"
-// " ldr             x13, %[k_left]                  \n\t"
-" mov             x13, x22                        \n\t"
+" ldr             x10, %[ai]                      \n\t" // A's address.
+" ldr             x12, %[k_mker]                  \n\t"
+" ldr             x13, %[k_left]                  \n\t"
 #ifdef _A64FX
 " mov             x16, 0x1                        \n\t" // Tag A address.
 " lsl             x16, x16, #56                   \n\t"
@@ -246,25 +238,25 @@ GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p1,p2,x10)
 " cmp             x6, #1                          \n\t"
 " b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
 " mov             x16, x5                         \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " END_CCOL_PRFM:                                  \n\t"
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
@@ -336,11 +328,10 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 "                                                 \n\t"
 " WRITE_MEM_PREP:                                 \n\t"
 "                                                 \n\t"
-// " ldr             x10, %[ai]                      \n\t"
-" mov             x10, x20                        \n\t"
+" ldr             x10, %[ai]                      \n\t"
 " add             x11, x0, x3                     \n\t"
-" dup             z30.d, x23                      \n\t" // Broadcast alpha & beta into vectors.
-" dup             z31.d, x24                      \n\t"
+" dup             z30.d, x17                      \n\t" // Broadcast alpha & beta into vectors.
+" dup             z31.d, x18                      \n\t"
 "                                                 \n\t"
 " cmp             x8, #1                          \n\t"
 " b.eq            PREFETCH_ABNEXT                 \n\t"
@@ -367,42 +358,48 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 " b               WRITE_MEM                       \n\t"
 "                                                 \n\t"
 " PREFETCH_ABNEXT:                                \n\t"
-// " ldr             x1, %[a_next]                   \n\t" // Final Millikernel loop, x1 and x2 not needed.
-" mov             x1, x25                         \n\t"
-// " ldr             x2, %[b_next]                   \n\t"
-" mov             x2, x26                         \n\t"
-" prfm            PLDL2KEEP, [x1]                 \n\t"
-" prfm            PLDL2KEEP, [x1, 256*1]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*3]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*4]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*5]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*6]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*7]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*8]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*9]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*10]         \n\t"
-" prfm            PLDL2KEEP, [x1, 256*11]         \n\t"
-" prfm            PLDL2KEEP, [x1, 256*12]         \n\t"
-" prfm            PLDL2KEEP, [x1, 256*13]         \n\t"
-" prfm            PLDL2KEEP, [x1, 256*14]         \n\t"
-" prfm            PLDL2KEEP, [x1, 256*15]         \n\t"
-" prfm            PLDL2KEEP, [x2]                 \n\t"
-" prfm            PLDL2KEEP, [x2, 256*1]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*2]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*3]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*4]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*5]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*6]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*7]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*8]          \n\t"
-" prfm            PLDL2KEEP, [x2, 256*9]          \n\t"
+" ldr             x1, %[a_next]                   \n\t" // Final Millikernel loop, x1 and x2 not needed.
+" ldr             x2, %[b_next]                   \n\t"
+#ifdef _A64FX
+" mov             x16, 0x2                        \n\t" // Tag B address.
+" lsl             x16, x16, #56                   \n\t"
+" orr             x2, x2, x16                     \n\t"
+" mov             x16, 0x1                        \n\t" // Tag A address.
+" lsl             x16, x16, #56                   \n\t"
+" orr             x1, x1, x16                     \n\t"
+#endif
+" prfm            PLDL1STRM, [x1]                 \n\t"
+" prfm            PLDL1STRM, [x1, 256*1]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*3]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*4]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*5]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*6]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*7]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*8]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*9]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*10]         \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*11]         \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*12]         \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*13]         \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*14]         \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*15]         \n\t"
+" prfm            PLDL1STRM, [x2]                 \n\t"
+" prfm            PLDL1STRM, [x2, 256*1]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*2]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*3]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*4]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*5]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*6]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*7]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*8]          \n\t"
+// " prfm            PLDL2KEEP, [x2, 256*9]          \n\t"
 "                                                 \n\t"
 " WRITE_MEM:                                      \n\t"
 "                                                 \n\t"
 " fmov            d28, #1.0                       \n\t"
 " fmov            x16, d28                        \n\t"
-" cmp             x16, x23                        \n\t"
+" cmp             x16, x17                        \n\t"
 " b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
 SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19,z30)
@@ -469,9 +466,9 @@ GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x5,x7,x13,x16)
   [beta]   "m" (beta),
   [a_next] "m" (a_next),
   [b_next] "m" (b_next)
-: "x0","x1","x2","x3","x4","x5","x6","x7","x8",
-  "x9","x10","x11","x12","x13","x14","x15","x16","x17",
-  "x20","x21","x22","x23","x24","x25","x26",
+: "x0","x1","x2","x3","x4","x5","x6","x7","x8","x9",
+  "x10","x11","x12","x13","x14","x15","x16","x17","x18",
+  "x20","x21","x22","x23","x24","x25",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
   "z16","z17","z18","z19",
