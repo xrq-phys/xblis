@@ -32,7 +32,7 @@
 
 */
 
-
+#include "blis.h"
 #include <stdint.h>
 #include "sve_architecture.h"
 #include "sve_kernels.h"
