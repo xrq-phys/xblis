@@ -36,7 +36,14 @@
 #include "blis.h"
 
 // Half-precision composite instructions.
-#include "armsve_asm_macros_half.h"
+#define DT    "h"
+#define LD1   "ld1h"
+#define ST1   "st1h"
+#define LD1R  "ld1rh"
+#define PRFG  "prfh"
+#define SZ    "2"
+// #define OFFS UNSUPPORTED
+#include "armsve_asm_macros.h"
 
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10.h"
@@ -73,6 +80,8 @@
 " add   "#CADDR", "#CADDR", "#CCS"    \n\t"
 
 
+// TODO: Merge this peripheral into
+//  templated bli_gemm_armsve_asm_2vx10_unindexed.c.
 void bli_shgemm_armsve_asm_2vx10_unindexed
      (
        dim_t               k0,

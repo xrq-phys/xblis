@@ -37,7 +37,16 @@
 #include <assert.h>
 
 // Double-precision composite instructions.
-#include "../armsve_asm_macros_double.h"
+#define HF    "x"
+#define DT    "d"
+#define LD1   "ld1d"
+#define ST1   "st1d"
+#define LD1R  "ld1rd"
+#define PRFG  "prfd"
+#define INC   "incd"
+#define SZ    "8"
+#define OFFS  "lsl #3"
+#include "../armsve_asm_macros.h"
 
 // 2vx10 microkernels.
 #include "../armsve_asm_2vx10.h"
