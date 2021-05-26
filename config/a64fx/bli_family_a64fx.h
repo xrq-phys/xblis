@@ -41,6 +41,35 @@
 #define BLIS_SIMD_ALIGN_SIZE    256
 #define BLIS_SIMD_NUM_REGISTERS 32
 
+#ifdef 1 // BLIS_ENABLE_MULTITHREADING
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm,  c) {           \
+                                                                        \
+    const dim_t ic = rntm->thrloop[ BLIS_MC ];                          \
+    const dim_t jr = rntm->thrloop[ BLIS_NR ];                          \
+    const dim_t m = bli_obj_length(&c);                                 \
+    const dim_t n = bli_obj_width(&c);                                  \
+                                                                        \
+    blksz_t blkszs[ BLIS_NUM_BLKSZS ];                                  \
+    if (ic >= 2 && m < 2400) {                                          \
+        bli_blksz_init_easy(&blkszs[BLIS_MC],   128,    64, -1, -1 );   \
+        bli_blksz_init_easy(&blkszs[BLIS_KC],  3072,  3072, -1, -1 );   \
+        bli_blksz_init_easy(&blkszs[BLIS_NC], 23040, 26880, -1, -1 );   \
+                                                                        \
+        bli_cntx_set_blkszs(                                            \
+            BLIS_NAT, 3,                                                \
+            BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                         \
+            BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                         \
+            BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                         \
+            cntx);                                                      \
+    } else {                                                            \
+      /* Do not touch block size otherwise.
+       * TODO: Process also small matrices. */                          \
+    }                                                                   \
+}
+#else
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
+#endif
+
 
 //#endif
 

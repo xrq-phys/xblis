@@ -183,6 +183,15 @@ void bli_gemm_front
 	  rntm
 	);
 
+#if defined(BLIS_CONFIG_ZEN3) || \
+    defined(BLIS_CONFIG_A64FX)
+	// On some platforms we support changing the blocksize
+	// at runtime to get optimial performance.
+	// TODO: Instead of checking supported configs one-by-one,
+	//       add an "else" case globally for this macro.
+	BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c_local);
+#endif
+
 	obj_t* cp    = &c_local;
 	obj_t* betap = beta;
 
