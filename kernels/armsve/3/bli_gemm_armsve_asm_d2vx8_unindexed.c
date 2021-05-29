@@ -283,11 +283,11 @@ GEMM_C_STORE_UKER_8COLS_C(z16,z18,z20,z22,z24,z26,z28,z0,z17,z19,z21,z23,z25,z27
 " incb            x8                              \n\t"
 " madd            x8, x8, x6, xzr                 \n\t" // C-column's logical 1-vector skip.
 " index           z30.d, xzr, x6                  \n\t" // Skips passed to index is not multiplied by 8.
-GEMM_C_LOAD_UKER_7COLS_G(z16,z18,z20,z22,z24,z26,z28,z17,z19,z21,z23,z25,z27,z29,z30,p0,p0,x9,x7,x9,x16)
+GEMM_C_LOAD_UKER_7COLS_G(z16,z18,z20,z22,z24,z26,z28,z17,z19,z21,z23,z25,z27,z29,z30,p0,p0,x9,x7,x8,x16)
 GEMM_CCOL_FMAD(z16,z17,p0,p0,z0,z1,z31)
 GEMM_CCOL_GATHER_LOAD_FWD(z0,z1,z30,p0,p0,x9,x7,x8,x16)
 GEMM_C_FMAD_UKER_7COLS(z18,z20,z22,z24,z26,z28,z0,z19,z21,z23,z25,z27,z29,z1,p0,p0,z2,z4,z6,z8,z10,z12,z14,z3,z5,z7,z9,z11,z13,z15,z31)
-GEMM_C_STORE_UKER_8COLS_G(z16,z18,z20,z22,z24,z26,z28,z0,z17,z19,z21,z23,z25,z27,z29,z1,z30,p0,p0,x5,x7,x9,x16)
+GEMM_C_STORE_UKER_8COLS_G(z16,z18,z20,z22,z24,z26,z28,z0,z17,z19,z21,z23,z25,z27,z29,z1,z30,p0,p0,x5,x7,x8,x16)
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t"
 " b               END_EXEC                        \n\t"
