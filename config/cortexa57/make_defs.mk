@@ -62,11 +62,7 @@ endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
-ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=cortex-a57
-else
-$(error gcc is required for this configuration.)
-endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
